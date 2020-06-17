@@ -4,10 +4,12 @@
 
 ## Questions
 
-  - Tensor dimensionality is not a hyperparameter? 
+  - Tensor dimensionality is not a hyperparameter?
    `batch_normalize: tensor([h, w, c]) -> tensor([h, w, c])`
+    - The dimensionality is usually inferred from the input, the type (e.g. `conv`) of the layer and the hyperparameters (e.g. `stride`, `kernel_size` and `padding`). The dimensionality itself is not considered a hyperparameter.
 
   - Are there a fixed set of possible hyperparameters?
+    - Depends on what do you mean by fixed. For each layer type, the set of possible hyperparameters are different. But you can assume that for a given type, the set is fixed.
 
   - I guess some hyperparameters are only applicable to some kinds of layers?
     Does it make sense to have types of hyperparameters specifically
@@ -17,7 +19,7 @@
        and so on?
     Maybe it is ok if there is only HyperParameters and you can
     select which to set or not for each layer?
-
+    - Yes absolutely makes sense to have that. We can also have a set of all possible hyperparameters and draw a subset from this pool for each specific layer type. The benefit would be to have a unified abstraction for all hyperparameters. If you think it also makes sense from an implementation point of view, I can come up with an abstraction that we can experiment with.
 
   - Excerpt from example below:
   ```
@@ -32,7 +34,9 @@
   - type: batch_normalize <- this is a new layer (that gets input from above)?
     name: conv <- what is this? why is the BN layer named conv
   ```
-
+    - This is a layer of type conv? Yes
+    - This is a new layer (that gets input from above)? Yes
+    - What is this? why is the BN layer named conv? It is the name for the output of the batch norm layer. It is arbitrarily chosen. I called it conv because the batch_norm layer is a post-processing function so I just ignored it and called the output conv (coz conv here performs the main functionality). But the naming is arbitrary here.
 
 
 
@@ -73,7 +77,7 @@ kernel_size:
 - Dimensionality: `conv: tensor([h, w, c]) -> tensor([(h-k_h+2p)/s_h+1, (w-k_w+2p)/s_w+1, f])`
 
 Another useful one is `add`, where basically we have to make sure that we are summing up tensors with the same shape. Relu is a piecewise linear function. There's no hyperparameter and it doesn't change the size so we can skip that one for now since it's trivial.
-Please let me know if things are unclear! 
+Please let me know if things are unclear!
 
 
 
