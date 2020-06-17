@@ -20,6 +20,7 @@
 
 
   - Excerpt from example below:
+  ```
    - type:    <- This is a layer of type conv?
       conv
     hyperparams: <- with these Hyperparameters
@@ -30,7 +31,7 @@
         16
   - type: batch_normalize <- this is a new layer (that gets input from above)?
     name: conv <- what is this? why is the BN layer named conv
-  
+  ```
 
 
 
