@@ -79,6 +79,7 @@ Please let me know if things are unclear!
 
 ## YAML Format
 
+```
 params_network:
   - type:
       conv
@@ -107,4 +108,4 @@ params_network:
       - input_layer
       - conv
   - type: relu
-
+```
