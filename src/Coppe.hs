@@ -57,8 +57,8 @@ batchNormalize h = operation BatchNormalize h
 relu :: Coppe ()
 relu = operation Relu emptyHyperparameters
 
-add :: Hyperparameters -> Coppe ()
-add h = operation Add h
+add :: Identifier -> Identifier -> Coppe ()
+add a b = operation Add (emptyHyperparameters {inputLayer = Just [a, b]})
 
 test :: Coppe a -> Coppe (a, Recipe)
 test = listen
@@ -71,7 +71,7 @@ skip :: Coppe () -> Coppe (Identifier,Identifier)
 skip m =
   do intermediate <- name
      m
-     result <- name 
+     result <- name
      return (intermediate, result)
 
 
@@ -90,7 +90,7 @@ testNetwork =
      conv convParams
      batchNormalize emptyHyperparameters
      bn_out <- name
-     add (addParams {inputLayer = Just [input_data, bn_out]})
+     add input_data bn_out
 
 
 testSkip =
@@ -103,10 +103,10 @@ testSkip =
      batchNormalize emptyHyperparameters
      relu
      (before, after) <- skip $ rep 10 $ conv convParams
-     add (addParams {inputLayer = Just [before, after]})
+     add before after
      batchNormalize emptyHyperparameters
      bn_out <- name
-     add (addParams {inputLayer = Just [input_data, bn_out]})
+     add input_data bn_out
         
 
 
