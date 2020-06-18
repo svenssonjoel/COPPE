@@ -63,9 +63,17 @@ add h = operation Add h
 test :: Coppe a -> Coppe (a, Recipe)
 test = listen
 
-rep :: Coppe () -> Integer -> Coppe ()
-rep m 0 = empty
-rep m n = m >> rep m (n-1)
+rep :: Integer -> Coppe () -> Coppe ()
+rep 0 m = empty
+rep n m = m >> rep (n-1) m
+
+skip :: Coppe () -> Coppe (Identifier,Identifier)
+skip m =
+  do intermediate <- name
+     m
+     result <- name 
+     return (intermediate, result)
+
 
 build :: Coppe a -> Recipe
 build m = execWriter $ evalStateT m 0
@@ -84,5 +92,20 @@ testNetwork =
      bn_out <- name
      add (addParams {inputLayer = Just [input_data, bn_out]})
 
+
+testSkip =
+  let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
+                                           ,filters = Just (Filters 16)}
+      addParams = emptyHyperparameters
+  in
+  do input_data <- name 
+     conv convParams  
+     batchNormalize emptyHyperparameters
+     relu
+     (before, after) <- skip $ rep 10 $ conv convParams
+     add (addParams {inputLayer = Just [before, after]})
+     batchNormalize emptyHyperparameters
+     bn_out <- name
+     add (addParams {inputLayer = Just [input_data, bn_out]})
         
 
