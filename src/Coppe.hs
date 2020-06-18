@@ -80,7 +80,7 @@ build m = execWriter $ evalStateT m 0
 
 testNetwork =
   let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
-                                           ,filters = Just (Filters 16)}
+                                        ,filters = Just (Filters 16)}
       addParams = emptyHyperparameters
   in
   do input_data <- name 
@@ -95,7 +95,7 @@ testNetwork =
 
 testSkip =
   let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
-                                           ,filters = Just (Filters 16)}
+                                        ,filters = Just (Filters 16)}
       addParams = emptyHyperparameters
   in
   do input_data <- name 
@@ -109,3 +109,53 @@ testSkip =
      add (addParams {inputLayer = Just [input_data, bn_out]})
         
 
+
+
+genYaml :: Coppe () -> String 
+genYaml m = yaml $ build m 
+
+  where
+    yaml :: Recipe -> String
+    yaml (Seq a b) = yaml a ++ yaml b
+    yaml (NamedIntermediate (Identifier i))  = "\t\tname:\n\t\tnom" ++ show i ++ "\n"
+    yaml Empty   = ""
+    yaml (Operation o h) = "\t- type:\n\t\t" ++ op o ++ "\n\thyperparams:\n" ++ hyper h
+
+    op Add = "add"
+    op Conv = "conv"
+    op BatchNormalize = "batch_normalize"
+    op Relu = "relu"
+
+    hyper h = pStrides  (strides h) ++
+              pFilters  (filters h) ++
+              pVariance (variance h) ++
+              pPadding  (padding h) ++
+              pInit     (initialization h) ++
+              pKernSize (kernelSize h) ++
+              pInputs   (inputLayer h)
+
+    pStrides Nothing = ""
+    pStrides (Just (Strides xs)) = "\t\tstrides:\n" ++ (concatMap (\x -> "\t\t- " ++ show x ++ "\n") xs) ++ "\n"
+
+    pFilters Nothing = ""
+    pFilters (Just (Filters i)) = "\t\tfilters:\n\t\t" ++ show i ++ "\n"
+    
+
+    pVariance Nothing = ""
+    pVariance (Just f) = "\t\tvariance:\n\t\t" ++ show f ++ "\n"
+            
+    pPadding Nothing = ""
+    pPadding (Just Same) = "\t\tpadding:\n\t\tsame\n"
+
+    pInit Nothing = ""
+    pInit (Just Random) = "\t\tinit:\n\t\trandom\n"
+
+    pKernSize Nothing = ""
+    pKernSize (Just (Dimensions xs)) = "\t\tdimensions:\n" ++ (concatMap (\x -> "\t\t- " ++ show x ++ "\n") xs) ++ "\n"
+
+    pInputs Nothing = ""
+    pInputs (Just xs) = "\t\tinput_layer:\n" ++ (concatMap (\(Identifier x) -> "\t\t- " ++ "nom" ++ show x ++ "\n") xs) ++ "\n"
+    
+                                  
+    
+  
