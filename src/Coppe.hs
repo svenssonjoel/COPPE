@@ -1,4 +1,3 @@
-
 -- Experimentation
 module Coppe
   where 
@@ -7,117 +6,141 @@ import Control.Monad.Writer
 import Control.Monad.Trans.State
 
 import Hyperparameters
+import Tensor
 
 data LayerOperation = Relu | Conv | BatchNormalize | Add
   deriving (Eq, Show)
 
 type Name = String
 
-data Recipe =
-  Input
+data Net =
+  Input 
   | Empty
   | NamedIntermediate Identifier
   | Operation LayerOperation Hyperparameters
-  | Seq Recipe Recipe
+  | Seq Net Net
   deriving (Eq, Show)
 
-instance Semigroup Recipe where
+instance Semigroup Net where
   (<>) = Seq
   
-instance Monoid Recipe where
+instance Monoid Net where
   mempty = Empty
   mappend Empty a = a
   mappend a Empty = a
   mappend a b     = Seq a b
 
-type Coppe a = StateT Integer (Writer Recipe) a
+type Coppe a = StateT Integer (Writer Net) a
 
 name :: Coppe Identifier
 name =
   do i <- get
      put (i + 1)
-     tell $ NamedIntermediate (Identifier i)
-     return $ Identifier i
+     tell $ NamedIntermediate i
+     return $ i
+
+getId :: Coppe Integer
+getId =
+  do i <- get
+     put (i + 1)
+     return i
      
 empty :: Coppe ()
 empty = tell Empty
 
-input :: Coppe ()
-input = tell Input
+inputFloat :: [Integer] -> Coppe (Tensor Float) 
+inputFloat d =
+  do tell Input
+     i <- getId
+     return $ mkTensor i d
 
-operation :: LayerOperation -> Hyperparameters -> Coppe ()
-operation op h = tell $ Operation op h
+inputDouble :: [Integer] -> Coppe (Tensor Double) 
+inputDouble d =
+  do tell Input
+     i <- getId
+     return $ mkTensor i d
 
-conv :: Hyperparameters -> Coppe ()
-conv h = operation Conv h
+operation :: TensorRepr a
+          => [Tensor a]
+          -> LayerOperation
+          -> Hyperparameters
+          -> Coppe (Tensor a)
+operation [] _ _  = error "No inputs specified" 
+operation ts op h =
+  let ids = map (\t -> (tensorId t)) ts
+      tensor = head ts
+  in 
+  do i <- getId 
+     tell $ Operation op  (h {inputLayer = Just ids})
+     tell $ NamedIntermediate i
+     return $ mkTensor i (tensorDim tensor)
+         
+conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
+conv h t = operation [t] Conv h
 
-batchNormalize :: Hyperparameters -> Coppe ()
-batchNormalize h = operation BatchNormalize h
+batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+batchNormalize h t = operation [t] BatchNormalize h
 
-relu :: Coppe ()
-relu = operation Relu emptyHyperparameters
+relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
+relu t = operation [t] Relu emptyHyperparameters
 
-add :: Identifier -> Identifier -> Coppe ()
-add a b = operation Add (emptyHyperparameters {inputLayer = Just [a, b]})
+-- Type instance for a ? 
+add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
+add a b =
+  operation [a,b] Add emptyHyperparameters
 
-test :: Coppe a -> Coppe (a, Recipe)
-test = listen
+rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
+rep 0 f t = return t
+rep n f t =
+   do t' <- f t
+      rep (n - 1) f t'
 
-rep :: Integer -> Coppe () -> Coppe ()
-rep 0 m = empty
-rep n m = m >> rep (n-1) m
+skip :: Tensor a -> (Tensor a -> Coppe (Tensor b)) -> Coppe (Tensor a, Tensor b)
+skip t f =
+  do t' <- f t
+     return (t, t')
 
-skip :: Coppe () -> Coppe (Identifier,Identifier)
-skip m =
-  do intermediate <- name
-     m
-     result <- name
-     return (intermediate, result)
-
-
-build :: Coppe a -> Recipe
+build :: Coppe a -> Net
 build m = execWriter $ evalStateT m 0
 
-testNetwork =
+testNetworkB =
   let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
                                         ,filters = Just (Filters 16)}
       addParams = emptyHyperparameters
   in
-  do input_data <- name 
-     conv convParams  
-     batchNormalize emptyHyperparameters
-     relu
-     conv convParams
-     batchNormalize emptyHyperparameters
-     bn_out <- name
-     add input_data bn_out
+  do
+    in_data <- inputFloat [32,32,3]
+    out_data <- conv convParams in_data
+                >>= batchNormalize emptyHyperparameters
+                >>= relu
+                >>= conv convParams
+                >>= batchNormalize emptyHyperparameters
+    add in_data out_data
 
-
-testSkip =
-  let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
-                                        ,filters = Just (Filters 16)}
-      addParams = emptyHyperparameters
-  in
-  do input_data <- name 
-     conv convParams  
-     batchNormalize emptyHyperparameters
-     relu
-     (before, after) <- skip $ rep 10 $ conv convParams
-     add before after
-     batchNormalize emptyHyperparameters
-     bn_out <- name
-     add input_data bn_out
+-- testSkip =
+--   let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
+--                                         ,filters = Just (Filters 16)}
+--       addParams = emptyHyperparameters
+--   in
+--   do input_data <- name 
+--      conv convParams  
+--      batchNormalize emptyHyperparameters
+--      relu
+--      (before, after) <- skip $ rep 10 $ conv convParams
+--      add before after
+--      batchNormalize emptyHyperparameters
+--      bn_out <- name
+--      add input_data bn_out
         
 
-
-
-genYaml :: Coppe () -> String 
+genYaml :: TensorRepr a => Coppe (Tensor a) -> String 
 genYaml m = yaml $ build m 
 
   where
-    yaml :: Recipe -> String
+    yaml :: Net -> String
+    yaml (Input)   = "input\n"
     yaml (Seq a b) = yaml a ++ yaml b
-    yaml (NamedIntermediate (Identifier i))  = "\t\tname:\n\t\tnom" ++ show i ++ "\n"
+    yaml (NamedIntermediate i)  = "\t\tname:\n\t\tnom" ++ show i ++ "\n"
     yaml Empty   = ""
     yaml (Operation o h) = "\t- type:\n\t\t" ++ op o ++ "\n\thyperparams:\n" ++ hyper h
 
@@ -154,7 +177,7 @@ genYaml m = yaml $ build m
     pKernSize (Just (Dimensions xs)) = "\t\tdimensions:\n" ++ (concatMap (\x -> "\t\t- " ++ show x ++ "\n") xs) ++ "\n"
 
     pInputs Nothing = ""
-    pInputs (Just xs) = "\t\tinput_layer:\n" ++ (concatMap (\(Identifier x) -> "\t\t- " ++ "nom" ++ show x ++ "\n") xs) ++ "\n"
+    pInputs (Just xs) = "\t\tinput_layer:\n" ++ (concatMap (\x -> "\t\t- " ++ "nom" ++ show x ++ "\n") xs) ++ "\n"
     
                                   
     

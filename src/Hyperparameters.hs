@@ -18,8 +18,8 @@ data Initialization = Random
 data Dimensions = Dimensions [Integer]
   deriving (Eq, Show)
 
-data Identifier = Identifier Integer
-  deriving (Eq, Show)
+type Identifier = Integer
+
 
 data Hyperparameters =
   Hyperparameters { strides         :: Maybe Strides
