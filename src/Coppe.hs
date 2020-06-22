@@ -16,9 +16,10 @@ type Name = String
 data Net =
   Input 
   | Empty
-  | NamedIntermediate Identifier
+  | NamedIntermediate Identifier -- Maybe remove and attach Identifier to Operation
   | Operation LayerOperation Hyperparameters
   | Seq Net Net
+  | Rep Integer Net -- What will the identifiers mean in here?
   deriving (Eq, Show)
 
 instance Semigroup Net where
@@ -131,8 +132,6 @@ testNetworkB =
 --      batchNormalize emptyHyperparameters
 --      bn_out <- name
 --      add input_data bn_out
-        
--- genYaml :: Tensor a -> Coppe (Tensor b) -> String
 
 genYaml :: TensorRepr a => Coppe (Tensor a) -> String 
 genYaml m = yaml $ build m 
