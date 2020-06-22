@@ -8,7 +8,7 @@ import Control.Monad.Trans.State
 import Hyperparameters
 import Tensor
 
-data LayerOperation = Relu | Conv | BatchNormalize | Add
+data LayerOperation = Relu | Conv | BatchNormalize | Add | Reshape 
   deriving (Eq, Show)
 
 type Name = String
@@ -132,6 +132,7 @@ testNetworkB =
 --      bn_out <- name
 --      add input_data bn_out
         
+-- genYaml :: Tensor a -> Coppe (Tensor b) -> String
 
 genYaml :: TensorRepr a => Coppe (Tensor a) -> String 
 genYaml m = yaml $ build m 

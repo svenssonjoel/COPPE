@@ -9,7 +9,7 @@ data Strides = Strides [Int]
 data Filters = Filters Int
   deriving (Eq, Show)
 
-data Padding = Same
+data Padding = Same | Valid 
   deriving (Eq, Show)
 
 data Initialization = Random
