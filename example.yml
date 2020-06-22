@@ -1,0 +1,71 @@
+params_input:
+  - type: data
+    dtype: float32
+    shape:
+      - null
+      - 32
+      - 32
+      - 3
+    name: input_data
+
+  - type: label
+    dtype: int64
+    shape:
+      - null
+      - 10
+    name: labels
+
+params_network:
+  - type: conv
+    hyperparams:
+      strides:
+        - 1
+        - 1
+      kernel_size:
+        - 3
+        - 3
+      filters:
+        16
+    input_layer: input_data
+
+  - type: batch_normalize
+
+  - type: relu
+
+  - type: resnet_16
+    repeat: 5
+
+  - type: resnet_32_short_cut
+  - type: resnet_32
+    repeat: 4
+
+  - type: resnet_64_short_cut
+  - type: resnet_64
+    repeat: 4
+
+  - type: deconv
+    hyperparams:
+      output_shape:
+        H: 32
+        W: 32
+      filters: 1
+  - type: batch_normalize
+    name: features
+
+
+  - type: avg_pool
+  - type: dense
+    name: d_1
+
+params_losses:
+  - type:
+      cross_entropy
+    input_layer:
+      - d_1
+      - labels
+    name: cross_0
+
+params_solvers:
+  - type: adam
+    input_layer: cross_0
+    name: adam
