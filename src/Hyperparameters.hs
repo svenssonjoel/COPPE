@@ -15,15 +15,27 @@ data Padding = Same
 data Initialization = Random
   deriving (Eq, Show)
 
-data Dimensions = Dimensions [Int]
+data Dimensions = Dimensions [Integer]
   deriving (Eq, Show)
 
+type Identifier = Integer
+
+
 data Hyperparameters =
-  Hyperparameters { strides    :: Maybe Strides
-                  , filters    :: Maybe Filters
-                  , variance   :: Maybe Float
-                  , padding    :: Maybe Padding
-                  , init       :: Maybe Initialization
-                  , kernelSize :: Maybe Dimensions }
-  
+  Hyperparameters { strides         :: Maybe Strides
+                  , filters         :: Maybe Filters
+                  , variance        :: Maybe Float
+                  , padding         :: Maybe Padding
+                  , initialization  :: Maybe Initialization
+                  , kernelSize      :: Maybe Dimensions
+                  , inputLayer      :: Maybe [Identifier]}
   deriving (Eq, Show)
+
+
+emptyHyperparameters = Hyperparameters { strides         = Nothing
+                                       , filters         = Nothing
+                                       , variance        = Nothing
+                                       , padding         = Nothing
+                                       , initialization  = Nothing
+                                       , kernelSize      = Nothing
+                                       , inputLayer      = Nothing }
