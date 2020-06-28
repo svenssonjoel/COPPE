@@ -3,10 +3,10 @@ module Hyperparameters where
 
 import Data.Maybe
 
-data Strides = Strides [Int]
+data Strides = Strides [Integer]
   deriving (Eq, Show)
 
-data Filters = Filters Int
+data Filters = Filters Integer
   deriving (Eq, Show)
 
 data Padding = Same | Valid 

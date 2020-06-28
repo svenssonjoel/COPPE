@@ -60,7 +60,7 @@ inputDouble d =
   do tell Input
      i <- getId
      return $ mkTensor i d
-
+    
 operation :: TensorRepr a
           => [Tensor a]
           -> LayerOperation
@@ -75,10 +75,30 @@ operation ts op h =
      tell $ Operation op  (h {inputLayer = Just ids})
      tell $ NamedIntermediate i
      return $ mkTensor i (tensorDim tensor)
-         
+       
 conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
-conv h t = operation [t] Conv h
-
+conv h t =
+  if ok
+  then
+    do tens <-  operation [t] Conv h
+       return $mkTensor (tensorId tens) (newDims ++ [f])
+  else error "Bad Hyperparameters" 
+  where
+    -- what if only 1 dimension
+    nok = kernelSize h == Nothing ||
+          filters h == Nothing ||
+          strides h == Nothing
+    ok = not nok &&
+         length ks == ndims - 1 &&
+         length s  == ndims - 1
+    Just (Dimensions ks) = kernelSize h
+    Just (Filters f)     = filters h
+    Just (Strides s)     = strides h
+    ndims = length (tensorDim t)
+    dims = take (ndims - 1) (tensorDim t)
+    newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1))) dims ks s
+    
+    
 batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 batchNormalize h t = operation [t] BatchNormalize h
 
