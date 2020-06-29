@@ -8,7 +8,12 @@ import Control.Monad.Trans.State
 import Hyperparameters
 import Tensor
 
-data LayerOperation = Relu | Conv | BatchNormalize | Add | Reshape 
+data LayerOperation = Relu
+                    | Conv
+                    | BatchNormalize
+                    | Add             
+                    | Reshape        
+                    | Dense          -- Dense feed-forward (Fully connected layer)
   deriving (Eq, Show)
 
 type Name = String
@@ -75,6 +80,10 @@ operation ts op h =
      tell $ Operation op  (h {inputLayer = Just ids})
      tell $ NamedIntermediate i
      return $ mkTensor i (tensorDim tensor)
+
+-- conv2D :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
+
+-- conv3D :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
        
 conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
 conv h t =
@@ -82,7 +91,13 @@ conv h t =
   then
     do tens <-  operation [t] Conv h
        return $mkTensor (tensorId tens) (newDims ++ [f])
-  else error "Bad Hyperparameters" 
+  else error $ "Bad Hyperparameters: " ++
+       if nok
+       then "one (or more) of kernelSize, filters or strides is not specified"
+       else "input dimemsions " ++ show ndims ++ "\n" ++
+            "kernelSize " ++ show ks ++ "\n" ++
+            "strides " ++ show s ++ "\n" ++
+            "filters " ++ show f ++ "\n"
   where
     -- what if only 1 dimension
     nok = kernelSize h == Nothing ||
@@ -108,7 +123,13 @@ relu t = operation [t] Relu emptyHyperparameters
 -- Type instance for a ? 
 add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
 add a b =
-  operation [a,b] Add emptyHyperparameters
+  if ok 
+  then operation [a,b] Add emptyHyperparameters
+  else error $ "Mismatching tensor dimensions in Addition layer: " ++ show (tensorDim a) ++ "=/=" ++ show (tensorDim b) 
+  where
+    ok = length (tensorDim a) == length (tensorDim b) &&
+         and (zipWith (==) (tensorDim a) (tensorDim b))
+  --- Check dimensions match. 
 
 rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
 rep 0 f t = return t
@@ -125,8 +146,9 @@ build :: Coppe a -> Net
 build m = execWriter $ evalStateT m 0
 
 testNetworkB =
-  let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
-                                        ,filters = Just (Filters 16)}
+  let convParams = emptyHyperparameters { kernelSize = Just (Dimensions [34,34])
+                                        , strides = Just (Strides [1,1])
+                                        , filters = Just (Filters 3)}
       addParams = emptyHyperparameters
   in
   do
