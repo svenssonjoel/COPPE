@@ -113,3 +113,45 @@ params_network:
       - conv
   - type: relu
 ```
+
+
+## Ordering and other properties.
+
+
+- Ordering common-sense rules or guidelines
+
+  - Never use patterns 
+    - No two relus directly after eachother
+    - No batchnorm relu batchnorm relu ... sequences
+   
+
+  - Block is defined as, one meaningful layer.
+    Sequence of layers containing one meaningful layer.
+    - Within block and between block properties. 
+
+  - Meaningful layers (Makes structural difference)
+    - conv 
+
+## Concatenation
+
+conat a b
+
+dim(a) = [X,Y,p]
+dim(b) = [Z,W,q]
+
+X == Z
+Y == W
+
+dim(output) = [X,Y,p+q]
+
+
+## Downsampling
+
+downsample(a)
+
+paramerters:
+- Function: Average, Max, 
+- Hyperparameters: Stride 
+
+
+## Upsampling

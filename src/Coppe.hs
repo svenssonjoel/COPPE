@@ -10,10 +10,14 @@ import Tensor
 
 data LayerOperation = Relu
                     | Conv
-                    | BatchNormalize
+                    | BatchNormalize 
                     | Add             
                     | Reshape        
                     | Dense          -- Dense feed-forward (Fully connected layer)
+                    | UpSampling     -- May be trained, interpolation, 
+                    | DownSampling   -- Pooling (function, for example average) Not trained
+                    | Padd           -- Add Padding
+                    | Concat         -- Along the channel dimension
   deriving (Eq, Show)
 
 type Name = String
@@ -81,9 +85,8 @@ operation ts op h =
      tell $ NamedIntermediate i
      return $ mkTensor i (tensorDim tensor)
 
--- conv2D :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
-
--- conv3D :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
+-- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+-- conv3D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
        
 conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
 conv h t =
@@ -145,8 +148,15 @@ skip t f =
 build :: Coppe a -> Net
 build m = execWriter $ evalStateT m 0
 
+{-
+ -  Messages that suggest that
+    - add upsampling/downsampling layer
+    - try using stride X
+    - add padding
+
+-}
 testNetworkB =
-  let convParams = emptyHyperparameters { kernelSize = Just (Dimensions [34,34])
+  let convParams = emptyHyperparameters { kernelSize = Just (Dimensions [4,4])
                                         , strides = Just (Strides [1,1])
                                         , filters = Just (Filters 3)}
       addParams = emptyHyperparameters
