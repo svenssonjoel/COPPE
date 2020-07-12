@@ -27,14 +27,12 @@ A postprocessing layer is a function that:
 \item does not change the ``type'' (shape, data type, etc) of the input tensor
 \end{itemize}
 
-A subnetwork $M\in N$ is a connected segmentation of a network $N$.
-
 \begin{definition}[valid nework]
   A generated network $N$ is valid if and only if the following hold:
   \begin{itemize}
     \item The ranks of sequentially connected tensors in the network are not increasing ($\rightarrow$ conv2d (rank 3) cannot be followed by a dense layer (rank 1)).
-  \item Let $M$ be an arbitrary subnetwrok of $N$. $\forall M\in N$ with only postprocessing layers, there only exists one layer per type.
-  \item All the connections have matching dimensions ($\rightarrow$ this can be fixed by adding upsampling/downsampling/reshape/concatenate layers).
+  \item Let $M$ be an arbitrary subgraph of $N$. $\forall M\subseteq N$ with only postprocessing layers, there only exists one layer per type.
+  \item Any connected vertices have matching dimensions ($\rightarrow$ this can be fixed by adding upsampling/downsampling/reshape/concatenate layers).
     \end{itemize}
   \end{definition}
 
