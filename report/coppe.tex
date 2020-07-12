@@ -1,0 +1,49 @@
+\title{COPPE}
+\author{}
+\date{\today}
+
+\documentclass[12pt]{article}
+
+\usepackage{amsthm}
+
+\newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
+\begin{document}
+\maketitle
+
+% \begin{abstract}
+% \end{abstract}
+
+\section{Definition}
+
+A postprocessing layer is a function that:
+\begin{itemize}
+\item is one of the following:
+  \begin{itemize}
+  \item a normalization function (e.g. batchnorm)
+  \item an activation function (e.g. relu)
+  \item dropout function
+  \end{itemize}
+\item does not change the ``type'' (shape, data type, etc) of the input tensor
+\end{itemize}
+
+A subnetwork $M\in N$ is a connected segmentation of a network $N$.
+
+\begin{definition}[valid nework]
+  A generated network $N$ is valid if and only if the following hold:
+  \begin{itemize}
+    \item The ranks of sequentially connected tensors in the network are not increasing ($\rightarrow$ conv2d (rank 3) cannot be followed by a dense layer (rank 1)).
+  \item Let $M$ be an arbitrary subnetwrok of $N$. $\forall M\in N$ with only postprocessing layers, there only exists one layer per type.
+  \item All the connections have matching dimensions ($\rightarrow$ this can be fixed by adding upsampling/downsampling/reshape/concatenate layers).
+    \end{itemize}
+  \end{definition}
+
+\bibliographystyle{abbrv}
+\bibliography{main}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
