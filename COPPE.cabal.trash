@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9bae9c12522dcc86afa9069b72382a46a9c0b784fb58302e5d06f7e62403a154
+-- hash: fa94982ab232dbcda9df7c3a09546abddd1e9952322a14cd50297b2d9726397c
 
 name:           COPPE
 version:        0.1.0.0
@@ -29,16 +29,14 @@ library
   exposed-modules:
       Coppe
       Hyperparameters
-      Tensor
   other-modules:
       Paths_COPPE
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
-    , mtl >=2.2.2 && <2.3
-    , transformers >=0.5.6.2 && <0.5.7
-    , yaml >=0.11.4.0 && <0.11.5
+       base >=4.7 && <5
+     , mtl  >=2.2.2 && <2.3
+     , transformers >= 0.5.6.2 && <0.5.7
   default-language: Haskell2010
 
 executable COPPE-exe
@@ -51,9 +49,6 @@ executable COPPE-exe
   build-depends:
       COPPE
     , base >=4.7 && <5
-    , mtl >=2.2.2 && <2.3
-    , transformers >=0.5.6.2 && <0.5.7
-    , yaml >=0.11.4.0 && <0.11.5
   default-language: Haskell2010
 
 test-suite COPPE-test
@@ -67,7 +62,4 @@ test-suite COPPE-test
   build-depends:
       COPPE
     , base >=4.7 && <5
-    , mtl >=2.2.2 && <2.3
-    , transformers >=0.5.6.2 && <0.5.7
-    , yaml >=0.11.4.0 && <0.11.5
   default-language: Haskell2010
