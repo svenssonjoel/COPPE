@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9bae9c12522dcc86afa9069b72382a46a9c0b784fb58302e5d06f7e62403a154
+-- hash: 61bcc52f43f23b0af3f91949cfbdbaf5d483d4d088b9a8e30b5ffbdc7686a3c6
 
 name:           COPPE
 version:        0.1.0.0
@@ -38,7 +38,6 @@ library
       base >=4.7 && <5
     , mtl >=2.2.2 && <2.3
     , transformers >=0.5.6.2 && <0.5.7
-    , yaml >=0.11.4.0 && <0.11.5
   default-language: Haskell2010
 
 executable COPPE-exe
@@ -53,7 +52,6 @@ executable COPPE-exe
     , base >=4.7 && <5
     , mtl >=2.2.2 && <2.3
     , transformers >=0.5.6.2 && <0.5.7
-    , yaml >=0.11.4.0 && <0.11.5
   default-language: Haskell2010
 
 test-suite COPPE-test
@@ -69,5 +67,4 @@ test-suite COPPE-test
     , base >=4.7 && <5
     , mtl >=2.2.2 && <2.3
     , transformers >=0.5.6.2 && <0.5.7
-    , yaml >=0.11.4.0 && <0.11.5
   default-language: Haskell2010
