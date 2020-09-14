@@ -1,5 +1,7 @@
-#!/usr/bin/env stack
+-- #!/usr/bin/env stack
 -- stack --install-ghc runghc
+
+module AstPOC where 
 
 ------------------------------------------------------------------------
 --Created: mån sep  7 16:12:09 2020 (+0200)
@@ -137,5 +139,3 @@ evalRecipe inputProperties (Recipe layers) =
       where newScope = ps ++ [(evalLayer ((InputLayer, inputProperty) : ps) l)]
 
 
-main :: IO ()
-main = print (evalRecipe [(Name "resnet32", Property [32,32,3])] resnet32)
