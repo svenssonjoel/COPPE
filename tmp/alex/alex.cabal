@@ -1,0 +1,71 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 567ef46c23dca0252cf814992145b9a19143e6f8dfc703b93a635ff4e5ae0304
+
+name:           alex
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/alex#readme>
+homepage:       https://github.com/githubuser/alex#readme
+bug-reports:    https://github.com/githubuser/alex/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2020 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/alex
+
+library
+  exposed-modules:
+      Lib
+  other-modules:
+      Paths_alex
+  hs-source-dirs:
+      src
+  build-depends:
+      QuickCheck
+    , base >=4.7 && <5
+    , containers
+    , extra
+  default-language: Haskell2010
+
+executable alex-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_alex
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      QuickCheck
+    , alex
+    , base >=4.7 && <5
+    , containers
+    , extra
+  default-language: Haskell2010
+
+test-suite alex-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_alex
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      QuickCheck
+    , alex
+    , base >=4.7 && <5
+    , containers
+    , extra
+  default-language: Haskell2010
