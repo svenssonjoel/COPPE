@@ -1,6 +1,14 @@
 # COPPE
 
 
+## How to do NN in Haskell? 
+
+- https://github.com/hasktorch/hasktorch#getting-started
+- TensorFlow (Really hard to get running) 
+
+## Python interfacing 
+- Language-python
+
 
 ## Questions
 
