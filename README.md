@@ -4,7 +4,9 @@
 ## How to do NN in Haskell? 
 
 - https://github.com/hasktorch/hasktorch#getting-started
+  https://www.reddit.com/r/haskell/comments/gkz6de/what_has_best_deep_learning_haskell_binding/
 - TensorFlow (Really hard to get running) 
+- https://github.com/HuwCampbell/grenade
 
 ## Python interfacing 
 - Language-python
