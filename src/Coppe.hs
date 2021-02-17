@@ -156,7 +156,7 @@ build m = execWriter $ evalStateT m 0
 
 -}
 testNetworkB =
-  let convParams = emptyHyperparameters { kernelSize = Just (Dimensions [4,4])
+  let convParams = emptyHyperparameters { kernelSize = Just (Dimensions [34,34])
                                         , strides = Just (Strides [1,1])
                                         , filters = Just (Filters 3)}
       addParams = emptyHyperparameters
