@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8ecc504c8316575cb274736abf98e1e42d66e68ee1aa57b65b0a97fdeee8944a
+-- hash: 46288db8a8c32f300c7d919163680901e087a2f457805528eae9fabfda950b67
 
 name:           pygen
 version:        0.1.0.0
@@ -35,6 +35,7 @@ library
   build-depends:
       base >=4.7 && <5
     , language-python >=0.5.8 && <0.6
+    , mtl >=2.2.2 && <=2.3
   default-language: Haskell2010
 
 executable pygen-exe
@@ -47,6 +48,7 @@ executable pygen-exe
   build-depends:
       base >=4.7 && <5
     , language-python >=0.5.8 && <0.6
+    , mtl >=2.2.2 && <=2.3
     , pygen
   default-language: Haskell2010
 
@@ -61,5 +63,6 @@ test-suite pygen-test
   build-depends:
       base >=4.7 && <5
     , language-python >=0.5.8 && <0.6
+    , mtl >=2.2.2 && <=2.3
     , pygen
   default-language: Haskell2010
