@@ -25,7 +25,12 @@ module Lib
     , pyFloat
     , pyDot
     , pyDotted
+    , pySubscript
     , (.:)
+    , (+:)
+    , (-:)
+    , (*:)
+    , (/:)
 
     , glorot_uniform
     , glorot_applied
@@ -86,6 +91,9 @@ pyNone = None NoAnnot
 pyTuple :: [PyExpr] -> PyExpr
 pyTuple es = Tuple es NoAnnot
 
+pyList :: [PyExpr] -> PyExpr
+pyList es = List es NoAnnot
+
 pyArg :: PyExpr -> PyArg
 pyArg e = ArgExpr e NoAnnot
 
@@ -98,7 +106,6 @@ pyInt i = Int i (show i) NoAnnot
 pyFloat :: Double -> PyExpr
 pyFloat f = Float f (show f) NoAnnot
 
-
 pyDot :: PyExpr -> PyIdent -> PyExpr
 pyDot e a = Dot e a NoAnnot
 
@@ -110,6 +117,27 @@ pyDotted (e:es) = dotit (Var e NoAnnot) es
     dotit e [i] = pyDot e i
     dotit e (i:is) = dotit (pyDot e i) is
 
+pySubscript :: PyExpr -> PyExpr -> PyExpr
+pySubscript e1 e2 = Subscript e1 e2 NoAnnot
+
+-- Some arithmetic
+
+(+:) :: PyExpr -> PyExpr -> PyExpr
+(+:) e1 e2 = BinaryOp (Plus NoAnnot) e1 e2 NoAnnot
+
+(-:) :: PyExpr -> PyExpr -> PyExpr
+(-:) e1 e2 = BinaryOp (Minus NoAnnot) e1 e2 NoAnnot
+
+(*:) :: PyExpr -> PyExpr -> PyExpr
+(*:) e1 e2 = BinaryOp (Multiply NoAnnot) e1 e2 NoAnnot
+
+(/:) :: PyExpr -> PyExpr -> PyExpr
+(/:) e1 e2 = BinaryOp (Divide NoAnnot) e1 e2 NoAnnot
+
+infixl 7 *:
+infixl 7 /:
+infixl 6 +:
+infixl 6 -:
 
 -- Examples
 glorot_uniform seed shape a =
@@ -123,6 +151,16 @@ glorot_applied =
                  (pyArg (pyInt 16))
 
 
+
+
 -- Monad?
+
+
+-- myModule =
+--   do
+--      genImport "checkpoint"
+--      genFunction "model" arg1 arg2
+--        do
+         
 
 

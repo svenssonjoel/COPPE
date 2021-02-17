@@ -13,11 +13,11 @@ test i =
     return $ stms !! i
           
 
-body =
+body i =
   do
     (Right (Module stms, _)) <- parseFile "generated.py"
     let (Fun a b c d e) = stms !! 6
-    return $ d !! 0
+    return $ d !! i
 
 
 main :: IO ()
