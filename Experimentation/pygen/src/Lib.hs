@@ -1,7 +1,9 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module Lib
     ( parseFile
 
-
+    , PyModule
     , PyIdent
     , PyExpr
     , PyArg
@@ -34,16 +36,21 @@ module Lib
 
     , glorot_uniform
     , glorot_applied
+
+    , runPyGen
+    , exampleProgram
     ) where
 
 import Language.Python.Common
 import Language.Python.Version3
 
 import Control.Monad.State
+import Control.Monad.Writer
 
 data NoAnnot = NoAnnot
   deriving (Eq, Show)
 
+type PyModule = Module NoAnnot
 type PyIdent = Ident NoAnnot
 type PyDotted = DottedName NoAnnot
 type PyExpr = Expr NoAnnot
@@ -62,6 +69,9 @@ pyIdent s = Ident s NoAnnot
 
 pyVar :: String -> PyExpr
 pyVar s = Var (pyIdent s) NoAnnot
+
+pyVarId :: PyIdent -> PyExpr
+pyVarId i = Var i NoAnnot
 
 pyStrings :: String -> PyExpr
 pyStrings s = Strings [s] NoAnnot
@@ -89,7 +99,7 @@ pyNone :: PyExpr
 pyNone = None NoAnnot
 
 pyTuple :: [PyExpr] -> PyExpr
-pyTuple es = Tuple es NoAnnot
+pyTuple es = Paren (Tuple es NoAnnot) NoAnnot
 
 pyList :: [PyExpr] -> PyExpr
 pyList es = List es NoAnnot
@@ -151,16 +161,66 @@ glorot_applied =
                  (pyArg (pyInt 16))
 
 
+-- PyGen monad
+
+newtype PyGen a = PyGen (StateT Integer (Writer [PyStmt]) a)
+  deriving (Functor, Applicative, Monad,  MonadState Integer, MonadWriter [PyStmt])
+
+runPyGen :: PyGen PyModule -> PyModule
+runPyGen (PyGen pm) = fst $ runWriter (evalStateT pm 0)
 
 
--- Monad?
+--type 
+
+genUnique :: PyGen Integer
+genUnique =
+  do  i <- get
+      put (i + 1)
+      return i
+
+genPyIdent :: PyGen PyIdent 
+genPyIdent =
+  do i <- genUnique
+     return $ pyIdent ("gen_ident" ++ show i)
+
+genPyVar :: PyGen PyExpr
+genPyVar =
+  do i <- genUnique
+     return $ pyVar ("gen_var" ++ show i)
 
 
--- myModule =
---   do
---      genImport "checkpoint"
---      genFunction "model" arg1 arg2
---        do
+
+genModule :: PyGen () -> PyGen PyModule
+genModule body =
+  do body' <- censor (const []) $ snd <$> listen body
+     return $ Module body'
+
+genFunction :: PyIdent -> [PyIdent] -> ([PyIdent] -> PyGen ()) -> PyGen ()
+genFunction name args body =
+  do body' <- censor (const []) $ snd <$> listen (body args)
+     tell [pyFn name args body']
+
+
+
+exampleProgram :: PyGen PyModule
+exampleProgram =
+   genModule $
+   do
+     genFunction (pyIdent "apa") [pyIdent "a", pyIdent "b"] $
+       \ [a,b] ->
+         do tell [pyAssign (pyVar "x") ((pyVarId a) +: (pyVarId b))]
+            tell [pyAssign (pyVar "y") glorot_applied]
+            
+
+              
          
-
-
+    
+-- Module [
+--   Fun {fun_name = Ident {ident_string = "apa", ident_annot = NoAnnot},
+--        fun_args = [Param {param_name = Ident {ident_string = "a", ident_annot = NoAnnot}, param_py_annotation = Nothing, param_default = Nothing, param_annot = NoAnnot},Param {param_name = Ident {ident_string = "b", ident_annot = NoAnnot}, param_py_annotation = Nothing, param_default = Nothing, param_annot = NoAnnot}],
+--        fun_result_annotation = Nothing,
+--        fun_body = [Assign {assign_to = [Var {var_ident = Ident {ident_string = "x", ident_annot = NoAnnot}, expr_annot = NoAnnot}],
+--                            assign_expr = BinaryOp {operator = Plus {op_annot = NoAnnot}, left_op_arg = Var {var_ident = Ident {ident_string = "a", ident_annot = NoAnnot}, expr_annot = NoAnnot}, right_op_arg = Var {var_ident = Ident {ident_string = "b", ident_annot = NoAnnot}, expr_annot = NoAnnot}, expr_annot = NoAnnot}, stmt_annot = NoAnnot},
+--                     Assign {assign_to = [Var {var_ident = Ident {ident_string = "y", ident_annot = NoAnnot}, expr_annot = NoAnnot}],
+--                             assign_expr = Call {call_fun = Call {call_fun = Dot {dot_expr = Dot {dot_expr = Dot {dot_expr = Var {var_ident = Ident {ident_string = "tf", ident_annot = NoAnnot}, expr_annot = NoAnnot}, dot_attribute = Ident {ident_string = "keras", ident_annot = NoAnnot}, expr_annot = NoAnnot}, dot_attribute = Ident {ident_string = "initializers", ident_annot = NoAnnot}, expr_annot = NoAnnot}, dot_attribute = Ident {ident_string = "glorot_uniform", ident_annot = NoAnnot}, expr_annot = NoAnnot}, call_args = [ArgKeyword {arg_keyword = Ident {ident_string = "seed", ident_annot = NoAnnot}, arg_expr = None {expr_annot = NoAnnot}, arg_annot = NoAnnot}], expr_annot = NoAnnot}, call_args = [ArgKeyword {arg_keyword = Ident {ident_string = "shape", ident_annot = NoAnnot},
+--                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               arg_expr = Tuple {tuple_exprs = [Int {int_value = 3, expr_literal = "3", expr_annot = NoAnnot},Int {int_value = 3, expr_literal = "3", expr_annot = NoAnnot},Int {int_value = 3, expr_literal = "3", expr_annot = NoAnnot}], expr_annot = NoAnnot}, arg_annot = NoAnnot},ArgExpr {arg_expr = Int {int_value = 16, expr_literal = "16", expr_annot = NoAnnot}, arg_annot = NoAnnot}], expr_annot = NoAnnot}, stmt_annot = NoAnnot}], stmt_annot = NoAnnot}]
