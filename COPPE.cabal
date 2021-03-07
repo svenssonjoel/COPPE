@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1b43b12667e2a341f1b11834fe5219cb706b84cb30d38631f8bc461937508dc9
+-- hash: 54af9066793c5f5c83989b8cff10b1bad7f27a165d86be64d01988268adb508f
 
 name:           COPPE
 version:        0.1.0.0
@@ -29,8 +29,9 @@ library
   exposed-modules:
       AstPOC
       Coppe
-      Hyperparameters
-      Tensor
+      CoppeAST
+      Pygen
+      YParse
   other-modules:
       Paths_COPPE
   hs-source-dirs:

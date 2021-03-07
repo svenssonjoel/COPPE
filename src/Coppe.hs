@@ -5,40 +5,7 @@ module Coppe
 import Control.Monad.Writer
 import Control.Monad.Trans.State
 
-import Hyperparameters
-import Tensor
-
-data LayerOperation = Relu
-                    | Conv
-                    | BatchNormalize 
-                    | Add             
-                    | Reshape        
-                    | Dense          -- Dense feed-forward (Fully connected layer)
-                    | UpSampling     -- May be trained, interpolation, 
-                    | DownSampling   -- Pooling (function, for example average) Not trained
-                    | Padd           -- Add Padding
-                    | Concat         -- Along the channel dimension
-  deriving (Eq, Show)
-
-type Name = String
-
-data Net =
-  Input 
-  | Empty
-  | NamedIntermediate Identifier -- Maybe remove and attach Identifier to Operation
-  | Operation LayerOperation Hyperparameters
-  | Seq Net Net
-  | Rep Integer Net -- What will the identifiers mean in here?
-  deriving (Eq, Show)
-
-instance Semigroup Net where
-  (<>) = Seq
-  
-instance Monoid Net where
-  mempty = Empty
-  mappend Empty a = a
-  mappend a Empty = a
-  mappend a b     = Seq a b
+import CoppeAST
 
 type Coppe a = StateT Integer (Writer Net) a
 

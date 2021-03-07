@@ -216,11 +216,6 @@ exampleProgram =
          do (pyIdent "x") =: ((pyVarId a) +: (pyVarId b))
             (pyIdent "y") =: glorot_applied
            
-            
-
-              
-         
-    
 -- Module [
 --   Fun {fun_name = Ident {ident_string = "apa", ident_annot = NoAnnot},
 --        fun_args = [Param {param_name = Ident {ident_string = "a", ident_annot = NoAnnot}, param_py_annotation = Nothing, param_default = Nothing, param_annot = NoAnnot},Param {param_name = Ident {ident_string = "b", ident_annot = NoAnnot}, param_py_annotation = Nothing, param_default = Nothing, param_annot = NoAnnot}],
