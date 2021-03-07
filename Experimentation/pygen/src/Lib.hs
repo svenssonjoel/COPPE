@@ -188,8 +188,6 @@ genPyVar =
   do i <- genUnique
      return $ pyVar ("gen_var" ++ show i)
 
-
-
 genModule :: PyGen () -> PyGen PyModule
 genModule body =
   do body' <- censor (const []) $ snd <$> listen body
@@ -200,16 +198,24 @@ genFunction name args body =
   do body' <- censor (const []) $ snd <$> listen (body args)
      tell [pyFn name args body']
 
+genAssign :: PyIdent -> PyExpr -> PyGen ()
+genAssign i e =
+  do tell [pyAssign (pyVarId i) e] 
 
+(=:) :: PyIdent -> PyExpr -> PyGen ()
+(=:) = genAssign
+
+infixl 1 =:
 
 exampleProgram :: PyGen PyModule
 exampleProgram =
    genModule $
    do
-     genFunction (pyIdent "apa") [pyIdent "a", pyIdent "b"] $
+     genFunction (pyIdent "apa") [pyIdent "argument1", pyIdent "argument2"] $
        \ [a,b] ->
-         do tell [pyAssign (pyVar "x") ((pyVarId a) +: (pyVarId b))]
-            tell [pyAssign (pyVar "y") glorot_applied]
+         do (pyIdent "x") =: ((pyVarId a) +: (pyVarId b))
+            (pyIdent "y") =: glorot_applied
+           
             
 
               

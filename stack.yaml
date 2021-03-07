@@ -17,7 +17,9 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-14.20
+
+#resolver: lts-14.20
+resolver: lts-17.5
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -35,9 +37,9 @@ packages:
 # forks / in-progress versions pinned to a git hash. For example:
 #
 extra-deps:
-  - tensorflow-0.2.0.1@sha256:adebe983e70c10ed2a27defeeb11fae6071874e898a1100e39f6409ff195b9ca,3120
-  - tensorflow-proto-0.2.0.1@sha256:843eb75f1b4eff7892208f1e800cd7dd3f9e01b1526b8a2855f6f702d87aef43,12225
-  - proto-lens-0.5.1.0@sha256:d959c40aabda1ab208a64b0c5abb5519e7956b665275b38beb4c812f51f95987,3266
+#  - tensorflow-0.2.0.1@sha256:adebe983e70c10ed2a27defeeb11fae6071874e898a1100e39f6409ff195b9ca,3120
+#  - tensorflow-proto-0.2.0.1@sha256:843eb75f1b4eff7892208f1e800cd7dd3f9e01b1526b8a2855f6f702d87aef43,12225
+#  - proto-lens-0.5.1.0@sha256:d959c40aabda1ab208a64b0c5abb5519e7956b665275b38beb4c812f51f95987,3266
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
