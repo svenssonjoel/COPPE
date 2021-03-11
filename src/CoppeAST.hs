@@ -1,9 +1,9 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 module CoppeAST (
                 -- Layeroperations
-                  LayerOperation(..)
+                  Ingredient(..)
                 , Name
-                , Net(..)
+                , Recipe(..)
 
                 -- hyperparameters
                 , Strides(..)
@@ -111,33 +111,52 @@ emptyHyperparameters = Hyperparameters { strides         = Nothing
 -- Layers 
 
 
-data LayerOperation = Relu
-                    | Conv
-                    | BatchNormalize 
-                    | Add             
-                    | Reshape        
-                    | Dense          -- Dense feed-forward (Fully connected layer)
-                    | UpSampling     -- May be trained, interpolation, 
-                    | DownSampling   -- Pooling (function, for example average) Not trained
-                    | Padd           -- Add Padding
-                    | Concat         -- Along the channel dimension
+-- May want annotations on Ingredients
+data Ingredient = Relu
+                | Conv
+                | BatchNormalize 
+                | Add             
+                | Reshape        
+                | Dense          -- Dense feed-forward (Fully connected layer)
+                | UpSampling     -- May be trained, interpolation, 
+                | DownSampling   -- Pooling (function, for example average) Not trained
+                | Padd           -- Add Padding
+                | Concat         -- Along the channel dimension
   deriving (Eq, Show)
 
 type Name = String
+  
 
-data Net =
+data RecipeAnnotation =
+  RecipeAnnotation { flopsInference :: Maybe Integer
+                   , flopsTraining  :: Maybe Integer  
+                   }
+  deriving (Eq, Show)
+
+
+data Recipe =
   Input 
   | Empty
   | NamedIntermediate Identifier -- Maybe remove and attach Identifier to Operation
-  | Operation LayerOperation Hyperparameters
-  | Seq Net Net
-  | Rep Integer Net -- What will the identifiers mean in here?
+  | Operation Ingredient Hyperparameters
+  | Seq Recipe Recipe
+  | Rep Integer Recipe -- What will the identifiers mean in here?
+  -- Annotations added by traversals  
+  | Annotated RecipeAnnotation Recipe
   deriving (Eq, Show)
 
-instance Semigroup Net where
+
+-- Seq (Seq x y) z)
+
+-- Can annotate one layer or a sequence of many layers. 
+-- Seq (Annotated r (Seq x y)  (Seq z (Annotated r1 k) ) 
+
+
+
+instance Semigroup Recipe where
   (<>) = Seq
   
-instance Monoid Net where
+instance Monoid Recipe where
   mempty = Empty
   mappend Empty a = a
   mappend a Empty = a
