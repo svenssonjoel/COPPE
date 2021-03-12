@@ -9,13 +9,6 @@ import CoppeAST
 
 type Coppe a = StateT Integer (Writer Recipe) a
 
-name :: Coppe Identifier
-name =
-  do i <- get
-     put (i + 1)
-     tell $ NamedIntermediate i
-     return $ i
-
 getId :: Coppe Integer
 getId =
   do i <- get
@@ -29,13 +22,13 @@ inputFloat :: [Integer] -> Coppe (Tensor Float)
 inputFloat d =
   do tell Input
      i <- getId
-     return $ mkTensor i d
+     return $ mkTensor ("tensor" ++ show i) d
 
 inputDouble :: [Integer] -> Coppe (Tensor Double) 
 inputDouble d =
   do tell Input
      i <- getId
-     return $ mkTensor i d
+     return $ mkTensor ("tensor" ++ show i) d
     
 operation :: TensorRepr a
           => [Tensor a]
@@ -47,10 +40,10 @@ operation ts op h =
   let ids = map (\t -> (tensorId t)) ts
       tensor = head ts
   in 
-  do i <- getId 
-     tell $ Operation op  (h {inputLayer = Just ids})
-     tell $ NamedIntermediate i
-     return $ mkTensor i (tensorDim tensor)
+  do i <- getId
+     let nom = "tensor" ++ show i
+     tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
+     return $ mkTensor nom (tensorDim tensor)
 
 -- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 -- conv3D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)

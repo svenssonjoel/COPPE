@@ -33,17 +33,17 @@ import Data.Maybe
 data Type = Float | Double 
 
 
-data TensorInternal = TensorInternal Integer Type [Integer] 
+data TensorInternal = TensorInternal String Type [Integer] 
 
 data Tensor a = Tensor TensorInternal
 
 
-mkTensor :: forall a. TensorRepr a => Integer -> [Integer] -> Tensor a
-mkTensor i d = toTensor (TensorInternal i t d)
+mkTensor :: forall a. TensorRepr a => String -> [Integer] -> Tensor a
+mkTensor nom d = toTensor (TensorInternal nom t d)
   where
     t = (tensorType (undefined :: Tensor a))
 
-tensorId :: Tensor a -> Integer
+tensorId :: Tensor a -> String
 tensorId (Tensor (TensorInternal i _ _)) = i
 
 tensorDim :: Tensor a -> [Integer]
@@ -83,7 +83,7 @@ data Initialization = Random
 data Dimensions = Dimensions [Integer]
   deriving (Eq, Show)
 
-type Identifier = Integer
+type Identifier = String
 
 
 data Hyperparameters =
@@ -93,7 +93,8 @@ data Hyperparameters =
                   , padding         :: Maybe Padding
                   , initialization  :: Maybe Initialization
                   , kernelSize      :: Maybe Dimensions
-                  , inputLayer      :: Maybe [Identifier]}
+                  , inputLayer      :: Maybe [Identifier]
+                  , name            :: Maybe Identifier}
   deriving (Eq, Show)
 
 
@@ -104,7 +105,8 @@ emptyHyperparameters = Hyperparameters { strides         = Nothing
                                        , padding         = Nothing
                                        , initialization  = Nothing
                                        , kernelSize      = Nothing
-                                       , inputLayer      = Nothing }
+                                       , inputLayer      = Nothing
+                                       , name            = Nothing}
 
 
 -- ------------------------------------------------------------ --
@@ -137,7 +139,6 @@ data RecipeAnnotation =
 data Recipe =
   Input 
   | Empty
-  | NamedIntermediate Identifier -- Maybe remove and attach Identifier to Operation
   | Operation Ingredient Hyperparameters
   | Seq Recipe Recipe
   | Rep Integer Recipe -- What will the identifiers mean in here?
@@ -145,6 +146,18 @@ data Recipe =
   | Annotated RecipeAnnotation Recipe
   deriving (Eq, Show)
 
+
+data RecipeT a where
+  InputT :: a -> RecipeT a
+  EmptyT :: RecipeT ()
+  OpT    :: Operation a b -> RecipeT (a -> b)
+  AppT   :: RecipeT (a -> b) -> RecipeT a -> RecipeT b 
+  SeqT   :: RecipeT (a -> b) -> RecipeT b
+  Annot  :: RecipeAnnotation -> RecipeT a -> RecipeT a
+
+
+
+  
 
 -- Seq (Seq x y) z)
 
@@ -161,3 +174,9 @@ instance Monoid Recipe where
   mappend Empty a = a
   mappend a Empty = a
   mappend a b     = Seq a b
+
+
+-- Recipe does not fit into Foldable (because it is * and not  * -> *)
+-- Recipe also does not fit into Traversable for the same reason.
+
+--foldIngredients :: (Ingredient -> 

@@ -1,0 +1,86 @@
+-- EAdd. Exp  ::= Exp  "+" Exp1 ;
+--  ESub. Exp  ::= Exp  "-" Exp1 ;
+--  EMul. Exp1 ::= Exp1 "*" Exp2 ;
+--  EDiv. Exp1 ::= Exp1 "/" Exp2 ;
+--  EInt. Exp2 ::= Integer ;
+
+--  coercions Exp 2 ;
+
+
+-- data Ingredient = Relu
+--                 | Conv
+--                 | BatchNormalize 
+--                 | Add             
+--                 | Reshape        
+--                 | Dense          -- Dense feed-forward (Fully connected layer)
+--                 | UpSampling     -- May be trained, interpolation, 
+--                 | DownSampling   -- Pooling (function, for example average) Not trained
+--                 | Padd           -- Add Padding
+--                 | Concat         -- Along the channel dimension
+--   deriving (Eq, Show)
+
+-- type Name = String
+  
+
+-- data RecipeAnnotation =
+--   RecipeAnnotation { flopsInference :: Maybe Integer
+--                    , flopsTraining  :: Maybe Integer  
+--                    }
+--   deriving (Eq, Show)
+
+
+-- data Recipe =
+--   Input 
+--   | Empty
+--   | Operation Ingredient Hyperparameters
+--   | Seq Recipe Recipe
+--   | Rep Integer Recipe -- What will the identifiers mean in here?
+--   -- Annotations added by traversals  
+--   | Annotated RecipeAnnotation Recipe
+--   deriving (Eq, Show)
+
+
+-- data RecipeT a where
+--   InputT :: a -> RecipeT a
+--   EmptyT :: RecipeT ()
+--   OpT    :: Operation a b -> RecipeT (a -> b)
+--   AppT   :: RecipeT (a -> b) -> RecipeT a -> RecipeT b 
+--   SeqT   :: RecipeT (a -> b) -> RecipeT b
+--   Annot  :: RecipeAnnotation -> RecipeT a -> RecipeT a
+
+M. Module ::= [Decl] ;
+
+ValueInt. Value ::= Integer ;
+separator Value "," ;
+
+ModDecl. Decl ::= Model;
+RecDecl. Decl ::= Recipe;
+
+terminator Decl "" ;
+
+Mod. Model ::= "model" Ident "{" [Layer] "}" ;
+
+R. Recipe ::= "recipe" Ident "{" [Layer] "}" ;
+
+terminator Recipe "" ;
+
+Op.          Layer  ::= Ingredient HyperParams ;
+NamedRecipe. Layer  ::= Ident ;
+
+
+terminator Layer "" ;
+
+
+Relu.      Ingredient ::= "relu" ;
+Conv.      Ingredient ::= "conv" ;
+BatchNorm. Ingredient ::= "batch_normalize" ; 
+
+Hyps. HyperParams ::= "[" [HyperParam] "]" ;
+
+terminator HyperParam "" ;
+separator  HyperParam "," ;
+
+Stride. HyperParam ::= "strides" ":=" "[" [Value] "]" ;
+
+
+
