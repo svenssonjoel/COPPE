@@ -155,10 +155,6 @@ data RecipeT a where
   SeqT   :: RecipeT (a -> b) -> RecipeT b
   Annot  :: RecipeAnnotation -> RecipeT a -> RecipeT a
 
-
-
-  
-
 -- Seq (Seq x y) z)
 
 -- Can annotate one layer or a sequence of many layers. 

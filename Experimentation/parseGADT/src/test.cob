@@ -15,5 +15,5 @@ model my_model {
   apa
   apa
   bepa
-  bepa
+  bepa  
 }
