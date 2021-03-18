@@ -115,63 +115,79 @@ type Identifier = String
 data Value = IntVal Integer | FloatVal Double
   | ListVal [ Value ]
 
+instance Num Value where
+  (+) (IntVal i) (IntVal j) = IntVal (i+j)
+  (+) (FloatVal i) (FloatVal j) = FloatVal (i+j)
+  (+) _ _ = error "Value: Mismatching types"
+  (-) (IntVal i) (IntVal j) = IntVal (i-j)
+  (-) (FloatVal i) (FloatVal j) = FloatVal (i-j)
+  (-) _ _ = error "Value: Mismatching types"
+  (*) (IntVal i) (IntVal j) = IntVal (i*j)
+  (*) (FloatVal i) (FloatVal j) = FloatVal (i*j)
+  (*) _ _ = error "Value: Mismatching types"
+  abs (IntVal i) = IntVal (abs i)
+  abs (FloatVal i) = FloatVal (abs i)
+  abs _ = error "Value: abs not supported on ListVal"
+  signum (IntVal i) = IntVal (signum i)
+  signum (FloatVal i) = FloatVal (signum i)
+  signum _ = error "Value: signum not supported on ListVal"
+  fromInteger i = IntVal (fromInteger i)
+  
+
 type Param = Value
 type Annot = Value
 
-type Hyperparameters = Map.Map String Param
-type Annotation      = Map.Map String Annot
-    
+type HyperMap    = Map.Map String Param
+type Annotation  = Map.Map String Annot
+
+type Hyperparameters = [(String, Param)]
+                 
 class Ingredient a  where 
-  name :: a -> String
+  name       :: a -> String
   annotation :: a -> Annotation 
-  annotate   :: String -> Value -> a -> a 
-
-
-
-
+  annotate   :: String -> Value -> a -> a
+  create     :: Hyperparameters -> a
 
 -- ------------------------------------------------------------ --
 -- Some example ingredients
 
-data Conv = Conv Annotation
+data Conv = Conv HyperMap Annotation 
 
 instance Ingredient Conv where
   name _ = "conv"
-  annotation (Conv a) = a
-  annotate s v (Conv a) = Conv $ Map.insert s v a
+  annotation (Conv h a) = a
+  annotate s v (Conv h a) = Conv h (Map.insert s v a)
+  create hyps = Conv (Map.fromList hyps) (Map.empty)
 
+instance Show Conv where
+  show = name 
 
+mkConv :: Hyperparameters -> Conv
+mkConv = create
+
+data Relu = Relu HyperMap Annotation
+
+instance Ingredient Relu where
+  name _ = "relu"
+  annotation (Relu h a) = a
+  annotate s v (Relu h a) = Relu h (Map.insert s v a)
+  create hyps = Relu (Map.fromList hyps) (Map.empty)
+
+instance Show Relu where
+  show = name
+
+mkRelu :: Hyperparameters -> Relu
+mkRelu = create
 
 -- ------------------------------------------------------------ --
 -- Layers 
 
--- May want annotations on Ingredients
--- data Ingredient = Relu
---                 | Conv
---                 | BatchNormalize 
---                 | Add             
---                 | Reshape        
---                 | Dense          -- Dense feed-forward (Fully connected layer)
---                 | UpSampling     -- May be trained, interpolation, 
---                 | DownSampling   -- Pooling (function, for example average) Not trained
---                 | Padd           -- Add Padding
---                 | Concat         -- Along the channel dimension
---   deriving (Eq, Show)
-
 type Name = String
   
-
-data RecipeAnnotation =
-  RecipeAnnotation { flopsInference :: Maybe Integer
-                   , flopsTraining  :: Maybe Integer  
-                   }
-  deriving (Eq, Show)
-
-
 data Recipe where
   Input :: Recipe
   Empty :: Recipe
-  Operation :: (Ingredient a) => a -> Maybe Hyperparameters -> Recipe
+  Operation :: (Ingredient a) => a -> Recipe
   Seq :: Recipe -> Recipe -> Recipe
   Annotated :: Annotation -> Recipe
 
