@@ -30,10 +30,9 @@ inputDouble d =
      i <- getId
      return $ mkTensor ("tensor" ++ show i) d
     
-operation :: TensorRepr a
+operation :: Ingredient i, TensorRepr a
           => [Tensor a]
-          -> Ingredient
-          -> Hyperparameters
+          -> i
           -> Coppe (Tensor a)
 operation [] _ _  = error "No inputs specified" 
 operation ts op h =

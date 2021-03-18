@@ -35,7 +35,6 @@ import qualified Data.Map as Map
 
 data Type = Float | Double 
 
-
 data TensorInternal = TensorInternal String Type [Integer] 
 
 data Tensor a = Tensor TensorInternal
@@ -143,10 +142,11 @@ type Annotation  = Map.Map String Annot
 type Hyperparameters = [(String, Param)]
                  
 class Ingredient a  where 
-  name       :: a -> String
-  annotation :: a -> Annotation 
-  annotate   :: String -> Value -> a -> a
-  create     :: Hyperparameters -> a
+  name       :: a -> String                 -- Used for printing
+  annotation :: a -> Annotation             -- Get all annotations on the layer 
+  annotate   :: String -> Value -> a -> a   -- Add an annotation key-value pair (or overwrite existing)
+  create     :: Hyperparameters -> a        -- Create an ingredient 
+  transform  :: a -> Tensor t -> Tensor t   -- How does ingredient change tensor dimensionality
 
 -- ------------------------------------------------------------ --
 -- Some example ingredients
@@ -158,6 +158,7 @@ instance Ingredient Conv where
   annotation (Conv h a) = a
   annotate s v (Conv h a) = Conv h (Map.insert s v a)
   create hyps = Conv (Map.fromList hyps) (Map.empty)
+  transform a t = undefined -- this will get messy
 
 instance Show Conv where
   show = name 
@@ -172,12 +173,14 @@ instance Ingredient Relu where
   annotation (Relu h a) = a
   annotate s v (Relu h a) = Relu h (Map.insert s v a)
   create hyps = Relu (Map.fromList hyps) (Map.empty)
+  transform a = id -- identity transformation of tensor shape
 
 instance Show Relu where
   show = name
 
 mkRelu :: Hyperparameters -> Relu
 mkRelu = create
+
 
 -- ------------------------------------------------------------ --
 -- Layers 
