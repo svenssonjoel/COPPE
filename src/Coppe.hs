@@ -30,7 +30,7 @@ inputDouble d =
      i <- getId
      return $ mkTensor ("tensor" ++ show i) d
     
-operation :: Ingredient i, TensorRepr a
+operation :: (Ingredient i, TensorRepr a)
           => [Tensor a]
           -> i
           -> Coppe (Tensor a)

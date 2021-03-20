@@ -112,7 +112,9 @@ type Identifier = String
 
 
 data Value = IntVal Integer | FloatVal Double
+  | StringVal String
   | ListVal [ Value ]
+  
 
 instance Num Value where
   (+) (IntVal i) (IntVal j) = IntVal (i+j)
@@ -145,9 +147,17 @@ class Ingredient a  where
   name       :: a -> String                 -- Used for printing
   annotation :: a -> Annotation             -- Get all annotations on the layer 
   annotate   :: String -> Value -> a -> a   -- Add an annotation key-value pair (or overwrite existing)
-  create     :: Hyperparameters -> a        -- Create an ingredient 
+  create     :: Hyperparameters -> a        -- Create an ingredient
+  hyperSet   :: a -> Hyperparameters -> a
+  hyperGet   :: a -> HyperMap
   transform  :: a -> Tensor t -> Tensor t   -- How does ingredient change tensor dimensionality
 
+  --toPython :: 
+
+  --serializeYaml  ::
+  --deserializeYaml ::
+
+  
 -- ------------------------------------------------------------ --
 -- Some example ingredients
 
@@ -158,6 +168,8 @@ instance Ingredient Conv where
   annotation (Conv h a) = a
   annotate s v (Conv h a) = Conv h (Map.insert s v a)
   create hyps = Conv (Map.fromList hyps) (Map.empty)
+  hyperSet (Conv h a) h' = Conv (Map.union (Map.fromList h') h) a
+  hyperGet (Conv h _) = h
   transform a t = undefined -- this will get messy
 
 instance Show Conv where
@@ -173,6 +185,8 @@ instance Ingredient Relu where
   annotation (Relu h a) = a
   annotate s v (Relu h a) = Relu h (Map.insert s v a)
   create hyps = Relu (Map.fromList hyps) (Map.empty)
+  hyperSet (Relu h a) h' = Relu (Map.union (Map.fromList h') h) a
+  hyperGet (Relu h _) = h
   transform a = id -- identity transformation of tensor shape
 
 instance Show Relu where
@@ -181,6 +195,31 @@ instance Show Relu where
 mkRelu :: Hyperparameters -> Relu
 mkRelu = create
 
+data BatchNorm = BatchNorm HyperMap Annotation
+
+instance Ingredient BatchNorm where
+  name _ = "batch_normalize"
+  annotation (BatchNorm h a) = a
+  annotate s v (BatchNorm h a) = BatchNorm h (Map.insert s v a)
+  create hyps = BatchNorm (Map.fromList hyps) (Map.empty)
+  hyperSet (BatchNorm h a) h' = BatchNorm (Map.union (Map.fromList h') h) a
+  hyperGet (BatchNorm h _) = h
+  transform a = id
+
+instance Show BatchNorm where
+  show = name
+
+mkBatchNorm :: Hyperparameters -> BatchNorm 
+mkBatchNorm = create
+
+
+data Optimizer = Optimizer String HyperMap Annotation
+
+instance Ingredient Optimizer where
+  name (Optimizer n _ _)  = n
+
+
+-- mkOptimizer [("function", "Adam"), ("input_layer", 1) ("learning_rate", \epoch -> f epoch) ]  
 
 -- ------------------------------------------------------------ --
 -- Layers 
