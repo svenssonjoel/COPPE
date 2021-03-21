@@ -73,7 +73,7 @@ conv h t =
     Just (Strides s)     = strides h
     ndims = length (tensorDim t)
     dims = take (ndims - 1) (tensorDim t)
-    newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1))) dims ks s
+    newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1))) dims ks s_
     
     
 batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)

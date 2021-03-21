@@ -82,8 +82,8 @@ data Padding = Same | Valid
 data Initialization = Random
   deriving (Eq, Show)
 
-data Dimensions = Dimensions [Integer]
-  deriving (Eq, Show)
+type Dimensions = [Integer]
+
 
 type Identifier = String
 
@@ -114,6 +114,7 @@ type Identifier = String
 data Value = IntVal Integer | FloatVal Double
   | StringVal String
   | ListVal [ Value ]
+  deriving (Eq, Ord)
   
 
 instance Num Value where
@@ -150,12 +151,37 @@ class Ingredient a  where
   create     :: Hyperparameters -> a        -- Create an ingredient
   hyperSet   :: a -> Hyperparameters -> a
   hyperGet   :: a -> HyperMap
-  transform  :: a -> Tensor t -> Tensor t   -- How does ingredient change tensor dimensionality
+  transform  :: a -> Dimensions -> Dimensions   -- How does ingredient change tensor dimensionality
 
   --toPython :: 
 
   --serializeYaml  ::
   --deserializeYaml ::
+
+
+-- ------------------------------------------------------------ --
+-- Helpers
+
+checkVal :: Value -> Value -> Bool
+checkVal (IntVal _) (IntVal _) = True
+checkVal (FloatVal _) (FloatVal _) = True
+checkVal (ListVal a) (ListVal b) = and (zipWith checkVal a b)
+checkVal _ _ = False
+
+extractInts :: String -> Value -> [Integer]
+extractInts e (ListVal []) = []
+extractInts e (ListVal ((IntVal x):xs)) = x : extractInts e (ListVal xs)
+extractInts e _ = error e
+
+dimValToList :: Value -> [Integer]
+dimValToList v = extractInts "Dimension specification is not a list of integers" v
+ 
+strideValToList :: Value -> [Integer]
+strideValToList v = extractInts "Strides specification is not a list of integers" v
+
+filterValToInt :: Value -> Integer
+filterValToInt (IntVal i) = i
+filterValToInt _ = error "Filters specification must be an integer"
 
   
 -- ------------------------------------------------------------ --
@@ -170,7 +196,33 @@ instance Ingredient Conv where
   create hyps = Conv (Map.fromList hyps) (Map.empty)
   hyperSet (Conv h a) h' = Conv (Map.union (Map.fromList h') h) a
   hyperGet (Conv h _) = h
-  transform a t = undefined -- this will get messy
+  transform a tensorDim = if nok
+                     then error $ "(conv) Missing hyperparameters: kernel-size, filters and strides must be specified."
+                     else if ok
+                          then newDims ++ [f]
+                          else error "(conv) Incompatible hyperparameters and tensor dimensionality."
+                    
+    where hm = hyperGet a
+          kernel_size = Map.lookup "kernel-size" hm
+          filters     = Map.lookup "filters" hm
+          strides     = Map.lookup "strides" hm
+          nok = kernel_size == Nothing || filters == Nothing || strides == Nothing
+          (Just lv) = kernel_size -- kernel size must be a list
+          (Just fv)  = filters     -- Filters must be an IntVal
+          (Just sv)  = strides     -- Strides must be an IntVal
+          ks =  dimValToList lv
+          s  =  strideValToList sv
+          f  =  filterValToInt fv
+          ok = length ks == ndims - 1 && length s == ndims - 1
+          ndims = length tensorDim
+          dims = take (ndims-1) tensorDim
+          newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
+                    dims
+                    ks
+                    s
+
+          
+          
 
 instance Show Conv where
   show = name 
@@ -213,10 +265,18 @@ mkBatchNorm :: Hyperparameters -> BatchNorm
 mkBatchNorm = create
 
 
-data Optimizer = Optimizer String HyperMap Annotation
+data Optimizer = Optimizer HyperMap Annotation
 
 instance Ingredient Optimizer where
-  name (Optimizer n _ _)  = n
+  name _  = "Optimizer"
+  annotation (Optimizer h a) = a
+  annotate s v (Optimizer h a) = Optimizer h (Map.insert s v a)
+  create hyps = Optimizer (Map.fromList hyps) (Map.empty)
+  hyperSet (Optimizer h a) h' = Optimizer (Map.union (Map.fromList h') h) a
+  hyperGet (Optimizer h _) = h
+  transform a = id
+
+
 
 
 -- mkOptimizer [("function", "Adam"), ("input_layer", 1) ("learning_rate", \epoch -> f epoch) ]  
