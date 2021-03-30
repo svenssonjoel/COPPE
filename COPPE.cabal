@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 1c5b7948242c36c0fcd1c091c6500ffab8c6438926a508aaf81847e8938d735b
+-- hash: 3dbcc91072a5ae63e4d4686a5ac6fa44a960e3a95ec0c234c4668a9ff9cb8c70
 
 name:           COPPE
 version:        0.1.0.0
@@ -30,6 +30,7 @@ library
       AstPOC
       Coppe
       CoppeAST
+      IngredientPrelude
       Pygen
       YParse
   other-modules:

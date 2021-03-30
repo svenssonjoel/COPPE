@@ -6,6 +6,7 @@ import Control.Monad.Writer
 import Control.Monad.Trans.State
 
 import CoppeAST
+import IngredientPrelude
 
 type Coppe a = StateT Integer (Writer Recipe) a
 
