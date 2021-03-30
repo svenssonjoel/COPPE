@@ -34,14 +34,15 @@ operation :: (Ingredient i, TensorRepr a)
           => [Tensor a]
           -> i
           -> Coppe (Tensor a)
-operation [] _ _  = error "No inputs specified" 
-operation ts op h =
+operation [] _  = error "No inputs specified" 
+operation ts op =
   let ids = map (\t -> (tensorId t)) ts
       tensor = head ts
   in 
   do i <- getId
      let nom = "tensor" ++ show i
-     tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
+     -- tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
+     tell $ Operation (hyperSet op [("inputLayer", toValue ids), ("name", toValue nom)])  
      return $ mkTensor nom (tensorDim tensor)
 
 -- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
@@ -49,60 +50,37 @@ operation ts op h =
        
 conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
 conv h t =
-  if ok
-  then
-    do tens <-  operation [t] Conv h
-       return $mkTensor (tensorId tens) (newDims ++ [f])
-  else error $ "Bad Hyperparameters: " ++
-       if nok
-       then "one (or more) of kernelSize, filters or strides is not specified"
-       else "input dimemsions " ++ show ndims ++ "\n" ++
-            "kernelSize " ++ show ks ++ "\n" ++
-            "strides " ++ show s ++ "\n" ++
-            "filters " ++ show f ++ "\n"
-  where
-    -- what if only 1 dimension
-    nok = kernelSize h == Nothing ||
-          filters h == Nothing ||
-          strides h == Nothing
-    ok = not nok &&
-         length ks == ndims - 1 &&
-         length s  == ndims - 1
-    Just (Dimensions ks) = kernelSize h
-    Just (Filters f)     = filters h
-    Just (Strides s)     = strides h
-    ndims = length (tensorDim t)
-    dims = take (ndims - 1) (tensorDim t)
-    newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1))) dims ks s_
-    
-    
+  let c = mkConv h
+  in do operation [t] c
+        return $ tensorReshape (transform c) t
+  
 batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
-batchNormalize h t = operation [t] BatchNormalize h
+batchNormalize h t = operation [t] $ mkBatchNorm h
 
 relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
-relu t = operation [t] Relu emptyHyperparameters
+relu t = operation [t] $ mkRelu emptyHyperparameters
 
 -- Type instance for a ? 
-add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
-add a b =
-  if ok 
-  then operation [a,b] Add emptyHyperparameters
-  else error $ "Mismatching tensor dimensions in Addition layer: " ++ show (tensorDim a) ++ "=/=" ++ show (tensorDim b) 
-  where
-    ok = length (tensorDim a) == length (tensorDim b) &&
-         and (zipWith (==) (tensorDim a) (tensorDim b))
-  --- Check dimensions match. 
+-- add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
+-- add a b =
+--   if ok 
+--   then operation [a,b] Add emptyHyperparameters
+--   else error $ "Mismatching tensor dimensions in Addition layer: " ++ show (tensorDim a) ++ "=/=" ++ show (tensorDim b) 
+--   where
+--     ok = length (tensorDim a) == length (tensorDim b) &&
+--          and (zipWith (==) (tensorDim a) (tensorDim b))
+--   --- Check dimensions match. 
 
-rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
-rep 0 f t = return t
-rep n f t =
-   do t' <- f t
-      rep (n - 1) f t'
+-- rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
+-- rep 0 f t = return t
+-- rep n f t =
+--    do t' <- f t
+--       rep (n - 1) f t'
 
-skip :: Tensor a -> (Tensor a -> Coppe (Tensor b)) -> Coppe (Tensor a, Tensor b)
-skip t f =
-  do t' <- f t
-     return (t, t')
+-- skip :: Tensor a -> (Tensor a -> Coppe (Tensor b)) -> Coppe (Tensor a, Tensor b)
+-- skip t f =
+--   do t' <- f t
+--      return (t, t')
 
 build :: Coppe a -> Recipe
 build m = execWriter $ evalStateT m 0
@@ -112,12 +90,13 @@ build m = execWriter $ evalStateT m 0
     - add upsampling/downsampling layer
     - try using stride X
     - add padding
-
 -}
+
+
 testNetworkB =
-  let convParams = emptyHyperparameters { kernelSize = Just (Dimensions [34,34])
-                                        , strides = Just (Strides [1,1])
-                                        , filters = Just (Filters 3)}
+  let convParams = [("kernelSize", toValue [34,34 :: Int])
+                   ,("strides", toValue [1,1 :: Int])
+                   ,("filters", toValue (3 :: Int))]
       addParams = emptyHyperparameters
   in
   do
@@ -127,7 +106,7 @@ testNetworkB =
                 >>= relu
                 >>= conv convParams
                 >>= batchNormalize emptyHyperparameters
-    add in_data out_data
+    return out_data 
 
 -- testSkip =
 --   let convParams = emptyHyperparameters {strides = Just (Strides [1,1])

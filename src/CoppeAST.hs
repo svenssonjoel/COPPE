@@ -1,11 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module CoppeAST (
                 -- Layeroperations
                   Ingredient(..)
+                , ToValue(..)
                 , Name
                 , Recipe(..)
+                , mkConv
+                , mkRelu
+                , mkBatchNorm
+                , Optimizer(..)
 
                 -- hyperparameters
                 , Strides(..)
@@ -15,7 +21,7 @@ module CoppeAST (
                 , Dimensions(..)
                 , Identifier
                 , Hyperparameters(..)
-             --   , emptyHyperparameters
+               , emptyHyperparameters
 
                 -- tensors
                 , Type(..)
@@ -24,7 +30,9 @@ module CoppeAST (
                 , mkTensor
                 , tensorId
                 , tensorDim
+                , tensorReshape
                 , TensorRepr(..)
+                
                 ) where
 
 import Data.Maybe
@@ -50,6 +58,9 @@ tensorId (Tensor (TensorInternal i _ _)) = i
 
 tensorDim :: Tensor a -> [Integer]
 tensorDim (Tensor (TensorInternal _ _ d)) = d
+
+tensorReshape :: ([Integer] -> [Integer]) -> Tensor a -> Tensor a
+tensorReshape trns (Tensor (TensorInternal i j d)) = Tensor (TensorInternal i j (trns d))
 
 class TensorRepr a where
   fromTensor :: Tensor a -> TensorInternal
@@ -134,7 +145,28 @@ instance Num Value where
   signum (FloatVal i) = FloatVal (signum i)
   signum _ = error "Value: signum not supported on ListVal"
   fromInteger i = IntVal (fromInteger i)
+
+class ToValue a where
+  toValue :: a -> Value
+
+
+instance ToValue Integer where
+  toValue = IntVal
+
+instance ToValue Int where
+  toValue i = IntVal (toInteger i)
   
+instance ToValue Float where
+  toValue f = FloatVal (realToFrac f)
+
+instance ToValue Double where
+  toValue d = FloatVal d
+
+instance  {-# OVERLAPPABLE #-} ToValue a => ToValue [a] where
+  toValue xs = ListVal $ map toValue xs
+
+instance  {-# OVERLAPS #-} ToValue [Char] where
+  toValue s = StringVal s
 
 type Param = Value
 type Annot = Value
@@ -143,6 +175,9 @@ type HyperMap    = Map.Map String Param
 type Annotation  = Map.Map String Annot
 
 type Hyperparameters = [(String, Param)]
+
+emptyHyperparameters :: Hyperparameters 
+emptyHyperparameters = []
                  
 class Ingredient a  where 
   name       :: a -> String                 -- Used for printing
