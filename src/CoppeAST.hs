@@ -267,5 +267,3 @@ instance Monoid Recipe where
 
 -- Recipe does not fit into Foldable (because it is * and not  * -> *)
 -- Recipe also does not fit into Traversable for the same reason.
-
---foldIngredients :: (Ingredient -> 
