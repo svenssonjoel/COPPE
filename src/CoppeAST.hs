@@ -35,6 +35,10 @@ module CoppeAST (
                 , tensorDim
                 , tensorReshape
                 , TensorRepr(..)
+
+                -- Folds and traversals
+                ,traverseRecipe
+                ,foldRecipe
                 
                 ) where
 
@@ -98,32 +102,7 @@ data Initialization = Random
 
 type Dimensions = [Integer]
 
-
 type Identifier = String
-
-
--- data Hyperparameters =
---   Hyperparameters { strides         :: Maybe Strides
---                   , filters         :: Maybe Filters
---                   , variance        :: Maybe Float
---                   , padding         :: Maybe Padding
---                   , initialization  :: Maybe Initialization
---                   , kernelSize      :: Maybe Dimensions
---                   , inputLayer      :: Maybe [Identifier]
---                   , name            :: Maybe Identifier}
---   deriving (Eq, Show)
-
-
-
--- emptyHyperparameters = Hyperparameters { strides         = Nothing
---                                        , filters         = Nothing
---                                        , variance        = Nothing
---                                        , padding         = Nothing
---                                        , initialization  = Nothing
---                                        , kernelSize      = Nothing
---                                        , inputLayer      = Nothing
---                                        , name            = Nothing}
-
 
 data Value = IntVal Integer | FloatVal Double
   | StringVal String
@@ -265,5 +244,22 @@ instance Monoid Recipe where
   mappend a b     = Seq a b
 
 
+-- ------------------------------------------------------------
+--  Folds and traversals 
+
 -- Recipe does not fit into Foldable (because it is * and not  * -> *)
 -- Recipe also does not fit into Traversable for the same reason.
+-- I am not too happy about these.... But lets see how it works out
+-- in practice. 
+
+traverseRecipe :: (Recipe -> Recipe) -> Recipe -> Recipe
+traverseRecipe f (Seq r1 r2) = Seq (traverseRecipe f r1) (traverseRecipe f r2)
+traverseRecipe f r = f r
+
+foldRecipe :: (Recipe -> a -> a) -> a -> Recipe -> a
+foldRecipe f a (Seq r1 r2) =
+  let a' = foldRecipe f a r1
+  in  foldRecipe f a' r2
+foldRecipe f a r = f r a
+
+
