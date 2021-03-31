@@ -128,7 +128,7 @@ type Identifier = String
 data Value = IntVal Integer | FloatVal Double
   | StringVal String
   | ListVal [ Value ]
-  deriving (Eq, Ord)
+  deriving (Eq, Ord, Show)
   
 
 instance Num Value where
@@ -182,7 +182,7 @@ type Hyperparameters = [(String, Param)]
 emptyHyperparameters :: Hyperparameters 
 emptyHyperparameters = []
                  
-class Ingredient a  where 
+class Show a => Ingredient a  where 
   name       :: a -> String                 -- Used for printing
   annotation :: a -> Annotation             -- Get all annotations on the layer 
   annotate   :: String -> Value -> a -> a   -- Add an annotation key-value pair (or overwrite existing)
@@ -233,6 +233,12 @@ data Recipe where
   Seq :: Recipe -> Recipe -> Recipe
   Annotated :: Annotation -> Recipe
 
+instance Show Recipe where
+  show Input = "Input"
+  show Empty = "Empty"
+  show (Operation i) = show i
+  show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
+  show (Annotated a) = "<<annot: " ++ show a ++ ">>"
 
 -- data Recipe =
 --   Input 

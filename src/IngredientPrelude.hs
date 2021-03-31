@@ -123,5 +123,8 @@ instance Ingredient Optimizer where
   hyperGet (Optimizer h _) = h
   transform a = id
 
+instance Show Optimizer where
+  show = name
+
 mkOptimizer :: Hyperparameters -> Optimizer
 mkOptimizer = create

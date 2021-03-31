@@ -1,5 +1,14 @@
 -- Experimentation
-module Coppe
+module Coppe (
+  module CoppeAST
+  , module IngredientPrelude
+
+  , build
+  , conv
+  , batchNormalize
+  , relu
+  , inputFloat
+  )
   where 
 
 import Control.Monad.Writer
@@ -32,11 +41,11 @@ inputDouble d =
      return $ mkTensor ("tensor" ++ show i) d
     
 operation :: (Ingredient i, TensorRepr a)
-          => [Tensor a]
-          -> i
+          => i
+          -> [Tensor a]
           -> Coppe (Tensor a)
-operation [] _  = error "No inputs specified" 
-operation ts op =
+operation _ [] = error "No inputs specified" 
+operation op ts =
   let ids = map (\t -> (tensorId t)) ts
       tensor = head ts
   in 
@@ -44,22 +53,21 @@ operation ts op =
      let nom = "tensor" ++ show i
      -- tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
      tell $ Operation (hyperSet op [("inputLayer", toValue ids), ("name", toValue nom)])  
-     return $ mkTensor nom (tensorDim tensor)
+     let result =  mkTensor nom (tensorDim tensor)
+     return $ tensorReshape (transform op) result
 
 -- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 -- conv3D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
        
 conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
-conv h t =
-  let c = mkConv h
-  in do operation [t] c
-        return $ tensorReshape (transform c) t
+conv h t = operation (mkConv h) [t]
+        
   
 batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
-batchNormalize h t = operation [t] $ mkBatchNorm h
+batchNormalize h t = operation (mkBatchNorm h) [t]
 
 relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
-relu t = operation [t] $ mkRelu emptyHyperparameters
+relu t = operation (mkRelu emptyHyperparameters) [t]
 
 -- Type instance for a ? 
 -- add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
@@ -93,21 +101,6 @@ build m = execWriter $ evalStateT m 0
     - add padding
 -}
 
-
-testNetworkB =
-  let convParams = [("kernelSize", toValue [34,34 :: Int])
-                   ,("strides", toValue [1,1 :: Int])
-                   ,("filters", toValue (3 :: Int))]
-      addParams = emptyHyperparameters
-  in
-  do
-    in_data <- inputFloat [32,32,3]
-    out_data <- conv convParams in_data
-                >>= batchNormalize emptyHyperparameters
-                >>= relu
-                >>= conv convParams
-                >>= batchNormalize emptyHyperparameters
-    return out_data 
 
 -- testSkip =
 --   let convParams = emptyHyperparameters {strides = Just (Strides [1,1])
