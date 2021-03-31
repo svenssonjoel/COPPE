@@ -8,13 +8,51 @@ module IngredientPrelude (
                 , mkRelu
                 , mkBatchNorm
                 , mkOptimizer
+
+                , conv
+                , batchNormalize
+                , relu
                 ) where
 
 
 
 import CoppeAST
+import CoppeMonad
+
 import Data.Maybe
 import qualified Data.Map as Map
+
+{------------------------------------------------------------}
+{- Planning
+
+-- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+-- conv3D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+
+-- Type instance for a ? 
+-- add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
+-- add a b =
+--   if ok 
+--   then operation [a,b] Add emptyHyperparameters
+--   else error $ "Mismatching tensor dimensions in Addition layer: " ++ show (tensorDim a) ++ "=/=" ++ show (tensorDim b) 
+--   where
+--     ok = length (tensorDim a) == length (tensorDim b) &&
+--          and (zipWith (==) (tensorDim a) (tensorDim b))
+--   --- Check dimensions match. 
+
+-- rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
+-- rep 0 f t = return t
+-- rep n f t =
+--    do t' <- f t
+--       rep (n - 1) f t'
+
+-- skip :: Tensor a -> (Tensor a -> Coppe (Tensor b)) -> Coppe (Tensor a, Tensor b)
+-- skip t f =
+--   do t' <- f t
+--      return (t, t')
+
+-}
+
+
 
 
 {----------------}
@@ -128,3 +166,16 @@ instance Show Optimizer where
 
 mkOptimizer :: Hyperparameters -> Optimizer
 mkOptimizer = create
+
+
+{----------------------------------------}
+{-             MONAD STUFF              -}
+       
+conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
+conv h t = operation (mkConv h) [t]
+         
+batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+batchNormalize h t = operation (mkBatchNorm h) [t]
+
+relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
+relu t = operation (mkRelu emptyHyperparameters) [t]
