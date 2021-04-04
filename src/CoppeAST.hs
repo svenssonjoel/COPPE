@@ -256,10 +256,10 @@ traverseRecipe :: (Recipe -> Recipe) -> Recipe -> Recipe
 traverseRecipe f (Seq r1 r2) = Seq (traverseRecipe f r1) (traverseRecipe f r2)
 traverseRecipe f r = f r
 
-foldRecipe :: (Recipe -> a -> a) -> a -> Recipe -> a
+foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
 foldRecipe f a (Seq r1 r2) =
   let a' = foldRecipe f a r1
   in  foldRecipe f a' r2
-foldRecipe f a r = f r a
+foldRecipe f a r = f a r
 
 

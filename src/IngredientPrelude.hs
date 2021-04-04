@@ -14,8 +14,6 @@ module IngredientPrelude (
                 , relu
                 ) where
 
-
-
 import CoppeAST
 import CoppeMonad
 
@@ -51,8 +49,6 @@ import qualified Data.Map as Map
 --      return (t, t')
 
 -}
-
-
 
 
 {----------------}

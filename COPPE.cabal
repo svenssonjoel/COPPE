@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 73289111c674932fa40eabf73c870066b40778af4f6e536ddeb6a4b2da15ced2
+-- hash: 6e60dfa002bb684d5fdc26419ccec59dedc19479438c53e013f6d9e76a9ec5d7
 
 name:           COPPE
 version:        0.1.0.0
@@ -30,9 +30,11 @@ library
       AstPOC
       Coppe
       CoppeAST
-      CoppeMonad
       IngredientPrelude
+      KerasGen
       Pygen
+      TFGen
+      TorchGen
       YParse
   other-modules:
       Paths_COPPE
