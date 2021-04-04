@@ -1,5 +1,5 @@
 
-module KeralGen where
+module KerasGen where
 
 import Pygen
 
