@@ -210,14 +210,14 @@ data Recipe where
   Empty :: Recipe
   Operation :: (Ingredient a) => a -> Recipe
   Seq :: Recipe -> Recipe -> Recipe
-  Annotated :: Annotation -> Recipe
+  Annotated :: Annotation -> Recipe -> Recipe
 
 instance Show Recipe where
   show Input = "Input"
   show Empty = "Empty"
   show (Operation i) = show i
   show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
-  show (Annotated a) = "<<annot: " ++ show a ++ ">>"
+  show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
 
 -- data Recipe =
 --   Input 
