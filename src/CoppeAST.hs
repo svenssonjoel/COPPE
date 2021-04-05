@@ -153,8 +153,8 @@ instance  {-# OVERLAPS #-} ToValue [Char] where
 type Param = Value
 type Annot = Value
 
-type HyperMap    = Map.Map String Param
-type Annotation  = Map.Map String Annot
+type HyperMap    = Map.Map String Param -- TODO: Parameter. 
+type Annotation  = Map.Map String Annot 
 
 type Hyperparameters = [(String, Param)]
 
@@ -186,12 +186,6 @@ class Show a => Ingredient a  where
   hyperSet   :: a -> Hyperparameters -> a
   hyperGet   :: a -> HyperMap
   transform  :: a -> Dimensions -> Dimensions   -- How does ingredient change tensor dimensionality
-
-  --toPython :: 
-
-  --serializeYaml  ::
-  --deserializeYaml ::
-
 
 -- ------------------------------------------------------------ --
 -- Helpers
@@ -235,21 +229,6 @@ instance Show Recipe where
   show (Operation i) = show i
   show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
   show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
-
--- data Recipe =
---   Input 
---   | Empty
---   | Operation Ingredient Hyperparameters
---   | Seq Recipe Recipe
---   | Rep Integer Recipe -- What will the identifiers mean in here?
---   -- Annotations added by traversals  
---   | Annotated RecipeAnnotation Recipe
---   deriving (Eq, Show)
-
--- Seq (Seq x y) z)
-
--- Can annotate one layer or a sequence of many layers. 
--- Seq (Annotated r (Seq x y)  (Seq z (Annotated r1 k) ) 
 
 instance Semigroup Recipe where
   (<>) = Seq
