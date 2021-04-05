@@ -158,9 +158,26 @@ type Annotation  = Map.Map String Annot
 
 type Hyperparameters = [(String, Param)]
 
+-- ------------------------------------------------------------ --
+-- Functions 
+
+class Show a => Function a where
+  funName   :: a -> String
+  funSetParams :: a -> [(Maybe String, Param)] -> a
+  funGetParams :: a -> [(Maybe String, Param)]
+  
+data Parameter where
+  FunAppParam :: Function a => a -> Parameter
+  ValParam    :: Param -> Parameter
+
+
+
 emptyHyperparameters :: Hyperparameters 
 emptyHyperparameters = []
-                 
+
+-- ------------------------------------------------------------ --
+-- Ingredients 
+                       
 class Show a => Ingredient a  where 
   name       :: a -> String                 -- Used for printing
   annotation :: a -> Annotation             -- Get all annotations on the layer 
