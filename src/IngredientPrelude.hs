@@ -20,6 +20,20 @@ import CoppeMonad
 import Data.Maybe
 import qualified Data.Map as Map
 
+
+{------------------------------------------------------------}
+{- Functions -}
+
+data GlorotUniform = GlorotUniform [(Maybe String, Parameter)]
+
+instance Function GlorotUniform where
+  funName _ = "glorot_uniform"
+  funSetParams _ ps = GlorotUniform ps
+  funGetParams (GlorotUniform ps) = ps
+
+instance Show GlorotUniform where -- TODO: Improve
+  show = funName 
+
 {------------------------------------------------------------}
 {- Planning
 

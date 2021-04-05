@@ -8,6 +8,8 @@ module CoppeAST (
                 , ToValue(..)
                 , Name
                 , Recipe(..)
+                , Function(..)
+                , Parameter(..)
 
                 -- hyperparameters
                 , Strides(..)
@@ -163,14 +165,12 @@ type Hyperparameters = [(String, Param)]
 
 class Show a => Function a where
   funName   :: a -> String
-  funSetParams :: a -> [(Maybe String, Param)] -> a
-  funGetParams :: a -> [(Maybe String, Param)]
+  funSetParams :: a -> [(Maybe String, Parameter)] -> a
+  funGetParams :: a -> [(Maybe String, Parameter)]
   
 data Parameter where
   FunAppParam :: Function a => a -> Parameter
   ValParam    :: Param -> Parameter
-
-
 
 emptyHyperparameters :: Hyperparameters 
 emptyHyperparameters = []
