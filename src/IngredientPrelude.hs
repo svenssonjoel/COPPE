@@ -31,8 +31,19 @@ instance Function GlorotUniform where
   funSetParams _ ps = GlorotUniform ps
   funGetParams (GlorotUniform ps) = ps
 
-instance Show GlorotUniform where -- TODO: Improve
-  show = funName 
+instance Show GlorotUniform where -- TODO: Improve by showing args
+  show = funName
+
+
+data Zeros = Zeros [(Maybe String, Parameter)]
+
+instance Function Zeros where
+  funName _ = "zeroes"
+  funSetParams _ ps = Zeros ps
+  funGetParams (Zeros ps) = ps
+
+instance Show Zeros where
+  show = funName
 
 {------------------------------------------------------------}
 {- Planning
