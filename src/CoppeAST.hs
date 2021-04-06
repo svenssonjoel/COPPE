@@ -172,7 +172,6 @@ data Parameter where
   FunAppParam :: Function a => a -> Parameter
   ValParam    :: Param -> Parameter
 
-
 funApp :: Function a => a -> [(Maybe String, Parameter)] -> Parameter
 funApp f args = FunAppParam $ funSetParams f args
 

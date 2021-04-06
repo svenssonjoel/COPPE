@@ -28,18 +28,17 @@ data GlorotUniform = GlorotUniform [(Maybe String, Parameter)]
 
 instance Function GlorotUniform where
   funName _ = "glorot_uniform"
-  funSetParams _ ps = GlorotUniform ps
+  funSetParams _ = GlorotUniform 
   funGetParams (GlorotUniform ps) = ps
 
 instance Show GlorotUniform where -- TODO: Improve by showing args
   show = funName
 
-
 data Zeros = Zeros [(Maybe String, Parameter)]
 
 instance Function Zeros where
   funName _ = "zeroes"
-  funSetParams _ ps = Zeros ps
+  funSetParams _ = Zeros
   funGetParams (Zeros ps) = ps
 
 instance Show Zeros where
@@ -112,9 +111,6 @@ instance Ingredient Conv where
                     dims
                     ks
                     s
-
-          
-          
 
 instance Show Conv where
   show = name 
