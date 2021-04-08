@@ -163,6 +163,7 @@ type Hyperparameters = [(String, Param)]
 -- ------------------------------------------------------------ --
 -- Functions 
 
+-- Split into Function and application?
 class Show a => Function a where
   funName   :: a -> String
   funSetParams :: a -> [(Maybe String, Parameter)] -> a
