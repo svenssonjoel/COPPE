@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 module CoppeMonad (
   Coppe(..),
   getId,
@@ -10,10 +12,12 @@ module CoppeMonad (
 
 import CoppeAST
 import Control.Monad.Writer
-import Control.Monad.Trans.State
+import Control.Monad.State
+import qualified  Control.Monad.Trans.State as S
 
 
-type Coppe a = StateT Integer (Writer Recipe) a
+newtype Coppe a = Coppe (StateT Integer (Writer Recipe) a)
+  deriving (Functor, Applicative, Monad, MonadState Integer, MonadWriter Recipe)
 
 getId :: Coppe Integer
 getId =
@@ -53,4 +57,4 @@ operation op ts =
      return $ tensorReshape (transform op) result
 
 build :: Coppe a -> Recipe
-build m = execWriter $ evalStateT m 0
+build (Coppe m) = execWriter $ evalStateT m 0
