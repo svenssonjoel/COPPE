@@ -8,7 +8,6 @@ module IngredientPrelude (
                 , mkRelu
                 , mkBatchNorm
                 , mkOptimizer
-
                 , conv
                 , batchNormalize
                 , relu
@@ -196,3 +195,17 @@ batchNormalize h t = operation (mkBatchNorm h) [t]
 
 relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
 relu t = operation (mkRelu emptyHyperparameters) [t]
+
+
+
+
+{----------------------------------------}
+{-             Analysis                 -}
+
+
+numOperations :: Coppe a -> Integer
+numOperations c = foldRecipe op 0 (build c)
+  where op n Input = n
+        op n Empty = n
+        op n (Operation _) = n + 1
+

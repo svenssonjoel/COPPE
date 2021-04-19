@@ -266,6 +266,7 @@ foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
 foldRecipe f a (Seq r1 r2) =
   let a' = foldRecipe f a r1
   in  foldRecipe f a' r2
+foldRecipe f a (Annotated _ r) = foldRecipe f a r
 foldRecipe f a r = f a r
 
 
