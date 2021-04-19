@@ -256,6 +256,12 @@ traverseRecipe :: (Recipe -> Recipe) -> Recipe -> Recipe
 traverseRecipe f (Seq r1 r2) = Seq (traverseRecipe f r1) (traverseRecipe f r2)
 traverseRecipe f r = f r
 
+traverseAnnotate :: (Recipe -> Annotation) -> Recipe -> Recipe
+traverseAnnotate f (Seq r1 r2) = Seq (traverseAnnotate f r1) (traverseAnnotate f r2)
+traverseAnnotate f r =
+  let a = f r
+  in Annotated a r
+
 foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
 foldRecipe f a (Seq r1 r2) =
   let a' = foldRecipe f a r1

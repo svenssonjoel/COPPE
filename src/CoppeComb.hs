@@ -1,16 +1,18 @@
-module CoppeComb where
+module CoppeComb ( CoppeArrow(..)
+                 , coppeArrow
+                 , runCoppeArrow
+                 )
+where
 
 import CoppeAST
 import CoppeMonad
 
 import Control.Arrow
-import Control.Monad.Writer
-import Control.Monad.Trans.State
 
+type CoppeArrow = Kleisli Coppe
 
+runCoppeArrow :: CoppeArrow a b -> a -> Coppe b
+runCoppeArrow = runKleisli
 
-
-
-type MyArrow = Kleisli Coppe
-
-
+coppeArrow :: (a -> Coppe b) -> CoppeArrow a b
+coppeArrow f =  Kleisli f
