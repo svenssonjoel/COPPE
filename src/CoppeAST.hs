@@ -262,6 +262,7 @@ traverseAnnotate f r =
   let a = f r
   in Annotated a r
 
+
 foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
 foldRecipe f a (Seq r1 r2) =
   let a' = foldRecipe f a r1
