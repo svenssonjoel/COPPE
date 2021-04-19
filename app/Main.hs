@@ -1,7 +1,7 @@
 module Main where
 
 import Coppe
-import Analysis
+import Coppe.Analysis
 
 
 

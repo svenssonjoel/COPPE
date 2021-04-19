@@ -1,6 +1,6 @@
 
-module Analysis ( numOperations
-                )
+module Coppe.Analysis ( numOperations
+                      )
   where
 
 import CoppeAST

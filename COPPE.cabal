@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c783a27996fa7564de8622a8338a9c3397a1537e953866af348fa7a293d138f6
+-- hash: 180a4bc21fc6c614391215cbaf8df112cd7c40955f59e527fc6a62526853ba40
 
 name:           COPPE
 version:        0.1.0.0
@@ -27,9 +27,9 @@ source-repository head
 
 library
   exposed-modules:
-      Analysis
       AstPOC
       Coppe
+      Coppe.Analysis
       CoppeAST
       CoppeComb
       CoppeMonad
