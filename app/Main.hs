@@ -23,5 +23,9 @@ testNetwork =
 
 main :: IO ()
 main =
-  let r = build testNetwork
-  in putStrLn $ show r 
+  do 
+    
+    let r = build testNetwork
+    putStrLn $ show r
+
+    putStrLn $ show $ numOperations testNetwork

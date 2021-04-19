@@ -8,9 +8,12 @@ module IngredientPrelude (
                 , mkRelu
                 , mkBatchNorm
                 , mkOptimizer
+                -- Monad implementations
                 , conv
                 , batchNormalize
                 , relu
+                -- Analysis
+                , numOperations
                 ) where
 
 import CoppeAST
