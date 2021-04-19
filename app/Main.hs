@@ -1,6 +1,7 @@
 module Main where
 
 import Coppe
+import Analysis
 
 
 
@@ -28,4 +29,4 @@ main =
     let r = build testNetwork
     putStrLn $ show r
 
-    putStrLn $ show $ numOperations testNetwork
+    putStrLn $ show $ numOperations (build testNetwork)

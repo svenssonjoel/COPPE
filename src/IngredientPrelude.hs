@@ -12,8 +12,6 @@ module IngredientPrelude (
                 , conv
                 , batchNormalize
                 , relu
-                -- Analysis
-                , numOperations
                 ) where
 
 import CoppeAST
@@ -201,14 +199,4 @@ relu t = operation (mkRelu emptyHyperparameters) [t]
 
 
 
-
-{----------------------------------------}
-{-             Analysis                 -}
-
-
-numOperations :: Coppe a -> Integer
-numOperations c = foldRecipe op 0 (build c)
-  where op n Input = n
-        op n Empty = n
-        op n (Operation _) = n + 1
 
