@@ -1,15 +1,20 @@
 -- Experimentation
 module Coppe (
-  module CoppeAST
-  , module IngredientPrelude
-  , module CoppeMonad
+  module Coppe.AST
+  , module Coppe.Monad
+  , module Coppe.Arrow
+  , module Coppe.Prelude
+  , module Coppe.Analysis
   )
   where 
 
 
-import CoppeAST
-import CoppeMonad
-import IngredientPrelude
+import Coppe.AST
+import Coppe.Monad
+import Coppe.Arrow
+import Coppe.Prelude
+import Coppe.Analysis
+
                                   
     
   

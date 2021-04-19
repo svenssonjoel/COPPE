@@ -2,47 +2,47 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module CoppeAST (
-                -- Layeroperations
-                  Ingredient(..)
-                , ToValue(..)
-                , Name
-                , Recipe(..)
-                , Function(..)
-                , Parameter(..)
-
-                -- hyperparameters
-                , Strides(..)
-                , Filters(..)
-                , Padding(..)
-                , Initialization(..)
-                , Dimensions(..)
-                , Identifier
-                , Hyperparameters(..)
-                , emptyHyperparameters
-                , HyperMap
-                , Annotation
-
-                -- Value related stuff
-                , filterValToInt
-                , strideValToList
-                , dimValToList
-
-                -- tensors
-                , Type(..)
-                , Tensor(..)
-                , TensorInternal(..)
-                , mkTensor
-                , tensorId
-                , tensorDim
-                , tensorReshape
-                , TensorRepr(..)
-
-                -- Folds and traversals
-                ,traverseRecipe
-                ,foldRecipe
+module Coppe.AST (
+  -- Layeroperations
+  Ingredient(..)
+  , ToValue(..)
+  , Name
+  , Recipe(..)
+  , Function(..)
+  , Parameter(..)
+  
+    -- hyperparameters
+  , Strides(..)
+  , Filters(..)
+  , Padding(..)
+  , Initialization(..)
+  , Dimensions(..)
+  , Identifier
+  , Hyperparameters(..)
+  , emptyHyperparameters
+  , HyperMap
+  , Annotation
+  
+    -- Value related stuff
+  , filterValToInt
+  , strideValToList
+  , dimValToList
+  
+    -- tensors
+  , Type(..)
+  , Tensor(..)
+  , TensorInternal(..)
+  , mkTensor
+  , tensorId
+  , tensorDim
+  , tensorReshape
+  , TensorRepr(..)
+    
+    -- Folds and traversals
+  ,traverseRecipe
+  ,foldRecipe
                 
-                ) where
+  ) where
 
 import Data.Maybe
 import qualified Data.Map as Map

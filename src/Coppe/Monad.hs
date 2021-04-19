@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module CoppeMonad (
+module Coppe.Monad (
   Coppe(..),
   getId,
   empty,
@@ -10,7 +10,7 @@ module CoppeMonad (
   build
   ) where 
 
-import CoppeAST
+import Coppe.AST
 import Control.Monad.Writer
 import Control.Monad.State
 import qualified  Control.Monad.Trans.State as S

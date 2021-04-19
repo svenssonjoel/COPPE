@@ -1,11 +1,11 @@
-module CoppeComb ( CoppeArrow(..)
-                 , coppeArrow
-                 , runCoppeArrow
-                 )
+module Coppe.Arrow ( CoppeArrow(..)
+                   , coppeArrow
+                   , runCoppeArrow
+                   )
 where
 
-import CoppeAST
-import CoppeMonad
+import Coppe.AST
+import Coppe.Monad
 
 import Control.Arrow
 

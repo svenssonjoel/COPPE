@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Pygen
+module Coppe.Pygen
     ( parseFile
 
     , PyModule

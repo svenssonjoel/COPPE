@@ -1,5 +1,5 @@
 
-module YParse (
+module Coppe.YParse (
 
        ) where
 

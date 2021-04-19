@@ -3,7 +3,7 @@
 {- The refrigerator of ingredients -} 
 
 
-module IngredientPrelude (
+module Coppe.Prelude (
                   mkConv
                 , mkRelu
                 , mkBatchNorm
@@ -14,8 +14,8 @@ module IngredientPrelude (
                 , relu
                 ) where
 
-import CoppeAST
-import CoppeMonad
+import Coppe.AST
+import Coppe.Monad
 
 import Data.Maybe
 import qualified Data.Map as Map

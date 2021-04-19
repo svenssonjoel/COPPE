@@ -3,7 +3,7 @@ module Coppe.Analysis ( numOperations
                       )
   where
 
-import CoppeAST
+import Coppe.AST
 
 {----------------------------------------}
 {-             Analysis                 -}

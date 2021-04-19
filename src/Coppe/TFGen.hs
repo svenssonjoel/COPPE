@@ -1,8 +1,8 @@
 
-module TFGen where
+module Coppe.TFGen where
 
-import Pygen
-import CoppeAST
+import Coppe.Pygen
+import Coppe.AST
 
 
 
