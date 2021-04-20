@@ -15,3 +15,11 @@ numOperations r = foldRecipe op 0 r
         op n Empty = n
         op n (Operation _) = n + 1
 
+
+numTrainableLayers :: Recipe -> Integer
+numTrainableLayers = undefined
+
+numTrainableWeights :: Recipe -> Integer
+numTrainableWeights = undefined
+
+

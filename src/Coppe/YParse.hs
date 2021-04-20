@@ -33,10 +33,7 @@ instance FromYAML Label where
    parseYAML = withMap "Label" $ \m -> Label
        <$> m .: "Label"
 
-
-
-  
-test = BLU.fromString "paramsNetwork:\n - apa: 13\n"
+test = BLU.fromString "paramsNetwork:\n - apa: 13\n - Bepa 14\n\nTestNetwork:\n - kurt: 14\n"
 
 stripPos :: [Doc (Node a)] -> [Doc (Node ())]
 stripPos xs = P.map (fmap f) xs
