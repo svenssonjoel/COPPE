@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3568d518e307624f35a780aacd97a8223c168492d81352f85a9fa894ebdb6b0b
+-- hash: 0154d18522b614cc477347677557486e048378f70b94ad201992b88d72f678fa
 
 name:           COPPE
 version:        0.1.0.0
@@ -46,10 +46,13 @@ library
   build-depends:
       HsYAML >=0.2.1.0 && <0.2.2
     , base >=4.7 && <5
+    , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
+    , utf8-string >=1.0.2 && <=1.1
   default-language: Haskell2010
 
 executable COPPE-exe
@@ -63,10 +66,13 @@ executable COPPE-exe
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
     , base >=4.7 && <5
+    , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
+    , utf8-string >=1.0.2 && <=1.1
   default-language: Haskell2010
 
 test-suite COPPE-test
@@ -81,8 +87,11 @@ test-suite COPPE-test
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
     , base >=4.7 && <5
+    , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
+    , utf8-string >=1.0.2 && <=1.1
   default-language: Haskell2010
