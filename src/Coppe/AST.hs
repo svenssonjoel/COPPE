@@ -5,6 +5,8 @@
 module Coppe.AST (
   -- Layeroperations
   Ingredient(..)
+  , hyperSet
+  , hyperGet           -- Move to an Ingredient.hs file 
   , ToValue(..)
   , Name
   , Recipe(..)
@@ -191,7 +193,16 @@ data Ingredient =
              , transform :: Dimensions -> Dimensions
              }
 
-                       
+
+hyperSet :: Ingredient -> Hyperparameters -> Ingredient
+hyperSet (Ingredient n a h t) ps =
+  Ingredient n a (Map.union (Map.fromList ps) h) t
+
+hyperGet :: Ingredient -> HyperMap
+hyperGet (Ingredient _ _ h _) = h
+
+
+              
 -- class Show a => Ingredient a  where 
 --   name       :: a -> String                 -- Used for printing
 --   annotation :: a -> Annotation             -- Get all annotations on the layer 
