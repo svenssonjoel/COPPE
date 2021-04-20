@@ -164,32 +164,42 @@ type Hyperparameters = [(String, Param)]
 -- Functions 
 
 -- Split into Function and application?
-class Show a => Function a where
-  funName   :: a -> String
-  funSetParams :: a -> [(Maybe String, Parameter)] -> a
-  funGetParams :: a -> [(Maybe String, Parameter)]
+
+data Function =
+  NamedFun String 
+
+
+type Arguments = [(Maybe String, Parameter)]
   
 data Parameter where
-  FunAppParam :: Function a => a -> Parameter
+  FunAppParam :: Function -> Arguments -> Parameter
   ValParam    :: Param -> Parameter
 
-funApp :: Function a => a -> [(Maybe String, Parameter)] -> Parameter
-funApp f args = FunAppParam $ funSetParams f args
+funApp :: Function -> [(Maybe String, Parameter)] -> Parameter
+funApp f args = FunAppParam f args
 
 emptyHyperparameters :: Hyperparameters 
 emptyHyperparameters = []
 
 -- ------------------------------------------------------------ --
 -- Ingredients 
+
+data Ingredient =
+  Ingredient { name :: String
+             , annotation :: Annotation
+             , hyper :: HyperMap
+             , transform :: Dimensions -> Dimensions
+             }
+
                        
-class Show a => Ingredient a  where 
-  name       :: a -> String                 -- Used for printing
-  annotation :: a -> Annotation             -- Get all annotations on the layer 
-  annotate   :: String -> Value -> a -> a   -- Add an annotation key-value pair (or overwrite existing)
-  create     :: Hyperparameters -> a        -- Create an ingredient
-  hyperSet   :: a -> Hyperparameters -> a
-  hyperGet   :: a -> HyperMap
-  transform  :: a -> Dimensions -> Dimensions   -- How does ingredient change tensor dimensionality
+-- class Show a => Ingredient a  where 
+--   name       :: a -> String                 -- Used for printing
+--   annotation :: a -> Annotation             -- Get all annotations on the layer 
+--   annotate   :: String -> Value -> a -> a   -- Add an annotation key-value pair (or overwrite existing)
+--   create     :: Hyperparameters -> a        -- Create an ingredient
+--   hyperSet   :: a -> Hyperparameters -> a
+--   hyperGet   :: a -> HyperMap
+--   transform  :: a -> Dimensions -> Dimensions   -- How does ingredient change tensor dimensionality
 
 -- ------------------------------------------------------------ --
 -- Helpers
@@ -220,17 +230,16 @@ filterValToInt _ = error "Filters specification must be an integer"
 
 type Name = String
   
-data Recipe where
-  Input :: Recipe
-  Empty :: Recipe
-  Operation :: (Ingredient a) => a -> Recipe
-  Seq :: Recipe -> Recipe -> Recipe
-  Annotated :: Annotation -> Recipe -> Recipe
+data Recipe = Input
+            | Empty
+            | Operation Ingredient
+            | Seq Recipe Recipe
+            | Annotated Annotation Recipe
 
 instance Show Recipe where
   show Input = "Input"
   show Empty = "Empty"
-  show (Operation i) = show i
+  show (Operation i) = name i
   show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
   show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
 
