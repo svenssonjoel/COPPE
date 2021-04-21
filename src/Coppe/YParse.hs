@@ -43,3 +43,4 @@ stripPos xs = P.map (fmap f) xs
     f (Mapping  _ t (mapping)) = Mapping () t (Map.mapKeys f (Map.map f mapping))
     f (Sequence _ t ns) = Sequence () t (P.map f ns)
     f (Anchor   _ id n) = Anchor () id (f n)
+

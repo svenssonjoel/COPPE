@@ -242,16 +242,22 @@ filterValToInt _ = error "Filters specification must be an integer"
 -- Layers 
 
 type Name = String
+
+
+
+data Module = Module  [(Name, Recipe)] 
   
 data Recipe = Input
             | Empty
+            | NamedRecipe Name
             | Operation Ingredient
-            | Seq Recipe Recipe
+            | Seq Recipe Recipe     -- Will get more obvious if this is a list of recipies. 
             | Annotated Annotation Recipe
 
 instance Show Recipe where
   show Input = "Input"
   show Empty = "Empty"
+  show (NamedRecipe n) = n
   show (Operation i) = name i
   show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
   show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
