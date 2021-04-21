@@ -73,6 +73,8 @@ tensorDim (Tensor (TensorInternal _ _ d)) = d
 tensorReshape :: ([Integer] -> [Integer]) -> Tensor a -> Tensor a
 tensorReshape trns (Tensor (TensorInternal i j d)) = Tensor (TensorInternal i j (trns d))
 
+
+-- Really TensorEltRepr... Maybe change?
 class TensorRepr a where
   fromTensor :: Tensor a -> TensorInternal
   toTensor   :: TensorInternal -> Tensor a

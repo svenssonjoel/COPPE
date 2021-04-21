@@ -12,10 +12,15 @@ module Coppe.Prelude (
                 , conv
                 , batchNormalize
                 , relu
+                -- Arrow implementations
+                , convA
+                , batchNormalizeA
+                , reluA
                 ) where
 
 import Coppe.AST
 import Coppe.Monad
+import Coppe.Arrow
 
 import Data.Maybe
 import qualified Data.Map as Map
@@ -130,4 +135,15 @@ relu t = operation (mkRelu emptyHyperparameters) [t]
 
 
 
+{----------------------------------------}
+{-             Arrow STUFF              -}
+
+convA :: TensorRepr a => Hyperparameters -> CoppeArrow (Tensor a) (Tensor a)
+convA hyps = coppeArrow (conv hyps)
+
+batchNormalizeA :: TensorRepr a => Hyperparameters -> CoppeArrow (Tensor a) (Tensor a)
+batchNormalizeA hyps = coppeArrow (batchNormalize hyps)
+
+reluA :: TensorRepr a =>  CoppeArrow (Tensor a) (Tensor a)
+reluA = coppeArrow relu
 
