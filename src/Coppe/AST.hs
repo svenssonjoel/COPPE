@@ -172,7 +172,6 @@ type Hyperparameters = [(String, Param)]
 data Function =
   NamedFun String 
 
-
 type Arguments = [(Maybe String, Parameter)]
   
 data Parameter where
@@ -202,17 +201,6 @@ hyperSet (Ingredient n a h t) ps =
 
 hyperGet :: Ingredient -> HyperMap
 hyperGet (Ingredient _ _ h _) = h
-
-
-              
--- class Show a => Ingredient a  where 
---   name       :: a -> String                 -- Used for printing
---   annotation :: a -> Annotation             -- Get all annotations on the layer 
---   annotate   :: String -> Value -> a -> a   -- Add an annotation key-value pair (or overwrite existing)
---   create     :: Hyperparameters -> a        -- Create an ingredient
---   hyperSet   :: a -> Hyperparameters -> a
---   hyperGet   :: a -> HyperMap
---   transform  :: a -> Dimensions -> Dimensions   -- How does ingredient change tensor dimensionality
 
 -- ------------------------------------------------------------ --
 -- Helpers
@@ -289,7 +277,6 @@ traverseAnnotate f (Seq r1 r2) = Seq (traverseAnnotate f r1) (traverseAnnotate f
 traverseAnnotate f r =
   let a = f r
   in Annotated a r
-
 
 foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
 foldRecipe f a (Seq r1 r2) =
