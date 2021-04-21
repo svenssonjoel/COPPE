@@ -1,29 +1,42 @@
 
 {-# Language GADTs #-}
-{-# Language DataKinds #-}
-{-# Language KindSignatures #-}
-{-# Language ExistentialQuantification #-}
-{-# Language ScopedTypeVariables #-}
+--{-# Language DataKinds #-}
+--{-# Language KindSignatures #-}
+--{-# Language ExistentialQuantification #-}
+--{-# Language ScopedTypeVariables #-}
 
 module Main where
 
 import Data.List
 
 -- User privileges for our users
-data UserPrivilege = Member | Admin | Guest
+-- data UserPrivilege = Member | Admin | Guest
+
+data Member = Member
+data Admin  = Admin
+data Guest  = Guest
+
 
 -- Our type witness
 data WitnessPrivilege up where
-  WitnessMember :: WitnessPrivilege Member
-  WitnessGuest :: WitnessPrivilege Guest
-  WitnessAdmin :: WitnessPrivilege Admin
+ WitnessMember :: WitnessPrivilege Member
+ WitnessGuest  :: WitnessPrivilege Guest
+ WitnessAdmin  :: WitnessPrivilege Admin
 
+-- data family WitnessPrivilege up
+
+-- data instance WitnessPrivilege Member = WitnessMember
+-- data instance WitnessPrivilege Guest  = WitnessGuest
+-- data instance WitnessPrivilege Admin  = WitnessAdmin
+
+  
 -- Our user type
-data User (up :: UserPrivilege) = User
+data User up = User
   { userId :: Integer
   , userName :: String
   , userPrivilege :: WitnessPrivilege up
   }
+
 
 -- The type that we use to hide the privilege type variable
 data SomeUser where
@@ -48,7 +61,7 @@ getUserName = userName
 
 -- This is a function only allows user
 -- with Admin privilege.
-deleteStuffAsAdmin :: User 'Admin -> IO ()
+deleteStuffAsAdmin :: User Admin -> IO ()
 deleteStuffAsAdmin _ = pure ()
 
 main :: IO ()
