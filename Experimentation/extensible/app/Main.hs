@@ -19,10 +19,10 @@ data Guest  = Guest
 
 
 -- Our type witness
--- data WitnessPrivilege up where
---  WitnessMember :: WitnessPrivilege Member
---  WitnessGuest  :: WitnessPrivilege Guest
---  WitnessAdmin  :: WitnessPrivilege Admin
+data WitnessPrivilege up where
+ WitnessMember :: WitnessPrivilege Member
+ WitnessGuest  :: WitnessPrivilege Guest
+ WitnessAdmin  :: WitnessPrivilege Admin
 
 -- data family WitnessPrivilege up
 

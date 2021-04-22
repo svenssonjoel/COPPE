@@ -233,6 +233,8 @@ filterValToInt _ = error "Filters specification must be an integer"
 
 type Name = String
 
+-- params_network is a tag present in recipes. 
+
 data Module = Module  [(Name, Recipe)] 
   
 data Recipe = Input

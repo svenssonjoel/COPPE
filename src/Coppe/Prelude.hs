@@ -133,8 +133,6 @@ batchNormalize h t = operation (mkBatchNorm h) [t]
 relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
 relu t = operation (mkRelu emptyHyperparameters) [t]
 
-
-
 {----------------------------------------}
 {-             Arrow STUFF              -}
 
