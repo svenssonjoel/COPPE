@@ -4,6 +4,7 @@
 --{-# Language KindSignatures #-}
 --{-# Language ExistentialQuantification #-}
 --{-# Language ScopedTypeVariables #-}
+{-# Language TypeFamilies #-}
 
 module Main where
 
@@ -18,16 +19,24 @@ data Guest  = Guest
 
 
 -- Our type witness
-data WitnessPrivilege up where
- WitnessMember :: WitnessPrivilege Member
- WitnessGuest  :: WitnessPrivilege Guest
- WitnessAdmin  :: WitnessPrivilege Admin
+-- data WitnessPrivilege up where
+--  WitnessMember :: WitnessPrivilege Member
+--  WitnessGuest  :: WitnessPrivilege Guest
+--  WitnessAdmin  :: WitnessPrivilege Admin
 
 -- data family WitnessPrivilege up
 
 -- data instance WitnessPrivilege Member = WitnessMember
 -- data instance WitnessPrivilege Guest  = WitnessGuest
 -- data instance WitnessPrivilege Admin  = WitnessAdmin
+
+data WitnessMember = WitnessMember
+data WitnessGuest = WitnessGuest
+data WitnessAdmin = WitnessAdmin
+
+type family WitnessPrivilege up
+
+type instance WitnesPrivilege Admin = WitnesAdmin
 
   
 -- Our user type

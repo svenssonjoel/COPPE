@@ -12,28 +12,46 @@ import Prelude as P
        
 import Coppe.AST
 
-data Label = Label Text
-data Person = Person Text Int
-  deriving Show
 
-instance ToYAML Person where
-    -- this generates a Node
-    toYAML (Person n a) = mapping [ "name" .= n, "age" .= a]
 
-instance FromYAML Person where
-   parseYAML = withMap "Person" $ \m -> Person
-       <$> m .: "name"
-       <*> m .: "age"
 
-instance ToYAML Label where
-    -- this generates a Node
-    toYAML (Label n) = mapping [ "Label" .= n]
+readModule :: ByteString -> Module
+readModule yaml =
+  case decode1 yaml :: Either (Pos,String) (Node Pos) of
+    Left (loc, err) -> error err
+    Right tree -> undefined 
 
-instance FromYAML Label where
-   parseYAML = withMap "Label" $ \m -> Label
-       <$> m .: "Label"
 
-test = BLU.fromString "paramsNetwork:\n - apa: 13\n - Bepa 14\n\nTestNetwork:\n - kurt: 14\n"
+      
+writeModule :: Module -> ByteString
+writeModule mod = encodeNode encodeModule mod
+  where
+    encodeModule :: Module -> [Doc (Node ())]
+    encodeModule = undefined 
+  
+
+-- data Label = Label Text
+-- data Person = Person Text Int
+--   deriving Show
+
+-- instance ToYAML Person where
+--     -- this generates a Node
+--     toYAML (Person n a) = mapping [ "name" .= n, "age" .= a]
+
+-- instance FromYAML Person where
+--    parseYAML = withMap "Person" $ \m -> Person
+--        <$> m .: "name"
+--        <*> m .: "age"
+
+-- instance ToYAML Label where
+--     -- this generates a Node
+--     toYAML (Label n) = mapping [ "Label" .= n]
+
+-- instance FromYAML Label where
+--    parseYAML = withMap "Label" $ \m -> Label
+--        <$> m .: "Label"
+
+-- test = BLU.fromString "paramsNetwork:\n - apa: 13\n - Bepa 14\n\nTestNetwork:\n - kurt: 14\n"
 
 stripPos :: [Doc (Node a)] -> [Doc (Node ())]
 stripPos xs = P.map (fmap f) xs

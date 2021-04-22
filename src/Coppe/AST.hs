@@ -3,8 +3,10 @@
 {-# LANGUAGE FlexibleInstances #-}
 
 module Coppe.AST (
+  -- Module
+  Module(..)
   -- Layeroperations
-  Ingredient(..)
+  , Ingredient(..)
   , hyperSet
   , hyperGet           -- Move to an Ingredient.hs file 
   , ToValue(..)
@@ -230,8 +232,6 @@ filterValToInt _ = error "Filters specification must be an integer"
 -- Layers 
 
 type Name = String
-
-
 
 data Module = Module  [(Name, Recipe)] 
   
