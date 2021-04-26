@@ -46,7 +46,7 @@ encodeRecipe (Seq r1 r2) =
         (Nothing, Just n)  -> Just n
         (Just n, Nothing)  -> Just n
         {- Not sure how to create valid sequences. -}
-        (Just n, Just m)   -> Just $ Sequence () (Event.mkTag "") [n,m]
+        (Just n, Just m)   -> Just $ Sequence () (Event.mkTag "apa") [n,m]
 encodeRecipe (NamedRecipe n) = Just $ mapping [ "type" .=  (pack n) ]
 encodeRecipe (Operation i) = encodeIngredient i
 
@@ -59,8 +59,8 @@ encodeRecipe (Operation i) = encodeIngredient i
 -} 
 encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
-  Just $ mapping ([ "type" .= pack (name i) ]  ++
-                  encodeHyper (hyper i) )
+  Just $ mapping $ P.reverse ([ "type" .= pack (name i) ]  ++
+                              encodeHyper (hyper i) )
 
 encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
 encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m 
@@ -70,34 +70,13 @@ encodeParam (FunAppParam f a) = undefined
 encodeParam (ValParam p) = encodeValue p
 
 encodeValue :: Value -> Node ()
-encodeValue = undefined 
+encodeValue (IntVal i)    = mapping ["integer" .= i]
+encodeValue (FloatVal f)  = mapping ["float"   .= f]
+encodeValue (StringVal s) = mapping ["string"  .= pack (s)]
+encodeValue (ListVal ls)  = mapping ["list"    .= Sequence () (Event.mkTag "apa") (P.map encodeValue ls)]
 
 encodeAnnotation :: Annotation -> Maybe (Node ())
 encodeAnnotation = undefined
-
--- data Label = Label Text
--- data Person = Person Text Int
---   deriving Show
-
--- instance ToYAML Person where
---     -- this generates a Node
---     toYAML (Person n a) = mapping [ "name" .= n, "age" .= a]
-
--- instance FromYAML Person where
---    parseYAML = withMap "Person" $ \m -> Person
---        <$> m .: "name"
---        <*> m .: "age"
-
--- instance ToYAML Label where
---     -- this generates a Node
---     toYAML (Label n) = mapping [ "Label" .= n]
-
--- instance FromYAML Label where
---    parseYAML = withMap "Label" $ \m -> Label
---        <$> m .: "Label"
-
--- test = BLU.fromString "paramsNetwork:\n - apa: 13\n - Bepa 14\n\nTestNetwork:\n - kurt: 14\n"
-apa = decodeNode (BLU.fromString "[1,2,3]") 
 
 stripPos :: [Doc (Node a)] -> [Doc (Node ())]
 stripPos xs = P.map (fmap f) xs
