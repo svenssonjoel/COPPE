@@ -57,7 +57,7 @@ encodeRecipe (Operation i) = encodeIngredient i
      Maybe there should be a small language for expressing
      computations such as the dimensionality transform. 
 -} 
-encodeIngredient :: Ingredient -> (Maybe (Node ()))
+encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
                   encodeHyper (hyper i) )
@@ -65,11 +65,14 @@ encodeIngredient i =
 encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
 encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m 
 
-encodeParam :: Parameter -> (Node ())
-encodeParam p = undefined 
+encodeParam :: Parameter -> Node ()
+encodeParam (FunAppParam f a) = undefined
+encodeParam (ValParam p) = encodeValue p
 
+encodeValue :: Value -> Node ()
+encodeValue = undefined 
 
-encodeAnnotation :: Annotation -> (Maybe (Node ()))
+encodeAnnotation :: Annotation -> Maybe (Node ())
 encodeAnnotation = undefined
 
 -- data Label = Label Text
@@ -94,6 +97,7 @@ encodeAnnotation = undefined
 --        <$> m .: "Label"
 
 -- test = BLU.fromString "paramsNetwork:\n - apa: 13\n - Bepa 14\n\nTestNetwork:\n - kurt: 14\n"
+apa = decodeNode (BLU.fromString "[1,2,3]") 
 
 stripPos :: [Doc (Node a)] -> [Doc (Node ())]
 stripPos xs = P.map (fmap f) xs

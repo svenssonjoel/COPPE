@@ -8,7 +8,8 @@ module Coppe.AST (
   -- Layeroperations
   , Ingredient(..)
   , hyperSet
-  , hyperGet           -- Move to an Ingredient.hs file 
+  , hyperGet           -- Move to an Ingredient.hs file
+  , Value(..)
   , ToValue(..)
   , valParam 
   , Name
