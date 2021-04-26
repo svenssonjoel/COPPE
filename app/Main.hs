@@ -29,10 +29,10 @@ main =
   do 
     
     let r = build testNetwork
-    putStrLn $ show r
+    --putStrLn $ show r
 
     let (Just e) = encodeRecipe r
 
     putStrLn $ BLU.toString $ encodeNode [(Doc e)]
 
-    putStrLn $ show $ numOperations (build testNetwork)
+    --putStrLn $ show $ numOperations (build testNetwork)

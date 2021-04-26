@@ -59,8 +59,8 @@ encodeRecipe (Operation i) = encodeIngredient i
 -} 
 encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
-  Just $ mapping $ P.reverse ([ "type" .= pack (name i) ]  ++
-                              encodeHyper (hyper i) )
+  Just $ mapping ([ "type" .= pack (name i) ]  ++
+                   encodeHyper (hyper i) )
 
 encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
 encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m 
