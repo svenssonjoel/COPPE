@@ -249,7 +249,7 @@ data Recipe = Input
             | Empty
             | NamedRecipe Name
             | Operation Ingredient
-            | Seq Recipe Recipe     -- Will get more obvious if this is a list of recipies. 
+            | Seq [Recipe]    -- Will get more obvious if this is a list of recipies. 
             | Annotated Annotation Recipe
 
 instance Show Recipe where
@@ -257,17 +257,25 @@ instance Show Recipe where
   show Empty = "Empty"
   show (NamedRecipe n) = n
   show (Operation i) = name i
-  show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
+  show (Seq []) = ""
+  show (Seq (r:rs)) = show r ++ ";\n" ++ show (Seq rs)
   show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
 
 instance Semigroup Recipe where
-  (<>) = Seq
+  (<>) Empty    Empty    = Empty
+  (<>) r1       Empty    = r1
+  (<>) Empty    r2       = r2
+  (<>) (Seq r1) (Seq r2) = Seq ((Seq r1):r2)
+  (<>) (Seq r1) r2       = Seq [(Seq r1), r2]
+  (<>) r1       (Seq r2) = Seq (r1:r2)
+  (<>) r1       r2       = Seq [r1,r2]
+                            
+
+-- (<>) is infixr     
   
 instance Monoid Recipe where
   mempty = Empty
-  mappend Empty a = a
-  mappend a Empty = a
-  mappend a b     = Seq a b
+  mappend = (<>)
 
 
 -- ------------------------------------------------------------
@@ -279,19 +287,18 @@ instance Monoid Recipe where
 -- in practice. 
 
 traverseRecipe :: (Recipe -> Recipe) -> Recipe -> Recipe
-traverseRecipe f (Seq r1 r2) = Seq (traverseRecipe f r1) (traverseRecipe f r2)
+traverseRecipe f (Seq rs) = Seq (map (traverseRecipe f) rs)
 traverseRecipe f r = f r
 
 traverseAnnotate :: (Recipe -> Annotation) -> Recipe -> Recipe
-traverseAnnotate f (Seq r1 r2) = Seq (traverseAnnotate f r1) (traverseAnnotate f r2)
+traverseAnnotate f (Seq rs) = Seq (map (traverseAnnotate f) rs) -- Seq (traverseAnnotate f r1) (traverseAnnotate f r2)
 traverseAnnotate f r =
   let a = f r
   in Annotated a r
 
 foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
-foldRecipe f a (Seq r1 r2) =
-  let a' = foldRecipe f a r1
-  in  foldRecipe f a' r2
+foldRecipe f a (Seq [])     = a
+foldRecipe f a (Seq (r:rs)) = f (foldRecipe f a (Seq rs)) r 
 foldRecipe f a (Annotated _ r) = foldRecipe f a r
 foldRecipe f a r = f a r
 

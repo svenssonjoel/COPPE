@@ -35,20 +35,15 @@ writeModule mod =  P.map (\(x,y) -> (x, encodeNode y)) $ encodeModule mod
     encodeModule :: Module -> [(FilePath, [Doc (Node ())])]
     encodeModule = undefined 
 
-encodeRecipe :: Recipe -> (Maybe (Node ()))
+encodeRecipe :: Recipe -> Maybe (Node ())
 encodeRecipe Empty = Nothing
 encodeRecipe Input = Just $ mapping [ "type" .= ("input_layer" :: Text) ]
-encodeRecipe (Seq r1 r2) =
-  let n1 = encodeRecipe r1
-      n2 = encodeRecipe r2
-  in  case (n1,n2) of
-        (Nothing, Nothing) -> Nothing
-        (Nothing, Just n)  -> Just n
-        (Just n, Nothing)  -> Just n
-        {- Not sure how to create valid sequences. -}
-        (Just n, Just m)   -> Just $ Sequence () (Event.mkTag "apa") [n,m]
+encodeRecipe (Seq rs) = Just $ encodeRecipeList rs 
 encodeRecipe (NamedRecipe n) = Just $ mapping [ "type" .=  (pack n) ]
 encodeRecipe (Operation i) = encodeIngredient i
+
+encodeRecipeList :: [Recipe] -> Node ()
+encodeRecipeList rs = Sequence () (Event.mkTag "apa") (catMaybes (P.map encodeRecipe rs))
 
 {- Ingredients
    - What to do about the transform field.
