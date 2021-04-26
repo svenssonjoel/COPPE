@@ -261,7 +261,6 @@ instance Show Recipe where
   show (Seq (r:rs)) = show r ++ ";\n" ++ show (Seq rs)
   show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
 
-
 -- This way we loose nesting.
 instance Semigroup Recipe where
   (<>) Empty    Empty    = Empty
@@ -272,7 +271,6 @@ instance Semigroup Recipe where
   (<>) r1       (Seq r2) = Seq (r1:r2)
   (<>) r1       r2       = Seq [r1,r2]
                             
-
 -- (<>) is infixr     
   
 instance Monoid Recipe where
