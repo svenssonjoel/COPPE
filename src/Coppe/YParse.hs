@@ -24,7 +24,7 @@ readModule yaml =
 
       
 writeModule :: Module -> ByteString
-writeModule mod = encodeNode encodeModule mod
+writeModule mod = encodeNode $ encodeModule mod
   where
     encodeModule :: Module -> [Doc (Node ())]
     encodeModule = undefined 
