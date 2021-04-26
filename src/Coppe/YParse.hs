@@ -62,9 +62,11 @@ encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
                   encodeHyper (hyper i) )
 
-encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ()) 
-encodeHyper m = undefined -- foldWithKey (\(kx,x) -> (pack kx, 
-  
+encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
+encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m 
+
+encodeParam :: Parameter -> (Node ())
+encodeParam p = undefined 
 
 
 encodeAnnotation :: Annotation -> (Maybe (Node ()))
