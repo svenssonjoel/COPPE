@@ -10,6 +10,7 @@ module Coppe.AST (
   , hyperSet
   , hyperGet           -- Move to an Ingredient.hs file 
   , ToValue(..)
+  , valParam 
   , Name
   , Recipe(..)
   , Function(..)
@@ -161,10 +162,10 @@ instance  {-# OVERLAPS #-} ToValue [Char] where
 type Param = Value
 type Annot = Value
 
-type HyperMap    = Map.Map String Param -- TODO: Parameter. 
+type HyperMap    = Map.Map String Parameter -- TODO: Parameter. 
 type Annotation  = Map.Map String Annot 
 
-type Hyperparameters = [(String, Param)]
+type Hyperparameters = [(String, Parameter)]
 
 -- ------------------------------------------------------------ --
 -- Functions 
@@ -172,13 +173,19 @@ type Hyperparameters = [(String, Param)]
 -- Split into Function and application?
 
 data Function =
-  NamedFun String 
+  NamedFun String
+  deriving (Eq, Ord, Show)
 
 type Arguments = [(Maybe String, Parameter)]
   
-data Parameter where
-  FunAppParam :: Function -> Arguments -> Parameter
-  ValParam    :: Param -> Parameter
+  
+data Parameter = 
+  FunAppParam Function Arguments 
+  | ValParam Param 
+  deriving (Eq, Ord, Show)
+
+valParam :: ToValue a => a -> Parameter
+valParam v = ValParam (toValue v)
 
 funApp :: Function -> [(Maybe String, Parameter)] -> Parameter
 funApp f args = FunAppParam f args

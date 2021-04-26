@@ -6,9 +6,9 @@ import Coppe.Analysis
 
 
 testNetwork =
-  let convParams = [("kernelSize", toValue [34,34 :: Int])
-                   ,("strides", toValue [1,1 :: Int])
-                   ,("filters", toValue (3 :: Int))]
+  let convParams = [("kernelSize", valParam [34,34 :: Int])
+                   ,("strides", valParam [1,1 :: Int])
+                   ,("filters", valParam (3 :: Int))]
       addParams = emptyHyperparameters
   in
   do

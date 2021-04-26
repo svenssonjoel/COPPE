@@ -52,7 +52,7 @@ operation op ts =
   do i <- getId
      let nom = "tensor" ++ show i
      -- tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
-     tell $ Operation (hyperSet op [("input_layer", toValue ids), ("name", toValue nom)])  
+     tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])  
      let result =  mkTensor nom (tensorDim tensor)
      return $ tensorReshape (transform op) result
 

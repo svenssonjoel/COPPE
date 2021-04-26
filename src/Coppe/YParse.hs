@@ -2,7 +2,9 @@
 module Coppe.YParse  where
 
 
+import Data.Maybe
 import Data.YAML
+import qualified Data.YAML.Event as Event
 import Data.Text
 import qualified Data.ByteString as BS
 import Data.ByteString.Lazy.UTF8 as BLU
@@ -13,7 +15,11 @@ import Prelude as P
 import Coppe.AST
 
 
+readRecipe :: ByteString -> Recipe
+readRecipe yaml = undefined
 
+readRecipeFile :: FilePath -> Recipe
+readRecipeFile fp = undefined 
 
 readModule :: ByteString -> Module
 readModule yaml =
@@ -23,12 +29,46 @@ readModule yaml =
 
 
       
-writeModule :: Module -> ByteString
-writeModule mod = encodeNode $ encodeModule mod
+writeModule :: Module -> [(FilePath, ByteString)] 
+writeModule mod =  P.map (\(x,y) -> (x, encodeNode y)) $ encodeModule mod
   where
-    encodeModule :: Module -> [Doc (Node ())]
+    encodeModule :: Module -> [(FilePath, [Doc (Node ())])]
     encodeModule = undefined 
+
+encodeRecipe :: Recipe -> (Maybe (Node ()))
+encodeRecipe Empty = Nothing
+encodeRecipe Input = Just $ mapping [ "type" .= ("input_layer" :: Text) ]
+encodeRecipe (Seq r1 r2) =
+  let n1 = encodeRecipe r1
+      n2 = encodeRecipe r2
+  in  case (n1,n2) of
+        (Nothing, Nothing) -> Nothing
+        (Nothing, Just n)  -> Just n
+        (Just n, Nothing)  -> Just n
+        {- Not sure how to create valid sequences. -}
+        (Just n, Just m)   -> Just $ Sequence () (Event.mkTag "") [n,m]
+encodeRecipe (NamedRecipe n) = Just $ mapping [ "type" .=  (pack n) ]
+encodeRecipe (Operation i) = encodeIngredient i
+
+{- Ingredients
+   - What to do about the transform field.
+     It would be nice to be able to store this information
+     as well in the future database.
+     Maybe there should be a small language for expressing
+     computations such as the dimensionality transform. 
+-} 
+encodeIngredient :: Ingredient -> (Maybe (Node ()))
+encodeIngredient i =
+  Just $ mapping ([ "type" .= pack (name i) ]  ++
+                  encodeHyper (hyper i) )
+
+encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ()) 
+encodeHyper m = undefined -- foldWithKey (\(kx,x) -> (pack kx, 
   
+
+
+encodeAnnotation :: Annotation -> (Maybe (Node ()))
+encodeAnnotation = undefined
 
 -- data Label = Label Text
 -- data Person = Person Text Int

@@ -92,9 +92,9 @@ mkConv hyps =
     filters     = Map.lookup "filters" hm
     strides     = Map.lookup "strides" hm
     nok = kernel_size == Nothing || filters == Nothing || strides == Nothing
-    (Just lv) = kernel_size -- kernel size must be a list
-    (Just fv)  = filters     -- Filters must be an IntVal
-    (Just sv)  = strides     -- Strides must be an IntVal
+    (Just (ValParam lv)) = kernel_size  -- kernel size must be a list
+    (Just (ValParam fv)) = filters     -- Filters must be an IntVal
+    (Just (ValParam sv)) = strides     -- Strides must be an IntVal
     ks =  dimValToList lv
     s  =  strideValToList sv
     f  =  filterValToInt fv
