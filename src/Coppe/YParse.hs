@@ -14,7 +14,6 @@ import Prelude as P
        
 import Coppe.AST
 
-
 readRecipe :: ByteString -> Recipe
 readRecipe yaml = undefined
 
@@ -27,8 +26,6 @@ readModule yaml =
     Left (loc, err) -> error err
     Right tree -> undefined 
 
-
-      
 writeModule :: Module -> [(FilePath, ByteString)] 
 writeModule mod =  P.map (\(x,y) -> (x, encodeNode y)) $ encodeModule mod
   where

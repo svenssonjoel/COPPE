@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0154d18522b614cc477347677557486e048378f70b94ad201992b88d72f678fa
+-- hash: 14386a7b4fe512797f95e0961893e68e6c25170740598cc7ed524d1ca0a60998
 
 name:           COPPE
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Coppe.Analysis
       Coppe.Arrow
       Coppe.AST
+      Coppe.Directory
       Coppe.KerasGen
       Coppe.Monad
       Coppe.Prelude
@@ -48,6 +49,7 @@ library
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
+    , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
     , text >=1.2.4.1 && <=1.2.5
@@ -68,6 +70,7 @@ executable COPPE-exe
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
+    , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
     , text >=1.2.4.1 && <=1.2.5
@@ -89,6 +92,7 @@ test-suite COPPE-test
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
+    , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
     , text >=1.2.4.1 && <=1.2.5
