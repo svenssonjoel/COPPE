@@ -1,12 +1,10 @@
 
-module Coppe.Directory
+module Coppe.Files
   ( coppeDir
   , coppeDirInit
   ) where 
 
 import System.Directory
-
-
 
 coppeDir :: IO FilePath
 coppeDir =
