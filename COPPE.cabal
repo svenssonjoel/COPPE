@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 14386a7b4fe512797f95e0961893e68e6c25170740598cc7ed524d1ca0a60998
+-- hash: f39b3d9f00ef7eda99c33b50b4e330f95047bc5bad3e081b18e77cd0fd7f246e
 
 name:           COPPE
 version:        0.1.0.0
@@ -32,7 +32,7 @@ library
       Coppe.Analysis
       Coppe.Arrow
       Coppe.AST
-      Coppe.Directory
+      Coppe.Files
       Coppe.KerasGen
       Coppe.Monad
       Coppe.Prelude
