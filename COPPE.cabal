@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: f39b3d9f00ef7eda99c33b50b4e330f95047bc5bad3e081b18e77cd0fd7f246e
+-- hash: 9078abf5d7bf6171023d703b8f5ea5083e5aa71a6fb6133b7dfa216656975f15
 
 name:           COPPE
 version:        0.1.0.0
@@ -37,6 +37,7 @@ library
       Coppe.Monad
       Coppe.Prelude
       Coppe.Pygen
+      Coppe.PyLSP
       Coppe.TFGen
       Coppe.TorchGen
       Coppe.YParse
@@ -46,12 +47,14 @@ library
       src
   build-depends:
       HsYAML >=0.2.1.0 && <0.2.2
+    , aeson >=1.5.6.0 && <=1.5.7
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
     , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , process >=1.6.9.0 && <=1.6.10
     , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
     , utf8-string >=1.0.2 && <=1.1
@@ -67,12 +70,14 @@ executable COPPE-exe
   build-depends:
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
+    , aeson >=1.5.6.0 && <=1.5.7
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
     , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , process >=1.6.9.0 && <=1.6.10
     , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
     , utf8-string >=1.0.2 && <=1.1
@@ -89,12 +94,14 @@ test-suite COPPE-test
   build-depends:
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
+    , aeson >=1.5.6.0 && <=1.5.7
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
     , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , process >=1.6.9.0 && <=1.6.10
     , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
     , utf8-string >=1.0.2 && <=1.1
