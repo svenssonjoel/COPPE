@@ -14,6 +14,12 @@ import Data.ByteString.Lazy.Char8 as BLC
 
 import Prelude as P
 
+{-
+   LSP seems cool but way to heavy weight for what we are doing. 
+-} 
+
+
+
 data ClientInfo = ClientInfo { name_ :: String,
                                version :: String }
   deriving (Generic, Show)
@@ -34,9 +40,9 @@ data IntializeRequest = IntializeRequest { processId :: Maybe Integer,
                                            locale :: String,
                                            rootPath :: Maybe String,
                                            rootUri :: Maybe URI,
-                                           initializationOptions :: InitOptions,
-                                           capabilities :: ClientCapabilities,
-                                           workspaceFolders :: [WorkspaceFolder] }
+                                           initializationOptions :: InitOptions}
+                                           --capabilities :: ClientCapabilities,
+                                           --workspaceFolders :: [WorkspaceFolder] }
   deriving (Generic, Show)
 
 instance ToJSON WorkspaceFolder where
@@ -61,31 +67,24 @@ data Message where
 instance ToJSON Message where
   toJSON (Message a s) = object ["jsonrpc" .= ("2.0" :: Text), "id" .= ("1" :: Text), "method" .= s,  "params" .= toJSON a]
 
-
 testinit = Message init "initialize"
-  where init = IntializeRequest Nothing (ClientInfo "apa" "1.2") "en" Nothing Nothing InitOptions (ClientCapabilities 15) [WorkspaceFolder "This_is_an_uri" "This_is_a_name"]
+  where init = IntializeRequest Nothing (ClientInfo "apa" "1.2") "en" Nothing Nothing InitOptions {-(ClientCapabilities 15)-} {- [WorkspaceFolder "This_is_an_uri" "This_is_a_name"] -} 
 
+data PyLSP = PyLSP (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle)
 
-
-startPyLSP :: IO (Maybe Handle, Maybe Handle, Maybe Handle, ProcessHandle)
-startPyLSP = createProcess (proc "pylsp" ["--verbose","--debug"]){ std_out = CreatePipe, std_in = CreatePipe, std_err = CreatePipe}
-
-
--- testReq = "Content-Length: ...\r\n\r\n \"jsonrpc\": \"2\"id\": 1,\"method\": \"textDocument/didOpen\",\"params\": {}}\r\n" 
+startPyLSP :: IO PyLSP
+startPyLSP = do
+  res <- createProcess (proc "pylsp" []){ std_out = CreatePipe, std_in = CreatePipe, std_err = CreatePipe}
+  return $ PyLSP res
 
 mkReq :: String -> String
 mkReq s = "Content-Length: " ++ show (P.length s) ++ "\r\n\r\n" ++ s
 
-  
+testReq = mkReq $ BLC.unpack $ encode $ toJSON testinit
 
-testReq = mkReq "{ \"jsonrpc\": \"2.0\",\"id\" : 1,\"method\": \"textDocument/definition\",\"params\": { \"textDocument\": { \"uri\": \"file:///py/test.py\" },\"position\": {\"line\": 0,\"character\": 0 } } }"
--- "{\"jsonrpc\": \"2\"id\": 1,\"method\": \"textDocument/didOpen\",\"params\": {}}\r\n" 
-
-
-testPyLSP :: IO ()
-testPyLSP =
-  do (Just input, Just output, Just err, pid) <- startPyLSP
-     IO.hPutStr input testReq
+testPyLSP :: PyLSP -> IO ()
+testPyLSP (PyLSP (Just input,Just output, Just err, pid))  =
+  do IO.hPutStr input testReq
      P.putStrLn testReq
      str <- IO.hGetContents output
      errstr <- IO.hGetContents err
