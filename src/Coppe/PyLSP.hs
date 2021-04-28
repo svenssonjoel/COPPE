@@ -15,7 +15,7 @@ import Data.ByteString.Lazy.Char8 as BLC
 import Prelude as P
 
 {-
-   LSP seems cool but way to heavy weight for what we are doing. 
+   LSP seems cool but way to heavy weight for what we are doing.
 -} 
 
 
