@@ -68,6 +68,8 @@ zeroes = NamedFun "Zeroes"
 {----------------}
 {- Convolutions -}
 
+-- Split out the dimensionality transform into a map
+-- Map String (Dimension -> Dimension)
 
 mkConv :: Hyperparameters -> Ingredient
 mkConv hyps =
