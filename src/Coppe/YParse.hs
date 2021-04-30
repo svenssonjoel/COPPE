@@ -16,17 +16,25 @@ import Coppe.AST
 
 seqTag = Event.mkTag "tag:yaml.org,2002:seq"
 
-readRecipe :: ByteString -> Recipe
-readRecipe yaml = undefined
+readRecipe :: ByteString -> Maybe Recipe
+readRecipe yaml =
+  case decode1 yaml :: Either (Pos,String) (Node Pos) of
+    Left (loc, err) -> error err
+    Right tree -> decodeRecipe tree
+
+decodeRecipe :: Node Pos -> Maybe Recipe
+decodeRecipe (Mapping _ _ m) = error "its a mapping"
+decodeRecipe _ = error "NOT A MAPPING"
+
 
 readRecipeFile :: FilePath -> Recipe
 readRecipeFile fp = undefined
 
-readModule :: ByteString -> Module
-readModule yaml =
-  case decode1 yaml :: Either (Pos,String) (Node Pos) of
-    Left (loc, err) -> error err
-    Right tree -> undefined
+--readModule :: ByteString -> Module
+--readModule yaml =
+--  case decode1 yaml :: Either (Pos,String) (Node Pos) of
+--    Left (loc, err) -> error err
+--    Right tree -> undefined
 
 writeModule :: Module -> [(FilePath, ByteString)]
 writeModule mod =  P.map (\(x,y) -> (x, encodeNode y)) $ encodeModule mod

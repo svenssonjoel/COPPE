@@ -35,4 +35,8 @@ main =
 
     putStrLn $ BLU.toString $ encodeNode [(Doc e)]
 
+    let m = readRecipe $ encodeNode [(Doc e)]
+
+    putStrLn $ show m 
+
     --putStrLn $ show $ numOperations (build testNetwork)
