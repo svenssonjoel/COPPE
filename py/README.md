@@ -40,3 +40,8 @@ pip3 install python-language-server[all]
 - Start python with access to alex
   PYTHONPATH=path/to/alex-private/ python3
 
+
+
+- Use curl to experiment
+  curl -i -X POST -H "Content-Type: application/json" -d '{"command":"val", "id":"1"}' localhost:5000
+  

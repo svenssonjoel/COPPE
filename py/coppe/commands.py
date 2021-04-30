@@ -3,8 +3,8 @@ import json
 
 #Todo check that cmd is well formed
 
-replySuccess = '{"command-status" : "ok"}'
-replyFailure = '{"command-status" : "failed"}'
+replySuccess = '{"status" : "ok"}'
+replyFailure = '{"status" : "failed"}'
 
 
 def process(cmd):
