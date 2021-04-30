@@ -58,6 +58,7 @@ encodeRecipe r = case encodeRecipe' r of
 encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
+                  [ "annotation" .= mapping (encodeAnnotation (annotation i))] ++ 
                    encodeHyper (hyper i) )
 
 encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
@@ -73,8 +74,8 @@ encodeValue (FloatVal f)  = mapping ["float"   .= f]
 encodeValue (StringVal s) = mapping ["string"  .= pack (s)]
 encodeValue (ListVal ls)  = mapping ["list"    .= Sequence () seqTag (P.map encodeValue ls)]
 
-encodeAnnotation :: Annotation -> Maybe (Node ())
-encodeAnnotation = undefined
+encodeAnnotation :: Annotation -> [Pair]
+encodeAnnotation m = Map.foldrWithKey (\k v as -> (pack k .= encodeValue v):as) [] m
 
 stripPos :: [Doc (Node a)] -> [Doc (Node ())]
 stripPos xs = P.map (fmap f) xs
