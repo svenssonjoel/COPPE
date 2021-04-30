@@ -44,6 +44,12 @@ encodeRecipe r = case encodeRecipe' r of
     encodeRecipe' (Seq rs) = Just $ encodeRecipeList rs
     encodeRecipe' (NamedRecipe n) = Just $ mapping [ "type" .=  (pack n) ]
     encodeRecipe' (Operation i) = encodeIngredient i
+    encodeRecipe' (Annotated a r) =
+      let r' = encodeRecipe r
+      in case r' of
+         Just recipe -> Just $ mapping [ "type" .= (pack "annotated"),
+                                         "recipe" .= recipe]
+         Nothing -> Nothing               
 
     encodeRecipeList :: [Recipe] -> Node ()
     encodeRecipeList rs = Sequence () seqTag (catMaybes (P.map encodeRecipe' rs))
