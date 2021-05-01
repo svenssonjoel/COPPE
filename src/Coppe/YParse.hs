@@ -73,9 +73,15 @@ decodeAnnotationNode _ = Nothing -- malformed annotation
 decodeValue :: Node Pos -> Maybe Value
 decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pair
   case elts of
-    [(Just "integer",n)] -> undefined
-    [(Just "float", f)]  -> undefined
-    [(Just "string", s)] -> undefined
+    [(Just "integer",n)] -> case parseEither ((parseYAML n) :: Parser Integer) of
+                              Left _ -> Nothing
+                              Right i -> Just $ IntVal i
+    [(Just "float", f)]  -> case parseEither ((parseYAML f) :: Parser Double) of
+                              Left _ -> Nothing
+                              Right f -> Just $ FloatVal f
+    [(Just "string", s)] -> case parseEither ((parseYAML s) :: Parser Text) of
+                              Left _ -> Nothing
+                              Right s -> Just $ StringVal (unpack s)
     [(Just "list", l)]   -> undefined
     _ -> Nothing -- Malformed value 
 
