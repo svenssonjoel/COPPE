@@ -23,9 +23,29 @@ readRecipe yaml =
     Right tree -> decodeRecipe tree
 
 decodeRecipe :: Node Pos -> Maybe Recipe
-decodeRecipe (Mapping _ _ m) = error "its a mapping"
-decodeRecipe _ = error "NOT A MAPPING"
+decodeRecipe (Mapping _ _ m) =
+  case parseEither ((m .: "params_network") :: Parser (Node Pos)) of
+    Left (pos,str) -> Nothing
+    Right n -> decodeLayers n                 
+decodeRecipe _ = Nothing
 
+decodeLayers :: Node Pos -> Maybe Recipe
+decodeLayers (Sequence _ _ ls) =
+  if (P.length layers' < P.length layers) then Nothing
+  else  Just $ Seq (catMaybes layers) 
+  where
+    layers = P.map decodeLayer ls
+    layers' = catMaybes layers
+  
+decodeLayer :: Node Pos -> Maybe Recipe
+decodeLayer (Mapping _ _ m) = decodeLayerMapping m
+decodeLayer (Sequence _ _ s) = decodeLayerSequence s
+  
+decodeLayerMapping :: Map.Map (Node pos) (Node pos) -> Maybe Recipe
+decodeLayerMapping m = error "Inside the layer Mapping"
+
+decodeLayerSequence :: [Node pos] -> Maybe Recipe
+decodeLayerSequence s = error "Inside the layer Sequence"
 
 readRecipeFile :: FilePath -> Recipe
 readRecipeFile fp = undefined

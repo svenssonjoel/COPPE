@@ -251,6 +251,7 @@ data Recipe = Input
             | Operation Ingredient
             | Seq [Recipe]    -- Will get more obvious if this is a list of recipies. 
             | Annotated Annotation Recipe
+--   deriving (Eq, Ord, Show)   -- We may want this
 
 instance Show Recipe where
   show Input = "Input"
