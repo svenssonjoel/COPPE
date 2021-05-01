@@ -87,9 +87,6 @@ decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pai
             Left _ -> Nothing
             Right s -> Just s
           
-        
-
-  
 decodeLayerSequence :: [Node Pos] -> Maybe Recipe
 decodeLayerSequence s = error "Inside the layer Sequence"
 
