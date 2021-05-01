@@ -46,9 +46,30 @@ decodeLayerMapping m =
   case parseEither ((m .: "type") :: Parser Text) of
     Left (pos,str) -> Nothing
     Right n -> case n of
-                 "input_layer" -> error "This is an input layer"
+                 "input_layer" -> Just Input
+                 "annotated"   -> decodeAnnotated m 
                  _ -> error "This is not an input layer" 
- 
+
+decodeAnnotated :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
+decodeAnnotated m = do
+  annotation_node <- case parseEither ((m .: "annotation") :: Parser (Node Pos)) of
+                       Left _ -> Nothing
+                       Right n -> Just n
+  recipe_node <- case parseEither ((m .: "recipe") :: Parser (Node Pos)) of
+                   Left _ -> Nothing
+                   Right n -> Just n
+
+  annotation <- decodeAnnotationNode annotation_node
+  recipe <- decodeRecipe recipe_node
+  return $ Annotated annotation recipe 
+  
+
+decodeAnnotationNode :: Node Pos -> Maybe Annotation
+decodeAnnotationNode (Mapping _ _ m) = undefined 
+decodeAnnotationNode _ = Nothing -- malformed annotation
+  
+decodeValue :: Node Pos -> Maybe Value
+decodeValue = undefined
 
 decodeLayerSequence :: [Node Pos] -> Maybe Recipe
 decodeLayerSequence s = error "Inside the layer Sequence"
@@ -82,6 +103,7 @@ encodeRecipe r = case encodeRecipe' r of
       let r' = encodeRecipe r
       in case r' of
          Just recipe -> Just $ mapping [ "type" .= (pack "annotated"),
+                                         "annotation" .= encodeAnnotation a,
                                          "recipe" .= recipe]
          Nothing -> Nothing               
 
