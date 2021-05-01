@@ -43,9 +43,11 @@ decodeLayer (Sequence _ _ s) = decodeLayerSequence s
   
 decodeLayerMapping :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
 decodeLayerMapping m = 
-  case parseEither ((m .: "type") :: Parser (Node Pos)) of
+  case parseEither ((m .: "type") :: Parser Text) of
     Left (pos,str) -> Nothing
-    Right n -> undefined
+    Right n -> case n of
+                 "input_layer" -> error "This is an input layer"
+                 _ -> error "This is not an input layer" 
  
 
 decodeLayerSequence :: [Node Pos] -> Maybe Recipe
