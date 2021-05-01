@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+
 module Coppe.YParse  where
 
 
@@ -69,8 +71,25 @@ decodeAnnotationNode (Mapping _ _ m) = undefined
 decodeAnnotationNode _ = Nothing -- malformed annotation
   
 decodeValue :: Node Pos -> Maybe Value
-decodeValue = undefined
+decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pair
+  case elts of
+    [(Just "integer",n)] -> undefined
+    [(Just "float", f)]  -> undefined
+    [(Just "string", s)] -> undefined
+    [(Just "list", l)]   -> undefined
+    _ -> Nothing -- Malformed value 
 
+  where elts = Map.toList (Map.mapKeys decodeKey m)
+
+        decodeKey :: Node Pos -> Maybe Text
+        decodeKey n =
+          case parseEither ((parseYAML n) :: Parser Text) of
+            Left _ -> Nothing
+            Right s -> Just s
+          
+        
+
+  
 decodeLayerSequence :: [Node Pos] -> Maybe Recipe
 decodeLayerSequence s = error "Inside the layer Sequence"
 
