@@ -41,10 +41,14 @@ decodeLayer :: Node Pos -> Maybe Recipe
 decodeLayer (Mapping _ _ m) = decodeLayerMapping m
 decodeLayer (Sequence _ _ s) = decodeLayerSequence s
   
-decodeLayerMapping :: Map.Map (Node pos) (Node pos) -> Maybe Recipe
-decodeLayerMapping m = error "Inside the layer Mapping"
+decodeLayerMapping :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
+decodeLayerMapping m = 
+  case parseEither ((m .: "type") :: Parser (Node Pos)) of
+    Left (pos,str) -> Nothing
+    Right n -> undefined
+ 
 
-decodeLayerSequence :: [Node pos] -> Maybe Recipe
+decodeLayerSequence :: [Node Pos] -> Maybe Recipe
 decodeLayerSequence s = error "Inside the layer Sequence"
 
 readRecipeFile :: FilePath -> Recipe
@@ -70,7 +74,7 @@ encodeRecipe r = case encodeRecipe' r of
     encodeRecipe' Empty = Nothing
     encodeRecipe' Input = Just $ mapping [ "type" .= ("input_layer" :: Text) ]
     encodeRecipe' (Seq rs) = Just $ encodeRecipeList rs
-    encodeRecipe' (NamedRecipe n) = Just $ mapping [ "type" .=  (pack n) ]
+    encodeRecipe' (NamedRecipe n) = Just $ mapping [ "type" .= (pack n) ]
     encodeRecipe' (Operation i) = encodeIngredient i
     encodeRecipe' (Annotated a r) =
       let r' = encodeRecipe r
@@ -92,8 +96,10 @@ encodeRecipe r = case encodeRecipe' r of
 encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
-                  [ "annotation" .= mapping (encodeAnnotation (annotation i))] ++ 
+                  (if not (P.null pairs) then [ "annotation" .= m ] else []) ++ 
                    encodeHyper (hyper i) )
+  where m = mapping pairs
+        pairs = (encodeAnnotation (annotation i))
 
 encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
 encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m
