@@ -49,8 +49,21 @@ decodeLayerMapping m =
     Left (pos,str) -> Nothing
     Right n -> case n of
                  "input_layer" -> Just Input
-                 "annotated"   -> decodeAnnotated m 
-                 _ -> error "This is not an input layer" 
+                 "annotated"   -> decodeAnnotated m
+                 "reference"   -> decodeReference m
+                 _ -> decodeIngredient m
+                
+
+decodeReference :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
+decodeReference m =
+  case parseEither ((m .: "name") :: Parser Text) of
+    Left (pos,str) -> Nothing
+    Right n -> Just $ NamedRecipe (unpack n)
+
+decodeIngredient :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
+decodeIngredient m = undefined 
+
+
 
 decodeAnnotated :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
 decodeAnnotated m = do
@@ -82,7 +95,7 @@ decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pai
     [(Just "string", s)] -> case parseEither ((parseYAML s) :: Parser Text) of
                               Left _ -> Nothing
                               Right s -> Just $ StringVal (unpack s)
-    [(Just "list", l)]   -> undefined
+    [(Just "list", l)]   -> error $ "list " ++ show l
     _ -> Nothing -- Malformed value 
 
   where elts = Map.toList (Map.mapKeys decodeKey m)
@@ -119,7 +132,7 @@ encodeRecipe r = case encodeRecipe' r of
     encodeRecipe' Empty = Nothing
     encodeRecipe' Input = Just $ mapping [ "type" .= ("input_layer" :: Text) ]
     encodeRecipe' (Seq rs) = Just $ encodeRecipeList rs
-    encodeRecipe' (NamedRecipe n) = Just $ mapping [ "type" .= (pack n) ]
+    encodeRecipe' (NamedRecipe n) = Just $ mapping [ "type" .= (pack "reference"), "name" .= (pack n) ]
     encodeRecipe' (Operation i) = encodeIngredient i
     encodeRecipe' (Annotated a r) =
       let r' = encodeRecipe r
