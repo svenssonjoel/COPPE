@@ -61,9 +61,39 @@ decodeReference m =
     Right n -> Just $ NamedRecipe (unpack n)
 
 decodeIngredient :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
-decodeIngredient m = undefined 
+decodeIngredient m =
+  do
+    name  <- decodeName m      
+    annot <- case decodeAnnot m of
+               Nothing -> Just Map.empty
+               Just a  -> Just a
+    hyps  <- decodeParams m
+    return $ Operation $ Ingredient (unpack name) annot hyps undefined -- TODO: FIX
+
+decodeName :: Map.Map (Node Pos) (Node Pos) -> Maybe Text
+decodeName m =
+  case parseEither ((m .: "type") :: Parser Text) of
+    Left (pos,str) -> Nothing
+    Right t        -> Just t
+
+decodeAnnot :: Map.Map (Node Pos) (Node Pos) -> Maybe Annotation
+decodeAnnot m =
+  case parseEither ((m .: "annotation") :: Parser (Node Pos)) of
+    Left (pos, str) -> Nothing
+    Right a         -> decodeAnnotationNode a
 
 
+decodeParams :: Map.Map (Node Pos) (Node Pos) -> Maybe HyperMap
+decodeParams m = case decodeParameterList ls of
+                   Nothing -> Nothing
+                   Just ps -> Just $ Map.fromList ps
+  where
+    ls = Map.toList m
+    decodeParameterList :: [(Node Pos, Node Pos)] -> Maybe [(String, Parameter)]
+    decodeParameterList = error "its a parameter list. yay" 
+
+decodeParameter :: Node Pos -> Maybe Parameter
+decodeParameter n = Nothing
 
 decodeAnnotated :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
 decodeAnnotated m = do
@@ -172,7 +202,7 @@ encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
                   (if not (P.null pairs) then [ "annotation" .= m ] else []) ++ 
-                   encodeHyper (hyper i) )
+                  [ "parameters" .= encodeHyper (hyper i)] )
   where m = mapping pairs
         pairs = (encodeAnnotation (annotation i))
 
