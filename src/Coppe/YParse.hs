@@ -80,9 +80,25 @@ decodeAnnotated m = do
   
 
 decodeAnnotationNode :: Node Pos -> Maybe Annotation
-decodeAnnotationNode (Mapping _ _ m) = undefined 
+decodeAnnotationNode (Mapping _ _ m) = decodeAnnotation m 
 decodeAnnotationNode _ = Nothing -- malformed annotation
-  
+
+decodeAnnotation :: Map.Map (Node Pos) (Node Pos) -> Maybe Annotation
+decodeAnnotation m = case decodeAnnotationList ls of
+                       Nothing -> Nothing
+                       Just as -> Just $ Map.fromList as
+  where
+    ls = Map.toList m
+    decodeAnnotationList :: [(Node Pos, Node Pos)] -> Maybe [(String, Value)]
+    decodeAnnotationList [] = Nothing
+    decodeAnnotationList ((k,v):xs) =
+      case (decodeKey k, decodeValue v) of
+        (Nothing, _) -> decodeAnnotationList xs
+        (_, Nothing) -> decodeAnnotationList xs
+        (Just k',Just v') -> case decodeAnnotationList xs of
+                               Nothing -> Just [(unpack k',v')]
+                               Just as -> Just $ (unpack k',v') : as
+
 decodeValue :: Node Pos -> Maybe Value
 decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pair
   case elts of
@@ -100,12 +116,12 @@ decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pai
 
   where elts = Map.toList (Map.mapKeys decodeKey m)
 
-        decodeKey :: Node Pos -> Maybe Text
-        decodeKey n =
-          case parseEither ((parseYAML n) :: Parser Text) of
-            Left _ -> Nothing
-            Right s -> Just s
-          
+decodeKey :: Node Pos -> Maybe Text
+decodeKey n =
+  case parseEither ((parseYAML n) :: Parser Text) of
+    Left _ -> Nothing
+    Right s -> Just s
+
 decodeLayerSequence :: [Node Pos] -> Maybe Recipe
 decodeLayerSequence s = error "Inside the layer Sequence"
 
