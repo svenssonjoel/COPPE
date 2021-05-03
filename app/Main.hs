@@ -11,6 +11,7 @@ import Coppe.Analysis
 import Coppe.YParse
 import Data.YAML
 import Data.ByteString.Lazy.UTF8 as BLU
+import Control.Arrow
 
 testNetwork =
   let kernel_size = [34,34] 
@@ -20,7 +21,7 @@ testNetwork =
       addParams = emptyHyperparameters
   in
   do
-    in_data <- inputFloat [32,32,3]
+    in_data <- inputFloat [32,32,3] 
     out_data <- conv kernel_size strides filters convParams in_data
                 >>= batchNormalize emptyHyperparameters
                 >>= relu
@@ -29,7 +30,20 @@ testNetwork =
     return out_data 
 
 
-
+testArrow =
+  let kernel_size = [34,34] 
+      strides     = [1,1]
+      filters     = 3
+      convParams = emptyHyperparameters
+      addParams = emptyHyperparameters
+  in 
+    convA kernel_size strides filters convParams >>>
+    batchNormalizeA emptyHyperparameters >>>
+    reluA >>>
+    convA kernel_size strides filters convParams >>>
+    batchNormalizeA emptyHyperparameters >>>
+    reluA
+    
 main :: IO ()
 main =
   do 
@@ -45,4 +59,14 @@ main =
 
     putStrLn $ show m 
 
+    putStrLn "***************************************"
+
+    let c =  do input <- inputFloat [32,32,3]
+                runCoppeArrow testArrow input
+    let r' = build c
+    let (Just e') =  encodeRecipe r'
+      
+    putStrLn $ BLU.toString $ encodeNode [(Doc e')]
+    
+  
     --putStrLn $ show $ numOperations (build testNetwork)
