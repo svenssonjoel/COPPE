@@ -16,6 +16,7 @@ module Coppe.AST (
   , Recipe(..)
   , Function(..)
   , Parameter(..)
+  , Arguments(..)
   
     -- hyperparameters
   , Strides(..)

@@ -84,16 +84,51 @@ decodeAnnot m =
 
 
 decodeParams :: Map.Map (Node Pos) (Node Pos) -> Maybe HyperMap
-decodeParams m = case decodeParameterList ls of
-                   Nothing -> Nothing
-                   Just ps -> Just $ Map.fromList ps
+decodeParams m = case parseEither (( m .: "parameters") :: Parser (Node Pos)) of
+                   Left (pos, str) -> Nothing
+                   Right p         -> decodeParameterNode p
+
+decodeParameterNode :: Node Pos -> Maybe HyperMap
+decodeParameterNode (Mapping _ _ m) = case decodeParameterList ls of
+                                        Just ls' -> Just $ Map.fromList ls'
+                                        Nothing -> Nothing
   where
     ls = Map.toList m
     decodeParameterList :: [(Node Pos, Node Pos)] -> Maybe [(String, Parameter)]
-    decodeParameterList = error "its a parameter list. yay" 
+    decodeParameterList [] = Nothing
+    decodeParameterList ((k,v):xs) =
+      case (decodeKey k, decodeParameter v) of
+        (Just k', Just p') -> Just [(unpack k', p')]
+                                    
+        _ -> Nothing
+decodeParameterNode n = error $ "Parameters are not a mapping:" ++ show n
 
 decodeParameter :: Node Pos -> Maybe Parameter
-decodeParameter n = Nothing
+decodeParameter (Mapping _ _ m) =
+  case elts of
+    [(Just "integer",n)] -> case parseEither ((parseYAML n) :: Parser Integer) of
+                              Left _ -> Nothing
+                              Right i -> Just $ ValParam $ IntVal i
+    [(Just "float", f)]  -> case parseEither ((parseYAML f) :: Parser Double) of
+                              Left _ -> Nothing
+                              Right f -> Just $ ValParam $ FloatVal f
+    [(Just "string", s)] -> case parseEither ((parseYAML s) :: Parser Text) of
+                              Left _ -> Nothing
+                              Right s -> Just $ ValParam $ StringVal (unpack s)
+    [(Just "list", l)]   -> case decodeValueList l of
+                              Nothing -> Nothing
+                              Just v  -> Just $ ValParam $ ListVal v
+    [(Just "function", f)] -> case decodeFunctionValue f of
+                                Nothing -> Nothing
+                                Just f' -> Just $ f'
+    _ -> Nothing -- Malformed value 
+
+  where elts = Map.toList (Map.mapKeys decodeKey m)
+decodeParameter _ = Nothing
+-- decodeParameter (Sequence _ _ s)  = error $ "it is a sequence ????: " ++ show s
+
+decodeFunctionValue :: Node Pos -> Maybe Parameter
+decodeFunctionValue = error "this is a function value. todo"
 
 decodeAnnotated :: Map.Map (Node Pos) (Node Pos) -> Maybe Recipe
 decodeAnnotated m = do
@@ -141,10 +176,19 @@ decodeValue (Mapping _ _ m) =   -- This mapping should be just one key/value pai
     [(Just "string", s)] -> case parseEither ((parseYAML s) :: Parser Text) of
                               Left _ -> Nothing
                               Right s -> Just $ StringVal (unpack s)
-    [(Just "list", l)]   -> error $ "list " ++ show l
+    [(Just "list", l)]   -> case decodeValueList l of
+                              Nothing -> Nothing
+                              Just v  -> Just $ ListVal v
     _ -> Nothing -- Malformed value 
 
   where elts = Map.toList (Map.mapKeys decodeKey m)
+
+decodeValueList :: Node Pos -> Maybe [Value]
+decodeValueList (Sequence _ _ s) = if (P.length res > P.length res')
+                                   then Nothing
+                                   else (Just res')
+  where res = P.map decodeValue s
+        res' = catMaybes res
 
 decodeKey :: Node Pos -> Maybe Text
 decodeKey n =
@@ -202,7 +246,7 @@ encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
                   (if not (P.null pairs) then [ "annotation" .= m ] else []) ++ 
-                  [ "parameters" .= encodeHyper (hyper i)] )
+                  [ "parameters" .= mapping (encodeHyper (hyper i))] )
   where m = mapping pairs
         pairs = (encodeAnnotation (annotation i))
 
@@ -210,8 +254,30 @@ encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
 encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m
 
 encodeParam :: Parameter -> Node ()
-encodeParam (FunAppParam f a) = undefined
+encodeParam (FunAppParam f a) = encodeFunApp f a
 encodeParam (ValParam p) = encodeValue p
+
+encodeFunApp :: Function -> Arguments -> Node ()
+encodeFunApp (NamedFun s) args = mapping $ ["function" .= (pack s)] ++
+                                            case args' of
+                                              Nothing -> []
+                                              Just n  -> ["arguments" .= n] -- sequence (not sure about that)
+  where args' = encodeArguments args
+  
+encodeArguments :: [(Maybe String, Parameter)] -> Maybe [Pair]
+encodeArguments [] = Nothing
+encodeArguments ((n,p):args) =
+  let args' = encodeArguments args
+  in 
+    let h = case n of
+              Nothing ->
+                [ "arg" .= encodeParam p ]
+              Just n' ->
+                [ "name" .= (pack n'), "arg" .= encodeParam p ]
+    in case args' of
+         Nothing -> Just h
+         Just hs -> Just (h ++ hs)
+                                 
 
 encodeValue :: Value -> Node ()
 encodeValue (IntVal i)    = mapping ["integer" .= i]
