@@ -1,3 +1,8 @@
+{- Main.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
 module Main where
 
 import Coppe
@@ -8,17 +13,18 @@ import Data.YAML
 import Data.ByteString.Lazy.UTF8 as BLU
 
 testNetwork =
-  let convParams = [("kernelSize", valParam [34,34 :: Int])
-                   ,("strides", valParam [1,1 :: Int])
-                   ,("filters", valParam (3 :: Int))]
+  let kernel_size = [34,34] 
+      strides     = [1,1]
+      filters     = 3
+      convParams = emptyHyperparameters
       addParams = emptyHyperparameters
   in
   do
     in_data <- inputFloat [32,32,3]
-    out_data <- conv convParams in_data
+    out_data <- conv kernel_size strides filters convParams in_data
                 >>= batchNormalize emptyHyperparameters
                 >>= relu
-                >>= conv convParams
+                >>= conv kernel_size strides filters convParams
                 >>= batchNormalize emptyHyperparameters
     return out_data 
 

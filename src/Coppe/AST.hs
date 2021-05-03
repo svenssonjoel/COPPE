@@ -1,3 +1,9 @@
+{- AST.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
+
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}

@@ -1,3 +1,9 @@
+{- Arrow.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
+
 module Coppe.Arrow ( CoppeArrow(..)
                    , coppeArrow
                    , runCoppeArrow

@@ -1,3 +1,8 @@
+{- YParse.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
@@ -250,7 +255,7 @@ encodeIngredient i =
   where m = mapping pairs
         pairs = (encodeAnnotation (annotation i))
 
-encodeHyper :: HyperMap -> [Pair] -- (Node (), Node ())
+encodeHyper :: HyperMap -> [Pair] 
 encodeHyper m = Map.foldrWithKey (\k v ps -> (pack k .= encodeParam v):ps) [] m
 
 encodeParam :: Parameter -> Node ()

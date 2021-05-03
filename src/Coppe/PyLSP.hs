@@ -1,3 +1,8 @@
+{- PyLSP.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE OverloadedStrings #-}
