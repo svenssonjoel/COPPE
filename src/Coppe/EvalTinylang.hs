@@ -60,7 +60,7 @@ evalTiny (EVar i) _ =
 evalTiny (EAdd e1 op e2) _ = evalAdd op e1 e2
 evalTiny (EMul e1 op e2) _ = evalMul op e1 e2
 evalTiny (ERel e1 op e2) _ = evalRel op e1 e2
-evalTiny e@(ELam _ _) args = evalLam e args
+evalTiny (ELam es e) args = evalLam es e args
 evalTiny (EApp e1 e2) _    =
   do v <- evalTiny e2 noArgs
      case v of
@@ -85,10 +85,13 @@ addAllBindings (x:xs) (ListVal (v:vs)) =
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
 
  
-
-evalLam :: Exp -> Value -> Eval (Either EvalError Value)
-evalLam = undefined  
-
+evalLam :: [Exp] -> Exp -> Value -> Eval (Either EvalError Value)
+evalLam es e v = do 
+  ostate <- get
+  addAllBindings es v
+  r <- evalTiny e noArgs
+  put ostate
+  return r
   
 noArgs = ListVal []
 
