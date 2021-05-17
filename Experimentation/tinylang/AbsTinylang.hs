@@ -9,16 +9,18 @@ module AbsTinylang where
 
 newtype Ident = Ident String deriving (Eq, Ord, Show, Read)
 data Exp
-    = ELam [Exp] Exp
+    = ELam [Arg] Exp
     | ELet Exp Exp Exp
     | EOr Exp Exp
     | EAnd Exp Exp
+    | ENot Exp
     | ERel Exp RelOp Exp
     | EAdd Exp AddOp Exp
     | EMul Exp MulOp Exp
     | EApp Exp Exp
     | EInt Integer
     | EFloat Double
+    | EBool Boolean
     | EVar Ident
   deriving (Eq, Ord, Show, Read)
 
@@ -29,5 +31,11 @@ data MulOp = Times | Div
   deriving (Eq, Ord, Show, Read)
 
 data RelOp = LTC | LEC | GTC | GEC | EQC
+  deriving (Eq, Ord, Show, Read)
+
+data Arg = Arg Ident
+  deriving (Eq, Ord, Show, Read)
+
+data Boolean = BTrue | BFalse
   deriving (Eq, Ord, Show, Read)
 
