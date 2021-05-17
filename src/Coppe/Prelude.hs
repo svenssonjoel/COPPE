@@ -104,6 +104,18 @@ convTransform kernel_size strides filters tensorDim =
               kernel_size
               strides
 
+convTransformSrc = unlines $ 
+  "fun dim -> ",
+  "  let ndims = length dim in",
+  "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
+  "  let dims = take (ndims - 1) dim in",
+  "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
+  "                dims ",
+  "                kernel_size ",
+  "                strides "
+
+              
+
 {----------------}
 {- RELU         -}
 
@@ -128,8 +140,8 @@ mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) True "
 {----------------------------------------}
 {-             MONAD STUFF              -}
 
-input :: TensorRepr a => Coppe (Tensor a)
-input = operation mkInput []
+input :: TensorRepr a => Dimensions -> Coppe (Tensor a)
+input dims = producer mkInput dims
 
 conv :: TensorRepr a => [Integer] -> [Integer] -> Integer -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
 conv ks ss f h t = operation (mkConv ks ss f h) [t]

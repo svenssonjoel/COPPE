@@ -15,7 +15,6 @@ import Control.Monad.State
 - A tinylang program can refer to any of the annotations
   in the annotation map by name.
 - Should there be a way to tell those namespaces apart?
-
 -} 
 
 data EvalState = EvalState HyperMap Annotation (Map.Map String Value)

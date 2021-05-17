@@ -10,6 +10,7 @@ module Coppe.Monad (
   getId,
   empty,
   operation,
+  producer,
   build
   ) where 
 
@@ -30,7 +31,20 @@ getId =
      
 empty :: Coppe ()
 empty = tell Empty
-    
+
+
+producer :: ( TensorRepr a)
+          => Ingredient
+          -> Dimensions
+          -> Coppe (Tensor a)
+producer op dim =
+  do i <- getId
+     let nom = "tensor" ++ show i
+     tell $ Operation (hyperSet op [("name", valParam nom)])  
+     let result =  mkTensor nom dim
+     return $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
+
+        
 operation :: ( TensorRepr a)
           => Ingredient
           -> [Tensor a]
