@@ -122,7 +122,10 @@ type Dimensions = [Integer]
 
 type Identifier = String
 
-data Value = IntVal Integer | FloatVal Double
+data Value =
+  IntVal Integer
+  | FloatVal Double
+  | BoolVal  Bool
   | StringVal String
   | ListVal [ Value ]
   deriving (Eq, Ord, Show)
@@ -158,6 +161,9 @@ instance ToValue Int where
   
 instance ToValue Float where
   toValue f = FloatVal (realToFrac f)
+
+instance ToValue Bool where
+  toValue b = BoolVal b
 
 instance ToValue Double where
   toValue d = FloatVal d
