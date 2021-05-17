@@ -50,7 +50,7 @@ addBinding s v =
 evalTiny :: Exp -> Value -> Eval (Either EvalError Value)
 evalTiny (EInt i) _ = return $ Right $ toValue i
 evalTiny (EFloat d) _ = return $ Right $ toValue d
-evalTinu (EVar i) _ =
+evalTiny (EVar i) _ =
   do res <- lookupBinding (identToString i)
      case res of
        Just v -> return $ Right v
