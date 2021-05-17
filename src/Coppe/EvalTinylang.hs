@@ -61,6 +61,18 @@ evalTiny (EAdd e1 op e2) _ = evalAdd op e1 e2
 evalTiny (EMul e1 op e2) _ = evalMul op e1 e2
 evalTiny (ERel e1 op e2) _ = evalRel op e1 e2
 evalTiny e@(ELam _ _) args = evalLam e args
+evalTiny (EApp e1 e2) _    =
+  do v <- evalTiny e2 noArgs
+     case v of
+       Left err -> return $ Left err
+       Right v ->  evalApp e1 v
+
+evalApp :: Exp -> Value -> Eval (Either EvalError Value)
+evalApp (EVar (Ident "length")) (ListVal l) = return $ Right $ toValue (length l)
+evalApp (EVar (Ident "length")) _  = return $ Left $ EvalError "Argument to length is not a list."
+evalApp (EVar (Ident "tail"))   (ListVal l) = return $ Right $ ListVal (tail l)
+evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to rail is not a list."
+
 
 addAllBindings :: [Exp] -> Value -> Eval (Either EvalError ())
 addAllBindings [] (ListVal []) = return $ Right ()
