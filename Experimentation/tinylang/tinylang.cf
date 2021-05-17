@@ -1,0 +1,30 @@
+
+
+-- Calc.cf: A grammar for arithmetical expressions
+
+ELam.   Exp  ::= "fun" [ Exp ] "->" Exp ;
+ELet.   Exp  ::= "let" Exp "=" Exp "in" Exp ;
+EOr.    Exp1 ::= Exp2 "||" Exp1 ;
+EAnd.   Exp2 ::= Exp3 "&&" Exp2 ;
+ERel.   Exp3 ::= Exp3 RelOp Exp4 ;
+EAdd.   Exp4 ::= Exp4 AddOp Exp5 ;
+EMul.   Exp5 ::= Exp5 MulOp Exp6 ;
+EApp.   Exp6 ::= Exp6 Exp7 ;
+EInt. 	Exp7 ::= Integer ;
+EFloat. Exp7 ::= Double ;
+EVar.   Exp7 ::= Ident ;
+
+Plus.   AddOp ::= "+" ;
+Minus.  AddOp ::= "-" ;
+
+Times.  MulOp ::= "*" ;
+Div.    MulOp ::= "/" ;
+
+LTC.  RelOp ::= "<" ;
+LEC.  RelOp ::= "<=" ;
+GTC.  RelOp ::= ">" ;
+GEC.  RelOp ::= ">=" ;
+EQC.  RelOp ::= "==" ;
+
+coercions 	Exp 	7 ;
+separator       Exp     "";
