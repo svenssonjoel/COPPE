@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 9078abf5d7bf6171023d703b8f5ea5083e5aa71a6fb6133b7dfa216656975f15
+-- hash: c23902df923928fd664e44edb3e07c85096359f55512ebd9f959afa66184baa3
 
 name:           COPPE
 version:        0.1.0.0
@@ -32,6 +32,7 @@ library
       Coppe.Analysis
       Coppe.Arrow
       Coppe.AST
+      Coppe.EvalTinylang
       Coppe.Files
       Coppe.KerasGen
       Coppe.Monad
@@ -39,6 +40,12 @@ library
       Coppe.Pygen
       Coppe.PyLSP
       Coppe.TFGen
+      Coppe.TinyLang.AbsTinylang
+      Coppe.TinyLang.ErrM
+      Coppe.TinyLang.LexTinylang
+      Coppe.TinyLang.ParTinylang
+      Coppe.TinyLang.PrintTinylang
+      Coppe.TinyLang.SkelTinylang
       Coppe.TorchGen
       Coppe.YParse
   other-modules:
@@ -47,7 +54,8 @@ library
       src
   build-depends:
       HsYAML >=0.2.1.0 && <0.2.2
-    , aeson >=1.5.6.0 && <=1.5.7
+    , aeson >=1.5.6.0 && <1.5.7
+    , array >=0.5.4.0 && <0.5.5
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
@@ -70,7 +78,8 @@ executable COPPE-exe
   build-depends:
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
-    , aeson >=1.5.6.0 && <=1.5.7
+    , aeson >=1.5.6.0 && <1.5.7
+    , array >=0.5.4.0 && <0.5.5
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
@@ -94,7 +103,8 @@ test-suite COPPE-test
   build-depends:
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
-    , aeson >=1.5.6.0 && <=1.5.7
+    , aeson >=1.5.6.0 && <1.5.7
+    , array >=0.5.4.0 && <0.5.5
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3

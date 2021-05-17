@@ -53,7 +53,7 @@ decodeLayerMapping m =
   case parseEither ((m .: "type") :: Parser Text) of
     Left (pos,str) -> Nothing
     Right n -> case n of
-                 "input_layer" -> Just Input
+--                 "input_layer" -> Just Input
                  "annotated"   -> decodeAnnotated m
                  "reference"   -> decodeReference m
                  _ -> decodeIngredient m
@@ -73,7 +73,8 @@ decodeIngredient m =
                Nothing -> Just Map.empty
                Just a  -> Just a
     hyps  <- decodeParams m
-    return $ Operation $ Ingredient (unpack name) annot hyps undefined -- TODO: FIX
+    -- TODO: ADD the trainable information to the yaml output also 
+    return $ Operation $ Ingredient (unpack name) annot hyps True "nothing" "nothing" -- TODO: FIX
 
 decodeName :: Map.Map (Node Pos) (Node Pos) -> Maybe Text
 decodeName m =
@@ -225,7 +226,7 @@ encodeRecipe r = case encodeRecipe' r of
                    Just n  -> Just $ mapping ["params_network" .= n]
   where
     encodeRecipe' Empty = Nothing
-    encodeRecipe' Input = Just $ mapping [ "type" .= ("input_layer" :: Text) ]
+    -- encodeRecipe' Input = Just $ mapping [ "type" .= ("input_layer" :: Text) ]
     encodeRecipe' (Seq rs) = Just $ encodeRecipeList rs
     encodeRecipe' (NamedRecipe n) = Just $ mapping [ "type" .= (pack "reference"), "name" .= (pack n) ]
     encodeRecipe' (Operation i) = encodeIngredient i

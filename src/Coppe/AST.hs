@@ -59,6 +59,7 @@ module Coppe.AST (
 
 import Data.Maybe
 import qualified Data.Map as Map
+import Coppe.TinyLang.AbsTinylang
 
 -- ------------------------------------------------------------ --
 -- Tensors
@@ -202,22 +203,39 @@ emptyHyperparameters :: Hyperparameters
 emptyHyperparameters = []
 
 -- ------------------------------------------------------------ --
+-- Expressions
+
+{-
+   fun ks ss fs dim -> 
+      let ndims  = length dim in 
+      let ok     = length ks = ndims - 1 && length ss = ndims - 1 in 
+      let dims   = take (ndims - 1) dim in 
+      let newdim = zipWith3 (fun d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
+                   dims ks ss
+-} 
+
+         
+
+
+-- ------------------------------------------------------------ --
 -- Ingredients 
 
 data Ingredient =
-  Ingredient { name :: String
+  Ingredient { name       :: String
              , annotation :: Annotation
-             , hyper :: HyperMap
-             , transform :: Dimensions -> Dimensions
+             , hyper      :: HyperMap
+             , trainable  :: Bool
+             , numWeights :: String     -- These should be embedded functions
+             , transform  :: String     -- Right now they point out a function in a table.
              }
 
 
 hyperSet :: Ingredient -> Hyperparameters -> Ingredient
-hyperSet (Ingredient n a h t) ps =
-  Ingredient n a (Map.union (Map.fromList ps) h) t
+hyperSet (Ingredient n a h trnble w t) ps =
+  Ingredient n a (Map.union (Map.fromList ps) h) trnble w t
 
 hyperGet :: Ingredient -> HyperMap
-hyperGet (Ingredient _ _ h _) = h
+hyperGet (Ingredient _ _ h _ _ _) = h
 
 -- ------------------------------------------------------------ --
 -- Helpers
@@ -252,8 +270,7 @@ type Name = String
 
 data Module = Module  [(Name, Recipe)] 
   
-data Recipe = Input
-            | Empty
+data Recipe =  Empty
             | NamedRecipe Name
             | Operation Ingredient
             | Seq [Recipe]    -- Will get more obvious if this is a list of recipies. 
@@ -261,7 +278,6 @@ data Recipe = Input
 --   deriving (Eq, Ord, Show)   -- We may want this
 
 instance Show Recipe where
-  show Input = "Input"
   show Empty = "Empty"
   show (NamedRecipe n) = n
   show (Operation i) = name i

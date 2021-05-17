@@ -9,8 +9,6 @@ module Coppe.Monad (
   Coppe(..),
   getId,
   empty,
-  inputFloat,
-  inputDouble,
   operation,
   build
   ) where 
@@ -32,18 +30,6 @@ getId =
      
 empty :: Coppe ()
 empty = tell Empty
-
-inputFloat :: [Integer] -> Coppe (Tensor Float) 
-inputFloat d =
-  do tell Input
-     i <- getId
-     return $ mkTensor ("tensor" ++ show i) d
-
-inputDouble :: [Integer] -> Coppe (Tensor Double) 
-inputDouble d =
-  do tell Input
-     i <- getId
-     return $ mkTensor ("tensor" ++ show i) d
     
 operation :: ( TensorRepr a)
           => Ingredient
@@ -59,7 +45,7 @@ operation op ts =
      -- tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
      tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])  
      let result =  mkTensor nom (tensorDim tensor)
-     return $ tensorReshape (transform op) result
+     return $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
 
 build :: Coppe a -> Recipe
 build (Coppe m) = execWriter $ evalStateT m 0

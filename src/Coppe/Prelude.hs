@@ -8,7 +8,8 @@
 
 
 module Coppe.Prelude (
-                  mkConv
+                  input
+                , mkConv
                 , mkRelu
                 , mkBatchNorm
                 , mkOptimizer
@@ -68,6 +69,11 @@ zeroes = NamedFun "Zeroes"
 
 -}
 
+{----------------}
+{- Input layers -} 
+
+mkInput :: Ingredient
+mkInput = Ingredient "input_layer" (Map.empty) (Map.empty) False "nothing" "nothing" 
 
 {----------------}
 {- Convolutions -}
@@ -80,7 +86,7 @@ mkConv kernel_size strides filters hyps =
   let hyps' = Map.union (Map.fromList  [("kernel_size", valParam kernel_size),
                                         ("filters",     valParam filters),
                                         ("strides",     valParam strides)]) hm
-  in Ingredient "conv" (Map.empty) hyps' (convTransform kernel_size strides filters)
+  in Ingredient "conv" (Map.empty) hyps' True "nothing" "nothing" {- (convTransform kernel_size strides filters) -} 
   where
     hm = (Map.fromList hyps)
 
@@ -103,24 +109,27 @@ convTransform kernel_size strides filters tensorDim =
 
 
 mkRelu :: Hyperparameters -> Ingredient
-mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) id
+mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
 
 {-----------------------}
 {- Batch normalization -}
 
 
 mkBatchNorm :: Hyperparameters -> Ingredient
-mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) id
+mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
 
 
 {----------------}
 {- Optimizer    -}
 
 mkOptimizer :: Hyperparameters -> Ingredient
-mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) id
+mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
 
 {----------------------------------------}
 {-             MONAD STUFF              -}
+
+input :: TensorRepr a => Coppe (Tensor a)
+input = operation mkInput []
 
 conv :: TensorRepr a => [Integer] -> [Integer] -> Integer -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
 conv ks ss f h t = operation (mkConv ks ss f h) [t]
