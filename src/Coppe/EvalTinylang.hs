@@ -4,6 +4,7 @@ import Coppe.TinyLang.AbsTinylang
 import Coppe.AST
 
 import Data.Maybe
+import Data.Either
 import qualified Data.Map as Map
 import Control.Monad.State
 
@@ -18,11 +19,15 @@ import Control.Monad.State
 -} 
 
 data EvalState = EvalState HyperMap Annotation (Map.Map String Value)
+data EvalError = EvalError String
+  deriving (Eq, Show)
 
 type Eval a = State EvalState a
 
-lookup :: String -> Eval (Maybe Value)
-lookup s =
+identToString (Ident s) = s
+
+lookupBinding :: String -> Eval (Maybe Value)
+lookupBinding s =
   do
     (EvalState h a e) <- get
     let r = case Map.lookup s h of
@@ -36,12 +41,21 @@ lookup s =
 
 addBinding :: String -> Value -> Eval ()
 addBinding s v =
-  do
-    (EvalState h a e) <- get
-    let e' = Map.insert s v e
-    put (EvalState h a e')
+  do (EvalState h a e) <- get
+     let e' = Map.insert s v e
+     put (EvalState h a e')
 
 -- Top level lambda is applied to the argument value
 -- If that does not result in a value there program is "incorrect" 
-evalTiny :: HyperMap -> Annotation -> Exp -> Value -> Eval Value
-evalTiny = undefined 
+evalTiny :: Exp -> Value -> Eval (Either EvalError Value)
+evalTiny (EInt i) _ = return $ Right $ toValue i
+evalTiny (EFloat d) _ = return $ Right $ toValue d
+evalTinu (EVar i) _ =
+  do res <- lookupBinding (identToString i)
+     case res of
+       Just v -> return $ Right v
+       Nothing -> return $
+                  Left $
+                  EvalError $ "Ident " ++ identToString i ++ "is not present in environment, annotations or hyperparameters."
+     
+ 
