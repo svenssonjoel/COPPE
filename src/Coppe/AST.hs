@@ -128,6 +128,7 @@ data Value =
   | BoolVal  Bool
   | StringVal String
   | ListVal [ Value ]
+  | CloVal Exp [Arg] HyperMap Annotation (Map.Map String Value)
   deriving (Eq, Ord, Show)
   
 

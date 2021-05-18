@@ -46,7 +46,11 @@ addBinding s v =
      put (EvalState h a e')
 
 -- Top level lambda is applied to the argument value
--- If that does not result in a value there program is "incorrect" 
+-- If that does not result in a value there program is "incorrect"
+
+evalApply :: Exp -> Value -> Eval (Either EvalError Value)
+evalApply = undefined 
+
 evalTiny :: Exp -> Value -> Eval (Either EvalError Value)
 evalTiny (EInt i) _ = return $ Right $ toValue i
 evalTiny (EFloat d) _ = return $ Right $ toValue d
@@ -71,7 +75,12 @@ evalApp :: Exp -> Value -> Eval (Either EvalError Value)
 evalApp (EVar (Ident "length")) (ListVal l) = return $ Right $ toValue (length l)
 evalApp (EVar (Ident "length")) _  = return $ Left $ EvalError "Argument to length is not a list."
 evalApp (EVar (Ident "tail"))   (ListVal l) = return $ Right $ ListVal (tail l)
-evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to rail is not a list."
+evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to tail is not a list."
+evalApp (EVar (Ident "take"))   (ListVal [IntVal n, ListVal l]) =
+  return $ Right $ ListVal (take (fromInteger n) l)
+evalApp (EVar (Ident "take")) _ = return $ Left $ EvalError "Argument to take incorrect."
+evalApp (EVar (Ident "zipWith3")) (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) = undefined 
+                              
 
 
 addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
