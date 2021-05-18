@@ -51,22 +51,22 @@ addBinding s v =
 evalApply :: Exp -> Value -> Eval (Either EvalError Value)
 evalApply = undefined 
 
-evalTiny :: Exp -> Value -> Eval (Either EvalError Value)
-evalTiny (EInt i) _ = return $ Right $ toValue i
-evalTiny (EFloat d) _ = return $ Right $ toValue d
-evalTiny (EVar i) _ =
+evalTiny :: Exp -> Eval (Either EvalError Value)
+evalTiny (EInt i)    = return $ Right $ toValue i
+evalTiny (EFloat d)  = return $ Right $ toValue d
+evalTiny (EVar i)    =
   do res <- lookupBinding (identToString i)
      case res of
        Just v -> return $ Right v
        Nothing -> return $
                   Left $
                   EvalError $ "Ident " ++ identToString i ++ "is not present in environment, annotations or hyperparameters."
-evalTiny (EAdd e1 op e2) _ = evalAdd op e1 e2
-evalTiny (EMul e1 op e2) _ = evalMul op e1 e2
-evalTiny (ERel e1 op e2) _ = evalRel op e1 e2
-evalTiny (ELam es e) args = evalLam es e args
-evalTiny (EApp e1 e2) _    =
-  do v <- evalTiny e2 noArgs
+evalTiny (EAdd e1 op e2) = evalAdd op e1 e2
+evalTiny (EMul e1 op e2) = evalMul op e1 e2
+evalTiny (ERel e1 op e2) = evalRel op e1 e2
+evalTiny (ELam as e)     = evalLam as e
+evalTiny (EApp e1 e2)    =
+  do v <- evalTiny e2
      case v of
        Left err -> return $ Left err
        Right v ->  evalApp e1 v
@@ -93,21 +93,19 @@ addAllBindings (x:xs) (ListVal (v:vs)) =
                         
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
 
- 
-evalLam :: [Arg] -> Exp -> Value -> Eval (Either EvalError Value)
-evalLam es e v = do 
-  ostate <- get
-  addAllBindings es v
-  r <- evalTiny e noArgs
-  put ostate
-  return r
+
+-- Create and return a closure Value
+evalLam :: [Arg] -> Exp -> Eval (Either EvalError Value)
+evalLam as e = do 
+  EvalState h a env <- get
+  return $ Right $ CloVal e as h a env
   
 noArgs = ListVal []
 
 evalAdd :: AddOp -> Exp -> Exp -> Eval (Either EvalError Value)
 evalAdd aop e1 e2 =
-  do v1 <- evalTiny e1 noArgs
-     v2 <- evalTiny e2 noArgs
+  do v1 <- evalTiny e1
+     v2 <- evalTiny e2
      let op :: Num a => a -> a -> a -- Make Haskell happy.. So needy!
          op = case aop of
                 Plus -> (+)
@@ -121,8 +119,8 @@ evalAdd aop e1 e2 =
 
 evalMul :: MulOp -> Exp -> Exp -> Eval (Either EvalError Value)
 evalMul mop e1 e2 =
-  do v1 <- evalTiny e1 noArgs
-     v2 <- evalTiny e2 noArgs
+  do v1 <- evalTiny e1
+     v2 <- evalTiny e2
      let r = case mop of
                Times -> case (v1,v2) of
                           (Right (IntVal i1), Right (IntVal i2)) -> Right $ IntVal (i1 * i2)
@@ -138,8 +136,8 @@ evalMul mop e1 e2 =
 
 evalRel :: RelOp -> Exp -> Exp -> Eval (Either EvalError Value)
 evalRel rop e1 e2 =
-  do v1 <- evalTiny e1 noArgs
-     v2 <- evalTiny e2 noArgs
+  do v1 <- evalTiny e1
+     v2 <- evalTiny e2
      let op :: (Eq a, Ord a) => a -> a -> Bool
          op = case rop of
                 LTC -> (<)
