@@ -49,7 +49,17 @@ addBinding s v =
 -- If that does not result in a value there program is "incorrect"
 
 evalApply :: Exp -> Value -> Eval (Either EvalError Value)
-evalApply = undefined 
+evalApply e v =
+  do f <- evalTiny e 
+     case f of
+       Left err -> return $ Left err
+       Right (CloVal f args h a env) ->
+         do put (EvalState h a env) 
+            addAllBindings args v
+            evalTiny f
+       Right _ -> return $ Left $ EvalError "evalApply: Not a function"
+  
+                
 
 evalTiny :: Exp -> Eval (Either EvalError Value)
 evalTiny (EInt i)    = return $ Right $ toValue i
@@ -79,17 +89,28 @@ evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to tail 
 evalApp (EVar (Ident "take"))   (ListVal [IntVal n, ListVal l]) =
   return $ Right $ ListVal (take (fromInteger n) l)
 evalApp (EVar (Ident "take")) _ = return $ Left $ EvalError "Argument to take incorrect."
-evalApp (EVar (Ident "zipWith3")) (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) = undefined 
+evalApp (EVar (Ident "zipWith3")) (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) =
+  local $
+  do
+    put (EvalState h a e) 
+    addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
+    evalTiny f  
+  
                               
 
-
+local :: Eval (Either EvalError a) -> Eval (Either EvalError a)
+local e =
+  do old <- get
+     a <- e
+     put old
+     return a
+     
 addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
 addAllBindings [] (ListVal []) = return $ Right ()
 addAllBindings (x:xs) (ListVal (v:vs)) =
   case x of
     (Arg i) -> do addBinding (identToString i) v
                   return $ Right ()
-    _ -> return $ Left $ EvalError "Left hand side is not an identifier in binding"                       
                         
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
 
