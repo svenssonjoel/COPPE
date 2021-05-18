@@ -112,7 +112,8 @@ convTransformSrc = unlines $
    "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
    "                dims ",
    "                kernel_size ",
-   "                strides "]
+   "                strides in",
+   "  if ok then (extend newDims filters) else error" ]
 
               
 

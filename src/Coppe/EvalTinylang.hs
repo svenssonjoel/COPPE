@@ -46,8 +46,6 @@ addBinding s v =
      put (EvalState h a e')
 
 -- Top level lambda is applied to the argument value
--- If that does not result in a value there program is "incorrect"
-
 evalApply :: Exp -> Value -> Eval (Either EvalError Value)
 evalApply e v =
   do f <- evalTiny e 
@@ -58,8 +56,6 @@ evalApply e v =
             addAllBindings args v
             evalTiny f
        Right _ -> return $ Left $ EvalError "evalApply: Not a function"
-  
-                
 
 evalTiny :: Exp -> Eval (Either EvalError Value)
 evalTiny (EInt i)    = return $ Right $ toValue i
@@ -89,14 +85,14 @@ evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to tail 
 evalApp (EVar (Ident "take"))   (ListVal [IntVal n, ListVal l]) =
   return $ Right $ ListVal (take (fromInteger n) l)
 evalApp (EVar (Ident "take")) _ = return $ Left $ EvalError "Argument to take incorrect."
+evalApp (EVar (Ident "extend")) (ListVal [ListVal l1, a2]) = return $ Right $ ListVal (l1 ++ [a2])
 evalApp (EVar (Ident "zipWith3")) (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) =
   local $
   do
     put (EvalState h a e) 
     addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
-    evalTiny f  
-  
-                              
+    evalTiny f
+evalApp (EVar (Ident "zipWith3")) _ = return $ Left $ EvalError "Argument to zipWith3 incorrect."
 
 local :: Eval (Either EvalError a) -> Eval (Either EvalError a)
 local e =
@@ -104,7 +100,7 @@ local e =
      a <- e
      put old
      return a
-     
+
 addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
 addAllBindings [] (ListVal []) = return $ Right ()
 addAllBindings (x:xs) (ListVal (v:vs)) =
@@ -113,7 +109,6 @@ addAllBindings (x:xs) (ListVal (v:vs)) =
                   return $ Right ()
                         
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
-
 
 -- Create and return a closure Value
 evalLam :: [Arg] -> Exp -> Eval (Either EvalError Value)
