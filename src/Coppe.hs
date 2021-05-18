@@ -1,4 +1,8 @@
--- Experimentation
+{- Coppe.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
 module Coppe (
   module Coppe.AST
   , module Coppe.Monad

@@ -1,10 +1,15 @@
+{- Prelude.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
 
 
-{- The refrigerator of ingredients -} 
+{- The refrigerator of ingredients -}
 
 
 module Coppe.Prelude (
-                  mkConv
+                  input
+                , mkConv
                 , mkRelu
                 , mkBatchNorm
                 , mkOptimizer
@@ -32,7 +37,7 @@ import qualified Data.Map as Map
 
 glorotUniform = NamedFun "glorot_uniform"
 
-zeroes = NamedFun "Zeroes" 
+zeroes = NamedFun "Zeroes"
 
 {------------------------------------------------------------}
 {- Planning
@@ -40,16 +45,16 @@ zeroes = NamedFun "Zeroes"
 -- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 -- conv3D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 
--- Type instance for a ? 
+-- Type instance for a ?
 -- add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
 -- add a b =
---   if ok 
+--   if ok
 --   then operation [a,b] Add emptyHyperparameters
 --   else error $ "Mismatching tensor dimensions in Addition layer: " ++ show (tensorDim a) ++ "=/=" ++ show (tensorDim b) 
 --   where
 --     ok = length (tensorDim a) == length (tensorDim b) &&
 --          and (zipWith (==) (tensorDim a) (tensorDim b))
---   --- Check dimensions match. 
+--   --- Check dimensions match.
 
 -- rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
 -- rep 0 f t = return t
@@ -64,69 +69,83 @@ zeroes = NamedFun "Zeroes"
 
 -}
 
+{----------------}
+{- Input layers -} 
+
+mkInput :: Ingredient
+mkInput = Ingredient "input_layer" (Map.empty) (Map.empty) False "nothing" "nothing" 
 
 {----------------}
 {- Convolutions -}
 
+-- Split out the dimensionality transform into a map
+-- Map String (Dimension -> Dimension)
 
-mkConv :: Hyperparameters -> Ingredient
-mkConv hyps =
-  Ingredient "conv" (Map.empty)  hm transform
+mkConv :: [Integer] -> [Integer] -> Integer -> Hyperparameters -> Ingredient
+mkConv kernel_size strides filters hyps =
+  let hyps' = Map.union (Map.fromList  [("kernel_size", valParam kernel_size),
+                                        ("filters",     valParam filters),
+                                        ("strides",     valParam strides)]) hm
+  in Ingredient "conv" (Map.empty) hyps' True "nothing" "nothing" {- (convTransform kernel_size strides filters) -} 
   where
     hm = (Map.fromList hyps)
-    transform tensorDim = if nok
-                          then error $ "(conv) Missing hyperparameters: kernel-size, filters and strides must be specified."
-                          else if ok
-                               then newDims ++ [f]
-                               else error "(conv) Incompatible hyperparameters and tensor dimensionality."
-      where
-        ok = length ks == ndims - 1 && length s == ndims - 1
-        ndims = length tensorDim
-        dims = take (ndims-1) tensorDim
-        newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
-                  dims
-                  ks
-                  s
-                                    
-    kernel_size = Map.lookup "kernel-size" hm
-    filters     = Map.lookup "filters" hm
-    strides     = Map.lookup "strides" hm
-    nok = kernel_size == Nothing || filters == Nothing || strides == Nothing
-    (Just lv) = kernel_size -- kernel size must be a list
-    (Just fv)  = filters     -- Filters must be an IntVal
-    (Just sv)  = strides     -- Strides must be an IntVal
-    ks =  dimValToList lv
-    s  =  strideValToList sv
-    f  =  filterValToInt fv
-    
-    
+
+convTransform :: [Integer] -> [Integer] -> Integer -> Dimensions -> Dimensions
+convTransform kernel_size strides filters tensorDim =
+  if ok
+  then newDims ++ [filters]
+  else error "(conv) Incompatible hyperparameters and tensor dimensionality."
+  where
+    ndims = length tensorDim
+    ok = length kernel_size == ndims - 1 && length strides  == ndims - 1
+    dims = take (ndims-1) tensorDim
+    newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
+              dims
+              kernel_size
+              strides
+
+convTransformSrc = unlines $ 
+  ["fun dim -> ",
+   "  let ndims = length dim in",
+   "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
+   "  let dims = take (ndims - 1) dim in",
+   "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
+   "                dims ",
+   "                kernel_size ",
+   "                strides "]
+
+              
+
 {----------------}
 {- RELU         -}
 
 
-mkRelu :: Hyperparameters -> Ingredient 
-mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) id
+mkRelu :: Hyperparameters -> Ingredient
+mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
 
 {-----------------------}
 {- Batch normalization -}
 
 
 mkBatchNorm :: Hyperparameters -> Ingredient
-mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) id
+mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
 
 
 {----------------}
 {- Optimizer    -}
 
 mkOptimizer :: Hyperparameters -> Ingredient
-mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) id 
+mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
 
 {----------------------------------------}
 {-             MONAD STUFF              -}
-       
-conv :: TensorRepr a =>  Hyperparameters -> Tensor a -> Coppe (Tensor a)
-conv h t = operation (mkConv h) [t]
-         
+
+input :: TensorRepr a => Dimensions -> Coppe (Tensor a)
+input dims = producer mkInput dims
+
+conv :: TensorRepr a => [Integer] -> [Integer] -> Integer -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
+conv ks ss f h t = operation (mkConv ks ss f h) [t]
+
 batchNormalize :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 batchNormalize h t = operation (mkBatchNorm h) [t]
 
@@ -136,8 +155,8 @@ relu t = operation (mkRelu emptyHyperparameters) [t]
 {----------------------------------------}
 {-             Arrow STUFF              -}
 
-convA :: TensorRepr a => Hyperparameters -> CoppeArrow (Tensor a) (Tensor a)
-convA hyps = coppeArrow (conv hyps)
+convA :: TensorRepr a => [Integer] -> [Integer] -> Integer -> Hyperparameters -> CoppeArrow (Tensor a) (Tensor a)
+convA ks ss f hyps = coppeArrow (conv ks ss f hyps)
 
 batchNormalizeA :: TensorRepr a => Hyperparameters -> CoppeArrow (Tensor a) (Tensor a)
 batchNormalizeA hyps = coppeArrow (batchNormalize hyps)

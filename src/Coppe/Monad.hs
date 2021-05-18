@@ -1,12 +1,16 @@
+{- Monad.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module Coppe.Monad (
   Coppe(..),
   getId,
   empty,
-  inputFloat,
-  inputDouble,
   operation,
+  producer,
   build
   ) where 
 
@@ -28,18 +32,19 @@ getId =
 empty :: Coppe ()
 empty = tell Empty
 
-inputFloat :: [Integer] -> Coppe (Tensor Float) 
-inputFloat d =
-  do tell Input
-     i <- getId
-     return $ mkTensor ("tensor" ++ show i) d
 
-inputDouble :: [Integer] -> Coppe (Tensor Double) 
-inputDouble d =
-  do tell Input
-     i <- getId
-     return $ mkTensor ("tensor" ++ show i) d
-    
+producer :: ( TensorRepr a)
+          => Ingredient
+          -> Dimensions
+          -> Coppe (Tensor a)
+producer op dim =
+  do i <- getId
+     let nom = "tensor" ++ show i
+     tell $ Operation (hyperSet op [("name", valParam nom)])  
+     let result =  mkTensor nom dim
+     return $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
+
+        
 operation :: ( TensorRepr a)
           => Ingredient
           -> [Tensor a]
@@ -52,9 +57,9 @@ operation op ts =
   do i <- getId
      let nom = "tensor" ++ show i
      -- tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
-     tell $ Operation (hyperSet op [("input_layer", toValue ids), ("name", toValue nom)])  
+     tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])  
      let result =  mkTensor nom (tensorDim tensor)
-     return $ tensorReshape (transform op) result
+     return $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
 
 build :: Coppe a -> Recipe
 build (Coppe m) = execWriter $ evalStateT m 0

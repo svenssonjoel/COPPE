@@ -1,3 +1,9 @@
+{- AST.hs
+
+   Copyright 2021 Bo Joel Svensson & Yinan Yu 
+-} 
+
+
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -8,12 +14,15 @@ module Coppe.AST (
   -- Layeroperations
   , Ingredient(..)
   , hyperSet
-  , hyperGet           -- Move to an Ingredient.hs file 
+  , hyperGet           -- Move to an Ingredient.hs file
+  , Value(..)
   , ToValue(..)
+  , valParam 
   , Name
   , Recipe(..)
   , Function(..)
   , Parameter(..)
+  , Arguments(..)
   
     -- hyperparameters
   , Strides(..)
@@ -50,6 +59,7 @@ module Coppe.AST (
 
 import Data.Maybe
 import qualified Data.Map as Map
+import Coppe.TinyLang.AbsTinylang
 
 -- ------------------------------------------------------------ --
 -- Tensors
@@ -112,9 +122,13 @@ type Dimensions = [Integer]
 
 type Identifier = String
 
-data Value = IntVal Integer | FloatVal Double
+data Value =
+  IntVal Integer
+  | FloatVal Double
+  | BoolVal  Bool
   | StringVal String
   | ListVal [ Value ]
+  | CloVal Exp [Arg] HyperMap Annotation (Map.Map String Value)
   deriving (Eq, Ord, Show)
   
 
@@ -149,6 +163,9 @@ instance ToValue Int where
 instance ToValue Float where
   toValue f = FloatVal (realToFrac f)
 
+instance ToValue Bool where
+  toValue b = BoolVal b
+
 instance ToValue Double where
   toValue d = FloatVal d
 
@@ -161,10 +178,10 @@ instance  {-# OVERLAPS #-} ToValue [Char] where
 type Param = Value
 type Annot = Value
 
-type HyperMap    = Map.Map String Param -- TODO: Parameter. 
+type HyperMap    = Map.Map String Parameter -- TODO: Parameter. 
 type Annotation  = Map.Map String Annot 
 
-type Hyperparameters = [(String, Param)]
+type Hyperparameters = [(String, Parameter)]
 
 -- ------------------------------------------------------------ --
 -- Functions 
@@ -172,13 +189,19 @@ type Hyperparameters = [(String, Param)]
 -- Split into Function and application?
 
 data Function =
-  NamedFun String 
+  NamedFun String
+  deriving (Eq, Ord, Show)
 
 type Arguments = [(Maybe String, Parameter)]
   
-data Parameter where
-  FunAppParam :: Function -> Arguments -> Parameter
-  ValParam    :: Param -> Parameter
+  
+data Parameter = 
+  FunAppParam Function Arguments 
+  | ValParam Param 
+  deriving (Eq, Ord, Show)
+
+valParam :: ToValue a => a -> Parameter
+valParam v = ValParam (toValue v)
 
 funApp :: Function -> [(Maybe String, Parameter)] -> Parameter
 funApp f args = FunAppParam f args
@@ -187,22 +210,39 @@ emptyHyperparameters :: Hyperparameters
 emptyHyperparameters = []
 
 -- ------------------------------------------------------------ --
+-- Expressions
+
+{-
+   fun ks ss fs dim -> 
+      let ndims  = length dim in 
+      let ok     = length ks = ndims - 1 && length ss = ndims - 1 in 
+      let dims   = take (ndims - 1) dim in 
+      let newdim = zipWith3 (fun d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
+                   dims ks ss
+-} 
+
+         
+
+
+-- ------------------------------------------------------------ --
 -- Ingredients 
 
 data Ingredient =
-  Ingredient { name :: String
+  Ingredient { name       :: String
              , annotation :: Annotation
-             , hyper :: HyperMap
-             , transform :: Dimensions -> Dimensions
+             , hyper      :: HyperMap
+             , trainable  :: Bool
+             , numWeights :: String     -- These should be embedded functions
+             , transform  :: String     -- Right now they point out a function in a table.
              }
 
 
 hyperSet :: Ingredient -> Hyperparameters -> Ingredient
-hyperSet (Ingredient n a h t) ps =
-  Ingredient n a (Map.union (Map.fromList ps) h) t
+hyperSet (Ingredient n a h trnble w t) ps =
+  Ingredient n a (Map.union (Map.fromList ps) h) trnble w t
 
 hyperGet :: Ingredient -> HyperMap
-hyperGet (Ingredient _ _ h _) = h
+hyperGet (Ingredient _ _ h _ _ _) = h
 
 -- ------------------------------------------------------------ --
 -- Helpers
@@ -237,29 +277,36 @@ type Name = String
 
 data Module = Module  [(Name, Recipe)] 
   
-data Recipe = Input
-            | Empty
+data Recipe =  Empty
             | NamedRecipe Name
             | Operation Ingredient
-            | Seq Recipe Recipe     -- Will get more obvious if this is a list of recipies. 
+            | Seq [Recipe]    -- Will get more obvious if this is a list of recipies. 
             | Annotated Annotation Recipe
+--   deriving (Eq, Ord, Show)   -- We may want this
 
 instance Show Recipe where
-  show Input = "Input"
   show Empty = "Empty"
   show (NamedRecipe n) = n
   show (Operation i) = name i
-  show (Seq r1 r2) = show r1 ++ " ;\n " ++ show r2
+  show (Seq []) = ""
+  show (Seq (r:rs)) = show r ++ ";\n" ++ show (Seq rs)
   show (Annotated a r) = "<<annot: " ++ show a ++  " " ++ show r ++ ">>"
 
+-- This way we loose nesting.
 instance Semigroup Recipe where
-  (<>) = Seq
+  (<>) Empty    Empty    = Empty
+  (<>) r1       Empty    = r1
+  (<>) Empty    r2       = r2
+  (<>) (Seq r1) (Seq r2) = Seq (r1 ++ r2)
+  (<>) (Seq r1) r2       = Seq (r1 ++ [r2])
+  (<>) r1       (Seq r2) = Seq (r1:r2)
+  (<>) r1       r2       = Seq [r1,r2]
+                            
+-- (<>) is infixr     
   
 instance Monoid Recipe where
   mempty = Empty
-  mappend Empty a = a
-  mappend a Empty = a
-  mappend a b     = Seq a b
+  mappend = (<>)
 
 
 -- ------------------------------------------------------------
@@ -271,19 +318,18 @@ instance Monoid Recipe where
 -- in practice. 
 
 traverseRecipe :: (Recipe -> Recipe) -> Recipe -> Recipe
-traverseRecipe f (Seq r1 r2) = Seq (traverseRecipe f r1) (traverseRecipe f r2)
+traverseRecipe f (Seq rs) = Seq (map (traverseRecipe f) rs)
 traverseRecipe f r = f r
 
 traverseAnnotate :: (Recipe -> Annotation) -> Recipe -> Recipe
-traverseAnnotate f (Seq r1 r2) = Seq (traverseAnnotate f r1) (traverseAnnotate f r2)
+traverseAnnotate f (Seq rs) = Seq (map (traverseAnnotate f) rs) -- Seq (traverseAnnotate f r1) (traverseAnnotate f r2)
 traverseAnnotate f r =
   let a = f r
   in Annotated a r
 
 foldRecipe :: ( a -> Recipe -> a) -> a -> Recipe -> a
-foldRecipe f a (Seq r1 r2) =
-  let a' = foldRecipe f a r1
-  in  foldRecipe f a' r2
+foldRecipe f a (Seq [])     = a
+foldRecipe f a (Seq (r:rs)) = f (foldRecipe f a (Seq rs)) r 
 foldRecipe f a (Annotated _ r) = foldRecipe f a r
 foldRecipe f a r = f a r
 

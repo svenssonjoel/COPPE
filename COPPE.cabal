@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0154d18522b614cc477347677557486e048378f70b94ad201992b88d72f678fa
+-- hash: c23902df923928fd664e44edb3e07c85096359f55512ebd9f959afa66184baa3
 
 name:           COPPE
 version:        0.1.0.0
@@ -32,11 +32,20 @@ library
       Coppe.Analysis
       Coppe.Arrow
       Coppe.AST
+      Coppe.EvalTinylang
+      Coppe.Files
       Coppe.KerasGen
       Coppe.Monad
       Coppe.Prelude
       Coppe.Pygen
+      Coppe.PyLSP
       Coppe.TFGen
+      Coppe.TinyLang.AbsTinylang
+      Coppe.TinyLang.ErrM
+      Coppe.TinyLang.LexTinylang
+      Coppe.TinyLang.ParTinylang
+      Coppe.TinyLang.PrintTinylang
+      Coppe.TinyLang.SkelTinylang
       Coppe.TorchGen
       Coppe.YParse
   other-modules:
@@ -45,11 +54,15 @@ library
       src
   build-depends:
       HsYAML >=0.2.1.0 && <0.2.2
+    , aeson >=1.5.6.0 && <1.5.7
+    , array >=0.5.4.0 && <0.5.5
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
+    , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , process >=1.6.9.0 && <=1.6.10
     , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
     , utf8-string >=1.0.2 && <=1.1
@@ -65,11 +78,15 @@ executable COPPE-exe
   build-depends:
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
+    , aeson >=1.5.6.0 && <1.5.7
+    , array >=0.5.4.0 && <0.5.5
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
+    , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , process >=1.6.9.0 && <=1.6.10
     , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
     , utf8-string >=1.0.2 && <=1.1
@@ -86,11 +103,15 @@ test-suite COPPE-test
   build-depends:
       COPPE
     , HsYAML >=0.2.1.0 && <0.2.2
+    , aeson >=1.5.6.0 && <1.5.7
+    , array >=0.5.4.0 && <0.5.5
     , base >=4.7 && <5
     , bytestring >=0.10.12.0 && <=0.10.13
     , containers >=0.6.2.1 && <=0.6.3
+    , directory >=1.3.6.0 && <=1.3.7
     , language-python >=0.5.8 && <0.6
     , mtl >=2.2.2 && <2.3
+    , process >=1.6.9.0 && <=1.6.10
     , text >=1.2.4.1 && <=1.2.5
     , transformers >=0.5.6.2 && <0.5.7
     , utf8-string >=1.0.2 && <=1.1
