@@ -85,16 +85,18 @@ instance Print Ident where
 
 instance Print Exp where
   prt i e = case e of
-    ELam exps exp -> prPrec i 0 (concatD [doc (showString "fun"), prt 0 exps, doc (showString "->"), prt 0 exp])
+    ELam args exp -> prPrec i 0 (concatD [doc (showString "fun"), prt 0 args, doc (showString "->"), prt 0 exp])
     ELet exp1 exp2 exp3 -> prPrec i 0 (concatD [doc (showString "let"), prt 0 exp1, doc (showString "="), prt 0 exp2, doc (showString "in"), prt 0 exp3])
     EOr exp1 exp2 -> prPrec i 1 (concatD [prt 2 exp1, doc (showString "||"), prt 1 exp2])
     EAnd exp1 exp2 -> prPrec i 2 (concatD [prt 3 exp1, doc (showString "&&"), prt 2 exp2])
+    ENot exp -> prPrec i 6 (concatD [doc (showString "!"), prt 7 exp])
     ERel exp1 relop exp2 -> prPrec i 3 (concatD [prt 3 exp1, prt 0 relop, prt 4 exp2])
     EAdd exp1 addop exp2 -> prPrec i 4 (concatD [prt 4 exp1, prt 0 addop, prt 5 exp2])
     EMul exp1 mulop exp2 -> prPrec i 5 (concatD [prt 5 exp1, prt 0 mulop, prt 6 exp2])
     EApp exp1 exp2 -> prPrec i 6 (concatD [prt 6 exp1, prt 7 exp2])
     EInt n -> prPrec i 7 (concatD [prt 0 n])
     EFloat d -> prPrec i 7 (concatD [prt 0 d])
+    EBool boolean -> prPrec i 7 (concatD [prt 0 boolean])
     EVar id -> prPrec i 7 (concatD [prt 0 id])
   prtList _ [] = (concatD [])
   prtList _ (x:xs) = (concatD [prt 0 x, prt 0 xs])
@@ -115,5 +117,15 @@ instance Print RelOp where
     GTC -> prPrec i 0 (concatD [doc (showString ">")])
     GEC -> prPrec i 0 (concatD [doc (showString ">=")])
     EQC -> prPrec i 0 (concatD [doc (showString "==")])
+
+instance Print Arg where
+  prt i e = case e of
+    Arg id -> prPrec i 0 (concatD [prt 0 id])
+  prtList _ [] = (concatD [])
+  prtList _ (x:xs) = (concatD [prt 0 x, prt 0 xs])
+instance Print Boolean where
+  prt i e = case e of
+    BTrue -> prPrec i 0 (concatD [doc (showString "True")])
+    BFalse -> prPrec i 0 (concatD [doc (showString "False")])
 
 

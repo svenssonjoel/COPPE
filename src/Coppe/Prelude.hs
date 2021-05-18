@@ -105,14 +105,14 @@ convTransform kernel_size strides filters tensorDim =
               strides
 
 convTransformSrc = unlines $ 
-  "fun dim -> ",
-  "  let ndims = length dim in",
-  "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
-  "  let dims = take (ndims - 1) dim in",
-  "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
-  "                dims ",
-  "                kernel_size ",
-  "                strides "
+  ["fun dim -> ",
+   "  let ndims = length dim in",
+   "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
+   "  let dims = take (ndims - 1) dim in",
+   "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
+   "                dims ",
+   "                kernel_size ",
+   "                strides "]
 
               
 

@@ -17,8 +17,9 @@ instance Monad Err where
   Ok a  >>= f = f a
   Bad s >>= _ = Bad s
 
+
 instance MonadFail Err where
-  fail = Bad
+    fail        = Bad
 
 instance Applicative Err where
   pure = Ok

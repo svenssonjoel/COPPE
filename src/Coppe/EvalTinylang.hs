@@ -24,6 +24,7 @@ data EvalError = EvalError String
 type Eval a = State EvalState a
 
 identToString (Ident s) = s
+argToString   (Arg (Ident s)) = s 
 
 lookupBinding :: String -> Eval (Maybe Value)
 lookupBinding s =
@@ -73,18 +74,18 @@ evalApp (EVar (Ident "tail"))   (ListVal l) = return $ Right $ ListVal (tail l)
 evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to rail is not a list."
 
 
-addAllBindings :: [Exp] -> Value -> Eval (Either EvalError ())
+addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
 addAllBindings [] (ListVal []) = return $ Right ()
 addAllBindings (x:xs) (ListVal (v:vs)) =
   case x of
-    (EVar (Ident s)) -> do addBinding s v
-                           return $ Right ()
+    (Arg i) -> do addBinding (identToString i) v
+                  return $ Right ()
     _ -> return $ Left $ EvalError "Left hand side is not an identifier in binding"                       
                         
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
 
  
-evalLam :: [Exp] -> Exp -> Value -> Eval (Either EvalError Value)
+evalLam :: [Arg] -> Exp -> Value -> Eval (Either EvalError Value)
 evalLam es e v = do 
   ostate <- get
   addAllBindings es v
