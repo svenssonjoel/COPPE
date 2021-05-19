@@ -1,12 +1,28 @@
 module Coppe.EvalTinylang where
 
 import Coppe.TinyLang.AbsTinylang
+import Coppe.TinyLang.LexTinylang
+import Coppe.TinyLang.ParTinylang
+import Coppe.TinyLang.PrintTinylang
+import Coppe.TinyLang.ErrM
+
 import Coppe.AST
 
 import Data.Maybe
 import Data.Either
 import qualified Data.Map as Map
 import Control.Monad.State
+
+
+data ParseError = ParseError String
+
+parseTiny :: String -> Either ParseError Exp
+parseTiny s =
+  let ts = myLexer s
+  in case pExp ts of
+       Bad s -> Left $ ParseError s
+       Ok  e -> Right e 
+
 
 {- Planning Tinylang
 

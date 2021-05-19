@@ -26,14 +26,44 @@ module Coppe.Prelude (
 import Coppe.AST
 import Coppe.Monad
 import Coppe.Arrow
+import Coppe.EvalTinylang
+import Coppe.TinyLang.AbsTinylang
 
 import Data.Maybe
 import qualified Data.Map as Map
 
 
 {------------------------------------------------------------}
-{- Functions -}
+{- TinyLang Functions -}
 
+convTransform :: Exp 
+convTransform = case parseTiny prg of
+                  Left (ParseError s) -> error s
+                  Right e -> e 
+  where prg =
+          unlines $ 
+          ["fun dim -> ",
+           "  let ndims = length dim in",
+           "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
+           "  let dims = take (ndims - 1) dim in",
+           "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
+           "                dims ",
+           "                kernel_size ",
+           "                strides in",
+           "  if ok then (extend newDims filters) else error" ]
+
+tinyId :: Exp
+tinyId = case parseTiny "fun a -> a" of
+           Left (ParseError s) -> error s
+           Right e -> e
+
+tinyConst :: Int -> Exp
+tinyConst n = case parseTiny ("fun a -> " ++ show n) of
+                Left (ParseError s) -> error s
+                Right e -> e
+
+{------------------------------------------------------------}
+{- Functions -}
 
 glorotUniform = NamedFun "glorot_uniform"
 
@@ -73,7 +103,7 @@ zeroes = NamedFun "Zeroes"
 {- Input layers -} 
 
 mkInput :: Ingredient
-mkInput = Ingredient "input_layer" (Map.empty) (Map.empty) False "nothing" "nothing" 
+mkInput = Ingredient "input_layer" (Map.empty) (Map.empty) False tinyId  
 
 {----------------}
 {- Convolutions -}
@@ -86,63 +116,52 @@ mkConv kernel_size strides filters hyps =
   let hyps' = Map.union (Map.fromList  [("kernel_size", valParam kernel_size),
                                         ("filters",     valParam filters),
                                         ("strides",     valParam strides)]) hm
-  in Ingredient "conv" (Map.empty) hyps' True "nothing" "nothing" {- (convTransform kernel_size strides filters) -} 
+  in Ingredient "conv" (Map.empty) hyps' True convTransform 
   where
     hm = (Map.fromList hyps)
 
-convTransform :: [Integer] -> [Integer] -> Integer -> Dimensions -> Dimensions
-convTransform kernel_size strides filters tensorDim =
-  if ok
-  then newDims ++ [filters]
-  else error "(conv) Incompatible hyperparameters and tensor dimensionality."
-  where
-    ndims = length tensorDim
-    ok = length kernel_size == ndims - 1 && length strides  == ndims - 1
-    dims = take (ndims-1) tensorDim
-    newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
-              dims
-              kernel_size
-              strides
+-- convTransform :: [Integer] -> [Integer] -> Integer -> Dimensions -> Dimensions
+-- convTransform kernel_size strides filters tensorDim =
+--   if ok
+--   then newDims ++ [filters]
+--   else error "(conv) Incompatible hyperparameters and tensor dimensionality."
+--   where
+--     ndims = length tensorDim
+--     ok = length kernel_size == ndims - 1 && length strides  == ndims - 1
+--     dims = take (ndims-1) tensorDim
+--     newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
+--               dims
+--               kernel_size
+--               strides
 
-convTransformSrc = unlines $ 
-  ["fun dim -> ",
-   "  let ndims = length dim in",
-   "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
-   "  let dims = take (ndims - 1) dim in",
-   "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
-   "                dims ",
-   "                kernel_size ",
-   "                strides in",
-   "  if ok then (extend newDims filters) else error" ]
 
-              
-
+             
 {----------------}
 {- RELU         -}
 
 
 mkRelu :: Hyperparameters -> Ingredient
-mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
+mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) True tinyId  
 
 {-----------------------}
 {- Batch normalization -}
 
 
 mkBatchNorm :: Hyperparameters -> Ingredient
-mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
+mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) True tinyId  
 
 
 {----------------}
 {- Optimizer    -}
 
 mkOptimizer :: Hyperparameters -> Ingredient
-mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) True "nothing" "nothing"
+mkOptimizer hyps = Ingredient "optimizer" (Map.empty) (Map.fromList hyps) True tinyId
 
 {----------------------------------------}
 {-             MONAD STUFF              -}
 
-input :: TensorRepr a => Dimensions -> Coppe (Tensor a)
-input dims = producer mkInput dims
+input :: TensorRepr a => Tensor a -> Coppe (Tensor a)
+input t = producer mkInput (tensorDim t)
 
 conv :: TensorRepr a => [Integer] -> [Integer] -> Integer -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
 conv ks ss f h t = operation (mkConv ks ss f h) [t]

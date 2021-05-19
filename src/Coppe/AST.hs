@@ -232,17 +232,16 @@ data Ingredient =
              , annotation :: Annotation
              , hyper      :: HyperMap
              , trainable  :: Bool
-             , numWeights :: String     -- These should be embedded functions
-             , transform  :: String     -- Right now they point out a function in a table.
+         --    , numWeights :: Exp -- :: Dimensions -> Int    
+             , transform  :: Exp -- :: Dimensions -> Dimensions   
              }
 
-
 hyperSet :: Ingredient -> Hyperparameters -> Ingredient
-hyperSet (Ingredient n a h trnble w t) ps =
-  Ingredient n a (Map.union (Map.fromList ps) h) trnble w t
+hyperSet (Ingredient n a h trnble t) ps =
+  Ingredient n a (Map.union (Map.fromList ps) h) trnble t
 
 hyperGet :: Ingredient -> HyperMap
-hyperGet (Ingredient _ _ h _ _ _) = h
+hyperGet (Ingredient _ _ h _ _) = h
 
 -- ------------------------------------------------------------ --
 -- Helpers

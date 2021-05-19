@@ -20,6 +20,9 @@ import qualified Data.Map        as Map
 import Prelude as P
 
 import Coppe.AST
+import qualified Coppe.TinyLang.AbsTinylang as Tiny
+import qualified Coppe.TinyLang.PrintTinylang as Tiny
+import Coppe.EvalTinylang
 
 seqTag = Event.mkTag "tag:yaml.org,2002:seq"
 
@@ -72,10 +75,27 @@ decodeIngredient m =
     annot <- case decodeAnnot m of
                Nothing -> Just Map.empty
                Just a  -> Just a
-    hyps  <- decodeParams m
-    -- TODO: ADD the trainable information to the yaml output also 
-    return $ Operation $ Ingredient (unpack name) annot hyps True "nothing" "nothing" -- TODO: FIX
+    hyps    <- decodeParams m
+    trnable <- decodeTrainable m
+    trans   <- decodeTransform m
 
+    case parseTiny (unpack trans) of
+      Left (ParseError s) -> Nothing
+      Right e -> return $ Operation $ Ingredient (unpack name) annot hyps trnable e
+
+decodeTrainable :: Map.Map (Node Pos) (Node Pos) -> Maybe Bool
+decodeTrainable m =
+  case parseEither ((m .: "trainable") :: Parser Bool) of
+    Left (pos,str) -> Nothing
+    Right b -> Just b
+
+decodeTransform :: Map.Map (Node Pos) (Node Pos) -> Maybe Text
+decodeTransform m =
+  case parseEither ((m .: "transform") :: Parser Text) of
+    Left (pos, str) -> Nothing
+    Right t -> Just t
+
+    
 decodeName :: Map.Map (Node Pos) (Node Pos) -> Maybe Text
 decodeName m =
   case parseEither ((m .: "type") :: Parser Text) of
@@ -252,7 +272,9 @@ encodeIngredient :: Ingredient -> Maybe (Node ())
 encodeIngredient i =
   Just $ mapping ([ "type" .= pack (name i) ]  ++
                   (if not (P.null pairs) then [ "annotation" .= m ] else []) ++ 
-                  [ "parameters" .= mapping (encodeHyper (hyper i))] )
+                  [ "parameters" .= mapping (encodeHyper (hyper i)),
+                    "trainable"  .= (trainable i),
+                    "transform"  .= pack (Tiny.printTree (transform i))] )
   where m = mapping pairs
         pairs = (encodeAnnotation (annotation i))
 
