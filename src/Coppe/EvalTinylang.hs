@@ -76,6 +76,8 @@ evalApply e v =
 evalTiny :: Exp -> Eval (Either EvalError Value)
 evalTiny (EInt i)    = return $ Right $ toValue i
 evalTiny (EFloat d)  = return $ Right $ toValue d
+evalTiny (EBool BTrue)   = return $ Right $ toValue True
+evalTiny (EBool BFalse)  = return $ Right $ toValue False
 evalTiny (EVar i)    =
   do res <- lookupBinding (identToString i)
      case res of
@@ -87,6 +89,14 @@ evalTiny (EAdd e1 op e2) = evalAdd op e1 e2
 evalTiny (EMul e1 op e2) = evalMul op e1 e2
 evalTiny (ERel e1 op e2) = evalRel op e1 e2
 evalTiny (ELam as e)     = evalLam as e
+evalTiny EError          = return $ Left $ EvalError "Program finishes in error"
+evalTiny (EIf  e1 e2 e3) =
+  do
+    cond <- evalTiny e1
+    case cond of
+      (Right (BoolVal True))  -> evalTiny e2
+      (Right (BoolVal False)) -> evalTiny e3
+      (Left (EvalError s))    -> return $ Left $ EvalError s
 evalTiny (EApp e1 e2)    =
   do v <- evalTiny e2
      case v of
