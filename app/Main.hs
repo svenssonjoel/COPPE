@@ -61,7 +61,7 @@ main =
 
     putStrLn "***************************************"
 
-    let input = mkTensor "input_data" [32,32,3] ::Tensor Float -- Float [32,32,3]
+    let input = mkTensor "input_data" [32,32,3] ::Tensor Float 
     let c =  runCoppeArrow testArrow input
     let r' = build c
     let (Just e') =  encodeRecipe r'
