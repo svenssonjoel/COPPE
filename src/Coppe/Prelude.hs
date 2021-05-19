@@ -47,7 +47,7 @@ convTransform = case parseTiny prg of
            "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
            "  let dims = take (ndims - 1) dim in",
            "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
-           "                dims ",
+           "                dim ",
            "                kernel_size ",
            "                strides in",
            "  if ok then (extend newDims filters) else error" ]

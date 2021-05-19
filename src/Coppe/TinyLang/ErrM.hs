@@ -17,15 +17,10 @@ instance Monad Err where
   Ok a  >>= f = f a
   Bad s >>= _ = Bad s
 
-
-instance MonadFail Err where
-    fail        = Bad
-
 instance Applicative Err where
   pure = Ok
   (Bad s) <*> _ = Bad s
   (Ok f) <*> o  = liftM f o
-
 
 instance Functor Err where
   fmap = liftM

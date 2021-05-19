@@ -16,6 +16,7 @@ transExp :: Exp -> Result
 transExp x = case x of
   ELam args exp -> failure x
   ELet exp1 exp2 exp3 -> failure x
+  EIf exp1 exp2 exp3 -> failure x
   EOr exp1 exp2 -> failure x
   EAnd exp1 exp2 -> failure x
   ENot exp -> failure x
@@ -26,6 +27,7 @@ transExp x = case x of
   EInt integer -> failure x
   EFloat double -> failure x
   EBool boolean -> failure x
+  EError -> failure x
   EVar ident -> failure x
 transAddOp :: AddOp -> Result
 transAddOp x = case x of
