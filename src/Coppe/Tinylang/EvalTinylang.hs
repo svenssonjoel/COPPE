@@ -1,10 +1,10 @@
-module Coppe.EvalTinylang where
+module Coppe.Tinylang.EvalTinylang where
 
-import Coppe.TinyLang.AbsTinylang
-import Coppe.TinyLang.LexTinylang
-import Coppe.TinyLang.ParTinylang
-import Coppe.TinyLang.PrintTinylang
-import Coppe.TinyLang.ErrM
+import Coppe.Tinylang.AbsTinylang
+import Coppe.Tinylang.LexTinylang
+import Coppe.Tinylang.ParTinylang
+import Coppe.Tinylang.PrintTinylang
+import Coppe.Tinylang.ErrM
 
 import Coppe.AST
 
@@ -60,6 +60,11 @@ addBinding s v =
   do (EvalState h a e) <- get
      let e' = Map.insert s v e
      put (EvalState h a e')
+
+runEval :: HyperMap -> Annotation -> Map.Map String Value -> Eval (Either EvalError Value) -> (Either EvalError Value)
+runEval h a e eval =
+  let estate = EvalState h a e
+  in evalState eval estate 
 
 -- Top level lambda is applied to the argument value
 evalApply :: Exp -> Value -> Eval (Either EvalError Value)

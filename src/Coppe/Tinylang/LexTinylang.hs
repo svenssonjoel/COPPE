@@ -4,7 +4,7 @@
 
 {-# OPTIONS -fno-warn-incomplete-patterns #-}
 {-# OPTIONS_GHC -w #-}
-module Coppe.TinyLang.LexTinylang where
+module Coppe.Tinylang.LexTinylang where
 
 
 

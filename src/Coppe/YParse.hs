@@ -20,9 +20,9 @@ import qualified Data.Map        as Map
 import Prelude as P
 
 import Coppe.AST
-import qualified Coppe.TinyLang.AbsTinylang as Tiny
-import qualified Coppe.TinyLang.PrintTinylang as Tiny
-import Coppe.EvalTinylang
+import qualified Coppe.Tinylang.AbsTinylang as Tiny
+import qualified Coppe.Tinylang.PrintTinylang as Tiny
+import Coppe.Tinylang.EvalTinylang
 
 seqTag = Event.mkTag "tag:yaml.org,2002:seq"
 

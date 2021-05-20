@@ -26,8 +26,7 @@ module Coppe.Prelude (
 import Coppe.AST
 import Coppe.Monad
 import Coppe.Arrow
-import Coppe.EvalTinylang
-import Coppe.TinyLang.AbsTinylang
+import Coppe.Tinylang
 
 import Data.Maybe
 import qualified Data.Map as Map

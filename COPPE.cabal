@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: c23902df923928fd664e44edb3e07c85096359f55512ebd9f959afa66184baa3
+-- hash: e4eb2aaaf964fe9e76d870ba2ecbc4d2c92adaeb37343b73a6aac7f65c625d9a
 
 name:           COPPE
 version:        0.1.0.0
@@ -32,7 +32,6 @@ library
       Coppe.Analysis
       Coppe.Arrow
       Coppe.AST
-      Coppe.EvalTinylang
       Coppe.Files
       Coppe.KerasGen
       Coppe.Monad
@@ -40,12 +39,14 @@ library
       Coppe.Pygen
       Coppe.PyLSP
       Coppe.TFGen
-      Coppe.TinyLang.AbsTinylang
-      Coppe.TinyLang.ErrM
-      Coppe.TinyLang.LexTinylang
-      Coppe.TinyLang.ParTinylang
-      Coppe.TinyLang.PrintTinylang
-      Coppe.TinyLang.SkelTinylang
+      Coppe.Tinylang
+      Coppe.Tinylang.AbsTinylang
+      Coppe.Tinylang.ErrM
+      Coppe.Tinylang.EvalTinylang
+      Coppe.Tinylang.LexTinylang
+      Coppe.Tinylang.ParTinylang
+      Coppe.Tinylang.PrintTinylang
+      Coppe.Tinylang.SkelTinylang
       Coppe.TorchGen
       Coppe.YParse
   other-modules:
