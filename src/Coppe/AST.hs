@@ -59,7 +59,7 @@ module Coppe.AST (
 
 import Data.Maybe
 import qualified Data.Map as Map
-import Coppe.TinyLang.AbsTinylang
+import Coppe.Tinylang.AbsTinylang
 
 -- ------------------------------------------------------------ --
 -- Tensors

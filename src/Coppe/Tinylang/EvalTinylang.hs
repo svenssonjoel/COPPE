@@ -1,10 +1,10 @@
-module Coppe.EvalTinylang where
+module Coppe.Tinylang.EvalTinylang where
 
-import Coppe.TinyLang.AbsTinylang
-import Coppe.TinyLang.LexTinylang
-import Coppe.TinyLang.ParTinylang
-import Coppe.TinyLang.PrintTinylang
-import Coppe.TinyLang.ErrM
+import Coppe.Tinylang.AbsTinylang
+import Coppe.Tinylang.LexTinylang
+import Coppe.Tinylang.ParTinylang
+import Coppe.Tinylang.PrintTinylang
+import Coppe.Tinylang.ErrM
 
 import Coppe.AST
 
