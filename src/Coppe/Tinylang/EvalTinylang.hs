@@ -61,6 +61,11 @@ addBinding s v =
      let e' = Map.insert s v e
      put (EvalState h a e')
 
+runEval :: HyperMap -> Annotation -> Map.Map String Value -> Eval (Either EvalError Value) -> (Either EvalError Value)
+runEval h a e eval =
+  let estate = EvalState h a e
+  in evalState eval estate 
+
 -- Top level lambda is applied to the argument value
 evalApply :: Exp -> Value -> Eval (Either EvalError Value)
 evalApply e v =

@@ -48,7 +48,7 @@ module Coppe.AST (
   , mkTensor
   , tensorId
   , tensorDim
-  , tensorReshape
+--  , tensorReshape
   , TensorRepr(..)
     
     -- Folds and traversals
@@ -82,8 +82,8 @@ tensorId (Tensor (TensorInternal i _ _)) = i
 tensorDim :: Tensor a -> [Integer]
 tensorDim (Tensor (TensorInternal _ _ d)) = d
 
-tensorReshape :: ([Integer] -> [Integer]) -> Tensor a -> Tensor a
-tensorReshape trns (Tensor (TensorInternal i j d)) = Tensor (TensorInternal i j (trns d))
+-- tensorReshape :: ([Integer] -> [Integer]) -> Tensor a -> Tensor a
+-- tensorReshape trns (Tensor (TensorInternal i j d)) = Tensor (TensorInternal i j (trns d))
 
 
 -- Really TensorEltRepr... Maybe change?
@@ -152,28 +152,35 @@ instance Num Value where
 
 class ToValue a where
   toValue :: a -> Value
-
+  fromValue :: Value -> a 
 
 instance ToValue Integer where
   toValue = IntVal
+  fromValue (IntVal i) = fromInteger i
 
 instance ToValue Int where
   toValue i = IntVal (toInteger i)
+  fromValue (IntVal i) = fromInteger i
   
 instance ToValue Float where
   toValue f = FloatVal (realToFrac f)
+  fromValue (FloatVal f) = (realToFrac f)
 
 instance ToValue Bool where
   toValue b = BoolVal b
+  fromValue (BoolVal b) = b
 
 instance ToValue Double where
   toValue d = FloatVal d
+  fromValue (FloatVal d) = d
 
 instance  {-# OVERLAPPABLE #-} ToValue a => ToValue [a] where
   toValue xs = ListVal $ map toValue xs
+  fromValue (ListVal xs) = map fromValue xs
 
 instance  {-# OVERLAPS #-} ToValue [Char] where
   toValue s = StringVal s
+  fromValue (StringVal s) = s
 
 type Param = Value
 type Annot = Value
