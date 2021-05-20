@@ -41,13 +41,26 @@ At a first glance, the process seems well established and data driven techniques
 \item Large complex functions with implicit states and side effect smake the programs difficult to reason
 \end{itemize}
 \end{itemize}
-In summary, there are a lot of errors being made along the way. In this work, we aim to improve the situation by providing the user with a eDSL for early bug discovery and network analysis and some other stuff. Not done here.
+In summary, there are a lot of errors being made along the way. In this work, we aim to improve the situation by providing the user with an EDSL for early bug discovery and network analysis and some other stuff. Not done here.
 
 In this paper, we describe a domain specific language with the following purposes:
 \begin{itemize}
-\item (This might not be too relevant here or maybe describe it in a different way?) Working towards a more declarative representation. Encode the network into a data structure so that it can be easily manipulated, documented for reproducibility and compared to each other.
-\item (This might not be too relevant either?) Minimal dependency. The data structure used to represent the neural network is an abstract syntax tree of the DSL. This AST does not depend on any deep learning frameworks, which means we do not need to install and instantiate the frameworks in order to enable the analysis.
-\item Enabling analysis, testing and verification. Describe how we annotate the tree and do stuff. When traversing the AST, we can generate code to define a neural network in any major frameworks, generate appropriate testing code, analyze different properties of the neural network. As a future step, the AST can also be used for verification purposes.
+\item (This might not be too relevant here or maybe describe it in a
+  different way?) Working towards a more declarative
+  representation. Encode the network into a data structure so that it
+  can be easily manipulated, documented for reproducibility and
+  compared to each other.
+\item (This might not be too relevant either?) Minimal dependency. The
+  data structure used to represent the neural network is an abstract
+  syntax tree of the DSL. This AST does not depend on any deep
+  learning frameworks, which means we do not need to install and
+  instantiate the frameworks in order to enable the analysis.
+\item Enabling analysis, testing and verification. Describe how we
+  annotate the tree and do stuff. When traversing the AST, we can
+  generate code to define a neural network in any major frameworks,
+  generate appropriate testing code, analyze different properties of
+  the neural network. As a future step, the AST can also be used for
+  verification purposes.
 \end{itemize}
 
 

@@ -10,7 +10,11 @@ failure :: Show a => a -> Result
 failure x = Bad $ "Undefined case: " ++ show x
 
 transIdent :: Ident -> Result
-transIdent x = case x of
+transIdent x = case x ofimport Coppe.Tinylang.AbsTinylang
+import Coppe.Tinylang.LexTinylang
+import Coppe.Tinylang.ParTinylang
+import Coppe.Tinylang.PrintTinylang
+
   Ident string -> failure x
 transExp :: Exp -> Result
 transExp x = case x of

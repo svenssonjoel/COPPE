@@ -21,7 +21,7 @@ testNetwork =
       addParams = emptyHyperparameters
   in
   do
-    in_data <- input (mkTensor "input_data" [32,32,3] ::Tensor Float)
+    in_data <- input (mkTensor "input_data" [32,32,3] :: Tensor Float)
     out_data <- conv kernel_size strides filters convParams in_data
                 >>= batchNormalize emptyHyperparameters
                 >>= relu
