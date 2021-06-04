@@ -26,6 +26,7 @@ type Eval a = State EvalState a
 identToString (Ident s) = s
 argToString   (Arg (Ident s)) = s 
 
+-- LookupBinding ignores the FunParams that may be in a hypermap.
 lookupBinding :: String -> Eval (Maybe Value)
 lookupBinding s =
   do
@@ -46,7 +47,7 @@ addBinding s v =
      put (EvalState h a e')
 
 -- Top level lambda is applied to the argument value
--- If that does not result in a value there program is "incorrect" 
+-- If that does not result in a value the program is "incorrect" 
 evalTiny :: Exp -> Value -> Eval (Either EvalError Value)
 evalTiny (EInt i) _ = return $ Right $ toValue i
 evalTiny (EFloat d) _ = return $ Right $ toValue d
@@ -71,7 +72,7 @@ evalApp :: Exp -> Value -> Eval (Either EvalError Value)
 evalApp (EVar (Ident "length")) (ListVal l) = return $ Right $ toValue (length l)
 evalApp (EVar (Ident "length")) _  = return $ Left $ EvalError "Argument to length is not a list."
 evalApp (EVar (Ident "tail"))   (ListVal l) = return $ Right $ ListVal (tail l)
-evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to rail is not a list."
+evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to tail is not a list."
 
 
 addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
