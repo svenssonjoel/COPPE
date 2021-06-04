@@ -3,6 +3,7 @@
 
 ELam.   Exp  ::= "fun" [ Arg ] "->" Exp ;
 ELet.   Exp  ::= "let" Exp "=" Exp "in" Exp ;
+EIf.    Exp  ::= "if" Exp "then" Exp "else" Exp ;
 EOr.    Exp1 ::= Exp2 "||" Exp1 ;
 EAnd.   Exp2 ::= Exp3 "&&" Exp2 ;
 ENot.   Exp6 ::= "!" Exp7 ;
@@ -13,6 +14,7 @@ EApp.   Exp6 ::= Exp6 Exp7 ;
 EInt. 	Exp7 ::= Integer ;
 EFloat. Exp7 ::= Double ;
 EBool.  Exp7 ::= Boolean ;
+EError. Exp7 ::= "error" ;
 EVar.   Exp7 ::= Ident ;
 
 Plus.   AddOp ::= "+" ;

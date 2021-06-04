@@ -21,7 +21,7 @@ testNetwork =
       addParams = emptyHyperparameters
   in
   do
-    in_data <- (input [32,32,3] :: Coppe (Tensor Float))  -- Float [32,32,3] 
+    in_data <- input (mkTensor "input_data" [32,32,3] :: Tensor Float)
     out_data <- conv kernel_size strides filters convParams in_data
                 >>= batchNormalize emptyHyperparameters
                 >>= relu
@@ -61,8 +61,8 @@ main =
 
     putStrLn "***************************************"
 
-    let c =  do input <- (input [32,32,3] :: Coppe (Tensor Float)) -- Float [32,32,3]
-                runCoppeArrow testArrow input
+    let input = mkTensor "input_data" [32,32,3] ::Tensor Float 
+    let c =  runCoppeArrow testArrow input
     let r' = build c
     let (Just e') =  encodeRecipe r'
       

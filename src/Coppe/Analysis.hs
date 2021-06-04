@@ -8,6 +8,7 @@ module Coppe.Analysis ( numOperations
   where
 
 import Coppe.AST
+import Coppe.Tinylang
 
 {----------------------------------------}
 {-             Analysis                 -}

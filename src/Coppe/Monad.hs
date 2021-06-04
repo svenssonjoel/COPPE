@@ -18,7 +18,9 @@ import Coppe.AST
 import Control.Monad.Writer
 import Control.Monad.State
 import qualified  Control.Monad.Trans.State as S
-
+import Coppe.Tinylang.AbsTinylang
+import Coppe.Tinylang.EvalTinylang
+import qualified Data.Map as Map
 
 newtype Coppe a = Coppe (StateT Integer (Writer Recipe) a)
   deriving (Functor, Applicative, Monad, MonadState Integer, MonadWriter Recipe)
@@ -42,7 +44,7 @@ producer op dim =
      let nom = "tensor" ++ show i
      tell $ Operation (hyperSet op [("name", valParam nom)])  
      let result =  mkTensor nom dim
-     return $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
+     return result -- $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
 
         
 operation :: ( TensorRepr a)
@@ -56,10 +58,21 @@ operation op ts =
   in 
   do i <- getId
      let nom = "tensor" ++ show i
-     -- tell $ Operation op (h {inputLayer = Just ids, name = Just nom})
-     tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])  
-     let result =  mkTensor nom (tensorDim tensor)
-     return $ tensorReshape id {-(transform op)-}  result -- TODO: FIX
+     tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])
+   
+     let result =  mkTensor nom (transformDim op (tensorDim tensor))
+     return result -- id {-(transform op)-}  result -- TODO: FIX
+
+
+transformDim :: Ingredient -> [Integer] -> [Integer]
+transformDim op i =
+  let i' = toValue i
+      (Ingredient _ a h _ exp) = op
+      e = Map.empty
+  in  case (runEval h a e (evalApply exp i')) of
+        Left (EvalError s) -> error $ "Error evaluating transformation function\n" ++ " " ++ s ++ "\n"
+        Right l@(ListVal _) -> fromValue l
+
 
 build :: Coppe a -> Recipe
 build (Coppe m) = execWriter $ evalStateT m 0

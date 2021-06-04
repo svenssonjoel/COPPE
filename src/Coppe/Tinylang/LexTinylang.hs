@@ -4,7 +4,7 @@
 
 {-# OPTIONS -fno-warn-incomplete-patterns #-}
 {-# OPTIONS_GHC -w #-}
-module Coppe.TinyLang.LexTinylang where
+module Coppe.Tinylang.LexTinylang where
 
 
 
@@ -70,7 +70,7 @@ alex_actions = array (0 :: Int, 6)
   , (0,alex_action_4)
   ]
 
-{-# LINE 37 "LexTinylang.x" #-}
+{-# LINE 41 "LexTinylang.x" #-}
 
 
 tok :: (Posn -> String -> Token) -> (Posn -> String -> Token)
@@ -94,10 +94,12 @@ data Token =
  | Err Posn
   deriving (Eq,Show,Ord)
 
+printPosn :: Posn -> String
+printPosn (Pn _ l c) = "line " ++ show l ++ ", column " ++ show c
+
 tokenPos :: [Token] -> String
-tokenPos (PT (Pn _ l _) _ :_) = "line " ++ show l
-tokenPos (Err (Pn _ l _) :_) = "line " ++ show l
-tokenPos _ = "end of file"
+tokenPos (t:_) = printPosn (tokenPosn t)
+tokenPos [] = "end of file"
 
 tokenPosn :: Token -> Posn
 tokenPosn (PT p _) = p
@@ -120,6 +122,7 @@ prToken t = case t of
   PT _ (TV s)   -> s
   PT _ (TD s)   -> s
   PT _ (TC s)   -> s
+  Err _         -> "#error"
 
 
 data BTree = N | B String Tok BTree BTree deriving (Show)
@@ -133,7 +136,7 @@ eitherResIdent tv s = treeFind resWords
                               | s == a = t
 
 resWords :: BTree
-resWords = b "<=" 11 (b "+" 6 (b "(" 3 (b "&&" 2 (b "!" 1 N N) N) (b "*" 5 (b ")" 4 N N) N)) (b "/" 9 (b "->" 8 (b "-" 7 N N) N) (b "<" 10 N N))) (b "True" 17 (b ">" 14 (b "==" 13 (b "=" 12 N N) N) (b "False" 16 (b ">=" 15 N N) N)) (b "let" 20 (b "in" 19 (b "fun" 18 N N) N) (b "||" 21 N N)))
+resWords = b "==" 13 (b "-" 7 (b ")" 4 (b "&&" 2 (b "!" 1 N N) (b "(" 3 N N)) (b "+" 6 (b "*" 5 N N) N)) (b "<" 10 (b "/" 9 (b "->" 8 N N) N) (b "=" 12 (b "<=" 11 N N) N))) (b "fun" 20 (b "True" 17 (b ">=" 15 (b ">" 14 N N) (b "False" 16 N N)) (b "error" 19 (b "else" 18 N N) N)) (b "let" 23 (b "in" 22 (b "if" 21 N N) N) (b "||" 25 (b "then" 24 N N) N)))
    where b s n = let bs = id s
                   in B bs (TS bs n)
 
@@ -143,6 +146,8 @@ unescapeInitTail = id . unesc . tail . id where
     '\\':c:cs | elem c ['\"', '\\', '\''] -> c : unesc cs
     '\\':'n':cs  -> '\n' : unesc cs
     '\\':'t':cs  -> '\t' : unesc cs
+    '\\':'r':cs  -> '\r' : unesc cs
+    '\\':'f':cs  -> '\f' : unesc cs
     '"':[]    -> []
     c:cs      -> c : unesc cs
     _         -> []
@@ -220,6 +225,256 @@ alex_action_2 =  tok (\p s -> PT p (eitherResIdent (TV . share) s))
 alex_action_3 =  tok (\p s -> PT p (TI $ share s))    
 alex_action_4 =  tok (\p s -> PT p (TD $ share s)) 
 {-# LINE 1 "templates/GenericTemplate.hs" #-}
+{-# LINE 1 "templates/GenericTemplate.hs" #-}
+{-# LINE 1 "<built-in>" #-}
+{-# LINE 1 "<command-line>" #-}
+{-# LINE 10 "<command-line>" #-}
+# 1 "/usr/include/stdc-predef.h" 1 3 4
+
+# 17 "/usr/include/stdc-predef.h" 3 4
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{-# LINE 10 "<command-line>" #-}
+{-# LINE 1 "/usr/lib/ghc/include/ghcversion.h" #-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{-# LINE 10 "<command-line>" #-}
+{-# LINE 1 "/tmp/ghce86c_0/ghc_2.h" #-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{-# LINE 10 "<command-line>" #-}
+{-# LINE 1 "templates/GenericTemplate.hs" #-}
 -- -----------------------------------------------------------------------------
 -- ALEX TEMPLATE
 --
@@ -229,17 +484,7 @@ alex_action_4 =  tok (\p s -> PT p (TD $ share s))
 -- -----------------------------------------------------------------------------
 -- INTERNALS and main scanner engine
 
-
-
-
-
-
-
-
-
-
-
-
+{-# LINE 21 "templates/GenericTemplate.hs" #-}
 
 
 
@@ -253,23 +498,7 @@ alex_action_4 =  tok (\p s -> PT p (TD $ share s))
 #define GTE(n,m) (n >=# m)
 #define EQ(n,m) (n ==# m)
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+{-# LINE 51 "templates/GenericTemplate.hs" #-}
 
 
 data AlexAddr = AlexA# Addr#
@@ -405,18 +634,7 @@ alex_scan_tkn user__ orig_input len input__ s last_acc =
         check_accs (AlexAccNone) = last_acc
         check_accs (AlexAcc a  ) = AlexLastAcc a input__ (I# (len))
         check_accs (AlexAccSkip) = AlexLastSkip  input__ (I# (len))
-
-
-
-
-
-
-
-
-
-
-
-
+{-# LINE 198 "templates/GenericTemplate.hs" #-}
 
 data AlexLastAcc
   = AlexNone
@@ -427,32 +645,3 @@ data AlexAcc user
   = AlexAccNone
   | AlexAcc Int
   | AlexAccSkip
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

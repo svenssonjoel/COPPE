@@ -28,13 +28,13 @@ followed by an unsigned or negative exponent.
 
 
 
-
 ===Reserved words and symbols===
 The set of reserved words is the set of terminals appearing in the grammar. Those reserved words that consist of non-letter characters are called symbols, and they are treated in a different way from those that are similar to identifiers. The lexer follows rules familiar from languages like Haskell, C, and Java, including longest match and spacing conventions.
 
 The reserved words used in tinylang are the following:
-  | ``False`` | ``True`` | ``fun`` | ``in``
-  | ``let`` |  |  | 
+  | ``False`` | ``True`` | ``else`` | ``error``
+  | ``fun`` | ``if`` | ``in`` | ``let``
+  | ``then`` |  |  |
 
 The symbols used in tinylang are the following:
   | -> | = | || | &&
@@ -46,47 +46,49 @@ The symbols used in tinylang are the following:
 There are no single-line comments in the grammar.There are no multiple-line comments in the grammar.
 
 ==The syntactic structure of tinylang==
-Non-terminals are enclosed between < and >. 
-The symbols -> (production),  **|**  (union) 
-and **eps** (empty rule) belong to the BNF notation. 
+Non-terminals are enclosed between < and >.
+The symbols -> (production),  **|**  (union)
+and **eps** (empty rule) belong to the BNF notation.
 All other symbols are terminals.
 
-  | //Exp// | -> | ``fun`` //[Arg]// ``->`` //Exp// 
-  |  |  **|**  | ``let`` //Exp// ``=`` //Exp// ``in`` //Exp// 
-  |  |  **|**  | //Exp1// 
-  | //Exp1// | -> | //Exp2// ``||`` //Exp1// 
-  |  |  **|**  | //Exp2// 
-  | //Exp2// | -> | //Exp3// ``&&`` //Exp2// 
-  |  |  **|**  | //Exp3// 
-  | //Exp6// | -> | ``!`` //Exp7// 
-  |  |  **|**  | //Exp6// //Exp7// 
-  |  |  **|**  | //Exp7// 
-  | //Exp3// | -> | //Exp3// //RelOp// //Exp4// 
-  |  |  **|**  | //Exp4// 
-  | //Exp4// | -> | //Exp4// //AddOp// //Exp5// 
-  |  |  **|**  | //Exp5// 
-  | //Exp5// | -> | //Exp5// //MulOp// //Exp6// 
-  |  |  **|**  | //Exp6// 
-  | //Exp7// | -> | //Integer// 
-  |  |  **|**  | //Double// 
-  |  |  **|**  | //Boolean// 
-  |  |  **|**  | //Ident// 
-  |  |  **|**  | ``(`` //Exp// ``)`` 
-  | //AddOp// | -> | ``+`` 
-  |  |  **|**  | ``-`` 
-  | //MulOp// | -> | ``*`` 
-  |  |  **|**  | ``/`` 
-  | //RelOp// | -> | ``<`` 
-  |  |  **|**  | ``<=`` 
-  |  |  **|**  | ``>`` 
-  |  |  **|**  | ``>=`` 
-  |  |  **|**  | ``==`` 
+  | //Exp// | -> | ``fun`` //[Arg]// ``->`` //Exp//
+  |  |  **|**  | ``let`` //Exp// ``=`` //Exp// ``in`` //Exp//
+  |  |  **|**  | ``if`` //Exp// ``then`` //Exp// ``else`` //Exp//
+  |  |  **|**  | //Exp1//
+  | //Exp1// | -> | //Exp2// ``||`` //Exp1//
+  |  |  **|**  | //Exp2//
+  | //Exp2// | -> | //Exp3// ``&&`` //Exp2//
+  |  |  **|**  | //Exp3//
+  | //Exp6// | -> | ``!`` //Exp7//
+  |  |  **|**  | //Exp6// //Exp7//
+  |  |  **|**  | //Exp7//
+  | //Exp3// | -> | //Exp3// //RelOp// //Exp4//
+  |  |  **|**  | //Exp4//
+  | //Exp4// | -> | //Exp4// //AddOp// //Exp5//
+  |  |  **|**  | //Exp5//
+  | //Exp5// | -> | //Exp5// //MulOp// //Exp6//
+  |  |  **|**  | //Exp6//
+  | //Exp7// | -> | //Integer//
+  |  |  **|**  | //Double//
+  |  |  **|**  | //Boolean//
+  |  |  **|**  | ``error``
+  |  |  **|**  | //Ident//
+  |  |  **|**  | ``(`` //Exp// ``)``
+  | //AddOp// | -> | ``+``
+  |  |  **|**  | ``-``
+  | //MulOp// | -> | ``*``
+  |  |  **|**  | ``/``
+  | //RelOp// | -> | ``<``
+  |  |  **|**  | ``<=``
+  |  |  **|**  | ``>``
+  |  |  **|**  | ``>=``
+  |  |  **|**  | ``==``
   | //[Exp]// | -> | **eps**
-  |  |  **|**  | //Exp// //[Exp]// 
-  | //Arg// | -> | //Ident// 
+  |  |  **|**  | //Exp// //[Exp]//
+  | //Arg// | -> | //Ident//
   | //[Arg]// | -> | **eps**
-  |  |  **|**  | //Arg// //[Arg]// 
-  | //Boolean// | -> | ``True`` 
-  |  |  **|**  | ``False`` 
+  |  |  **|**  | //Arg// //[Arg]//
+  | //Boolean// | -> | ``True``
+  |  |  **|**  | ``False``
 
 

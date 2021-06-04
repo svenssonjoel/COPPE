@@ -2,7 +2,7 @@
 -- Copyright (C) 2004  Author:  Aarne Ranta
 
 -- This file comes with NO WARRANTY and may be used FOR ANY PURPOSE.
-module Coppe.TinyLang.ErrM where
+module Coppe.Tinylang.ErrM where
 
 -- the Error monad: like Maybe type with error msgs
 
@@ -17,15 +17,10 @@ instance Monad Err where
   Ok a  >>= f = f a
   Bad s >>= _ = Bad s
 
-
-instance MonadFail Err where
-    fail        = Bad
-
 instance Applicative Err where
   pure = Ok
   (Bad s) <*> _ = Bad s
   (Ok f) <*> o  = liftM f o
-
 
 instance Functor Err where
   fmap = liftM
