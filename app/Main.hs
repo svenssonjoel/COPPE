@@ -27,7 +27,8 @@ testNetwork =
                 >>= relu
                 >>= conv kernel_size strides filters convParams
                 >>= batchNormalize emptyHyperparameters
-    return out_data 
+    (d1,d2) <- par return return out_data
+    add d1 d2 
 
 
 testArrow =

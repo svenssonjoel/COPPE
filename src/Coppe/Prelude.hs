@@ -12,11 +12,14 @@ module Coppe.Prelude (
                 , mkConv
                 , mkRelu
                 , mkBatchNorm
+                , mkAdd
                 , mkOptimizer
                 -- Monad implementations
                 , conv
                 , batchNormalize
                 , relu
+                , add
+                , par
                 -- Arrow implementations
                 , convA
                 , batchNormalizeA
@@ -50,6 +53,21 @@ convTransform = case parseTiny prg of
            "                kernel_size ",
            "                strides in",
            "  if ok then (extend newDims filters) else error" ]
+
+
+addTransform :: Exp
+addTransform = case parseTiny prg of
+                 Left (ParseError s) -> error s
+                 Right e -> e
+  where prg =
+          unlines $
+          ["fun d1 d2 -> ",
+           "  let nd1 = length d1 in",
+           "  let nd2 = length d2 in",
+           "  let ndim_ok = nd1 == nd2 in",
+           "  let ok_list = zipWith (fun a b -> a == b) d1 d2 in",
+           "  if ndim_ok && !(elem False ok_list) then d1 else error" ]
+  
 
 tinyId :: Exp
 tinyId = case parseTiny "fun a -> a" of
@@ -149,6 +167,12 @@ mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) True tinyId
 mkBatchNorm :: Hyperparameters -> Ingredient
 mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) True tinyId  
 
+{-------}
+{- Add -}
+
+mkAdd :: Ingredient
+mkAdd = Ingredient "add" (Map.empty) (Map.empty) False addTransform
+
 
 {----------------}
 {- Optimizer    -}
@@ -171,6 +195,21 @@ batchNormalize h t = operation (mkBatchNorm h) [t]
 relu :: TensorRepr a => Tensor a -> Coppe (Tensor a)
 relu t = operation (mkRelu emptyHyperparameters) [t]
 
+add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
+add t1 t2 = operation (mkAdd) [t1,t2]
+
+
+{-Combinators-}
+
+par :: (TensorRepr a, TensorRepr b, TensorRepr c)
+  =>  (Tensor a -> Coppe (Tensor b)) -> (Tensor a -> Coppe (Tensor c)) -> Tensor a -> Coppe (Tensor b, Tensor c)
+par f g t =
+  do a <- f t
+     b <- g t
+     return (a,b)
+
+
+
 {----------------------------------------}
 {-             Arrow STUFF              -}
 
@@ -183,3 +222,4 @@ batchNormalizeA hyps = coppeArrow (batchNormalize hyps)
 reluA :: TensorRepr a =>  CoppeArrow (Tensor a) (Tensor a)
 reluA = coppeArrow relu
 
+-- The arrow library has some interesting ones already 
