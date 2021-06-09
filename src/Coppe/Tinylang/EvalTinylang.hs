@@ -68,13 +68,6 @@ runEval h a e eval =
   in evalState eval estate 
 
 -- Top level lambda is applied to the argument value
-<<<<<<< HEAD:src/Coppe/EvalTinylang.hs
--- If that does not result in a value the program is "incorrect" 
-evalTiny :: Exp -> Value -> Eval (Either EvalError Value)
-evalTiny (EInt i) _ = return $ Right $ toValue i
-evalTiny (EFloat d) _ = return $ Right $ toValue d
-evalTiny (EVar i) _ =
-=======
 evalApply :: Exp -> Value -> Eval (Either EvalError Value)
 evalApply e v =
   do f <- evalTiny e 
@@ -92,7 +85,6 @@ evalTiny (EFloat d)  = return $ Right $ toValue d
 evalTiny (EBool BTrue)   = return $ Right $ toValue True
 evalTiny (EBool BFalse)  = return $ Right $ toValue False
 evalTiny (EVar i)    =
->>>>>>> f735bbddd41ed8e1bef5df227fab71444255992e:src/Coppe/Tinylang/EvalTinylang.hs
   do res <- lookupBinding (identToString i)
      case res of
        Just v -> return $ Right v
@@ -122,9 +114,7 @@ evalApp (EVar (Ident "length")) (ListVal l) = return $ Right $ toValue (length l
 evalApp (EVar (Ident "length")) _  = return $ Left $ EvalError "Argument to length is not a list."
 evalApp (EVar (Ident "tail"))   (ListVal l) = return $ Right $ ListVal (tail l)
 evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to tail is not a list."
-<<<<<<< HEAD:src/Coppe/EvalTinylang.hs
 
-=======
 evalApp (EVar (Ident "take"))   (ListVal [IntVal n, ListVal l]) =
   return $ Right $ ListVal (take (fromInteger n) l)
 evalApp (EVar (Ident "take")) _ = return $ Left $ EvalError "Argument to take incorrect."
@@ -143,7 +133,6 @@ local e =
      a <- e
      put old
      return a
->>>>>>> f735bbddd41ed8e1bef5df227fab71444255992e:src/Coppe/Tinylang/EvalTinylang.hs
 
 addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
 addAllBindings [] (ListVal []) = return $ Right ()
