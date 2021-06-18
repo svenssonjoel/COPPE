@@ -23,7 +23,7 @@ transExp x = case x of
   ERel exp1 relop exp2 -> failure x
   EAdd exp1 addop exp2 -> failure x
   EMul exp1 mulop exp2 -> failure x
-  EApp exp1 exp2 -> failure x
+  EApp exp appargs -> failure x
   EInt integer -> failure x
   EFloat double -> failure x
   EBool boolean -> failure x
@@ -47,6 +47,9 @@ transRelOp x = case x of
 transArg :: Arg -> Result
 transArg x = case x of
   Arg ident -> failure x
+transAppArg :: AppArg -> Result
+transAppArg x = case x of
+  AppArg exp -> failure x
 transBoolean :: Boolean -> Result
 transBoolean x = case x of
   BTrue -> failure x

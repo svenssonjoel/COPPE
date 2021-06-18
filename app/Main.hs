@@ -77,18 +77,18 @@ main =
       
     putStrLn $ BLU.toString $ encodeNode [(Doc e')]
 
-    putStrLn "***************************************"
+    -- putStrLn "***************************************"
 
-    let r = build shouldFail
-    let (Just e) = encodeRecipe r
+    -- let r = build shouldFail
+    -- let (Just e) = encodeRecipe r
 
-    putStrLn $ BLU.toString $ encodeNode [(Doc e)]
+    -- putStrLn $ BLU.toString $ encodeNode [(Doc e)]
 
-    let m = readRecipe $ encodeNode [(Doc e)]
+    -- let m = readRecipe $ encodeNode [(Doc e)]
 
-    putStrLn $ show m 
+    -- putStrLn $ show m 
 
-    putStrLn "***************************************"
+    -- putStrLn "***************************************"
 
     
 

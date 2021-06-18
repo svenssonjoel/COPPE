@@ -79,7 +79,29 @@ evalApply e v =
             evalTiny f
        Right _ -> return $ Left $ EvalError "evalApply: Not a function"
 
+  
+builtIn :: [String]
+builtIn = ["length",
+           "tail",
+           "take",
+           "extend",
+           "zipWith3",
+           "zipWith",
+           "elem"]
+           
+
+
 evalTiny :: Exp -> Eval (Either EvalError Value)
+evalTiny (ELet (EVar (Ident name)) ev e) =
+          do
+            val <- evalTiny ev
+            case val of
+              Right v -> do addBinding name v
+                            evalTiny e
+              Left err -> return $ Left err 
+           
+
+
 evalTiny (EInt i)    = return $ Right $ toValue i
 evalTiny (EFloat d)  = return $ Right $ toValue d
 evalTiny (EBool BTrue)   = return $ Right $ toValue True
@@ -88,9 +110,12 @@ evalTiny (EVar i)    =
   do res <- lookupBinding (identToString i)
      case res of
        Just v -> return $ Right v
-       Nothing -> return $
-                  Left $
-                  EvalError $ "Ident " ++ identToString i ++ "is not present in environment, annotations or hyperparameters."
+       Nothing -> if (identToString i) `elem` builtIn
+                  then return $ Right (StringVal (identToString i))
+                  else return $
+                       Left $
+                       EvalError $ "Ident " ++ identToString i ++ "is not present in environment, annotations or hyperparameters."
+                       
 evalTiny (EAdd e1 op e2) = evalAdd op e1 e2
 evalTiny (EMul e1 op e2) = evalMul op e1 e2
 evalTiny (ERel e1 op e2) = evalRel op e1 e2
@@ -120,28 +145,32 @@ evalTiny (EIf  e1 e2 e3) =
       (Left (EvalError s))    -> return $ Left $ EvalError s
 evalTiny (EApp e1 e2)    =
   do v <- evalTiny e2
-     case v of
-       Left err -> return $ Left err
-       Right v ->  evalApp e1 v
+     f <- evalTiny e1
+     case (f,v) of
+       (Right f, Right v) -> evalApp f v
+       (Left e, _)        -> return $ Left e
+       (_, Left e)        -> return $ Left e
+  
 evalTiny x = error $ "Not implemented: " ++ show x 
 
-evalApp :: Exp -> Value -> Eval (Either EvalError Value)
-evalApp (EVar (Ident "length")) (ListVal l) = return $ Right $ toValue (length l)
-evalApp (EVar (Ident "length")) _  = return $ Left $ EvalError "Argument to length is not a list."
-evalApp (EVar (Ident "tail"))   (ListVal l) = return $ Right $ ListVal (tail l)
-evalApp (EVar (Ident "tail"))   _ = return $ Left $ EvalError "Argument to tail is not a list."
+evalApp :: Value -> Value -> Eval (Either EvalError Value)
+evalApp (StringVal "length")  (ListVal l) = return $ Right $ toValue (length l)
+evalApp (StringVal "length")  _  = return $ Left $ EvalError "Argument to length is not a list."
+evalApp (StringVal "tail")   (ListVal l) = return $ Right $ ListVal (tail l)
+evalApp (StringVal "tail")   _ = return $ Left $ EvalError "Argument to tail is not a list."
 
-evalApp (EVar (Ident "take"))   (ListVal [IntVal n, ListVal l]) =
+evalApp (StringVal "take")   (ListVal [IntVal n, ListVal l]) =
   return $ Right $ ListVal (take (fromInteger n) l)
-evalApp (EVar (Ident "take")) _ = return $ Left $ EvalError "Argument to take incorrect."
-evalApp (EVar (Ident "extend")) (ListVal [ListVal l1, a2]) = return $ Right $ ListVal (l1 ++ [a2])
-evalApp (EVar (Ident "zipWith3")) (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) =
+evalApp (StringVal "take") a = return $ Left $ EvalError $ "Argument to take incorrect: " ++ show a
+evalApp (StringVal "extend") (ListVal [ListVal l1, a2]) = return $ Right $ ListVal (l1 ++ [a2])
+evalApp (StringVal "zipWith3") (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) =
   local $
   do
     put (EvalState h a e) 
     addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
     evalTiny f
-evalApp (EVar (Ident "zipWith3")) _ = return $ Left $ EvalError "Argument to zipWith3 incorrect."
+evalApp (StringVal"zipWith3") _ = return $ Left $ EvalError "Argument to zipWith3 incorrect."
+evalApp (StringVal x) _ = return $ Left $ EvalError $ "Unknown function: " ++ x
 evalApp _ _ = return $ Left $ EvalError "Unknown function."
 
 local :: Eval (Either EvalError a) -> Eval (Either EvalError a)
