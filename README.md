@@ -12,3 +12,17 @@ Coppe is an experimental EDSL for machine learning implemented in Haskell.
    rewriting the internal representation data structure for each addition.
 3. Serializable/deserializable intermediate representation of networks.
 
+
+## Build
+
+Coppe uses the stack build tool. To build issue the command:
+
+```
+stack build
+```
+
+and to run an example issue:
+
+```
+stack run
+```
