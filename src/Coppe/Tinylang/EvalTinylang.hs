@@ -94,6 +94,21 @@ evalTiny (EVar i)    =
 evalTiny (EAdd e1 op e2) = evalAdd op e1 e2
 evalTiny (EMul e1 op e2) = evalMul op e1 e2
 evalTiny (ERel e1 op e2) = evalRel op e1 e2
+evalTiny (EOr  e1 e2)    = do a <- evalTiny e1
+                              b <- evalTiny e2
+                              case (a,b) of
+                                (Right (BoolVal a'), Right (BoolVal b')) -> return $ Right (BoolVal (a' || b'))
+                                (_,_) -> return $ Left $ EvalError "Not a boolean used in ||"
+evalTiny (EAnd  e1 e2)    = do a <- evalTiny e1
+                               b <- evalTiny e2
+                               case (a,b) of
+                                 (Right (BoolVal a'), Right (BoolVal b')) -> return $ Right (BoolVal (a' && b'))
+                                 (_,_) -> return $ Left $ EvalError "Not a boolean used in &&"
+evalTiny (ENot e1) = do a <- evalTiny e1
+                        case a of
+                          (Right (BoolVal a')) -> return $ Right (BoolVal (not a'))
+                          _ -> return $ Left $ EvalError "not a boolean used in !"
+                                                                                                   
 evalTiny (ELam as e)     = evalLam as e
 evalTiny EError          = return $ Left $ EvalError "Program finishes in error"
 evalTiny (EIf  e1 e2 e3) =
@@ -108,6 +123,7 @@ evalTiny (EApp e1 e2)    =
      case v of
        Left err -> return $ Left err
        Right v ->  evalApp e1 v
+evalTiny x = error $ "Not implemented: " ++ show x 
 
 evalApp :: Exp -> Value -> Eval (Either EvalError Value)
 evalApp (EVar (Ident "length")) (ListVal l) = return $ Right $ toValue (length l)
@@ -126,6 +142,7 @@ evalApp (EVar (Ident "zipWith3")) (ListVal [CloVal f args h a e, ListVal l1, Lis
     addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
     evalTiny f
 evalApp (EVar (Ident "zipWith3")) _ = return $ Left $ EvalError "Argument to zipWith3 incorrect."
+evalApp _ _ = return $ Left $ EvalError "Unknown function."
 
 local :: Eval (Either EvalError a) -> Eval (Either EvalError a)
 local e =

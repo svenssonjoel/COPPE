@@ -27,8 +27,16 @@ testNetwork =
                 >>= relu
                 >>= conv kernel_size strides filters convParams
                 >>= batchNormalize emptyHyperparameters
-    (d1,d2) <- par return return out_data
-    add d1 d2 
+                >>= relu
+    return out_data
+
+
+shouldFail =
+  do
+    in_a <- input (mkTensor "input_a" [32,32,3] :: Tensor Float)
+    in_b <- input (mkTensor "input_b" [15,15] :: Tensor Float)           
+    add in_a in_b
+
 
 
 testArrow =
@@ -68,6 +76,22 @@ main =
     let (Just e') =  encodeRecipe r'
       
     putStrLn $ BLU.toString $ encodeNode [(Doc e')]
+
+    putStrLn "***************************************"
+
+    let r = build shouldFail
+    let (Just e) = encodeRecipe r
+
+    putStrLn $ BLU.toString $ encodeNode [(Doc e)]
+
+    let m = readRecipe $ encodeNode [(Doc e)]
+
+    putStrLn $ show m 
+
+    putStrLn "***************************************"
+
+    
+
     
   
     --putStrLn $ show $ numOperations (build testNetwork)

@@ -54,24 +54,28 @@ operation :: ( TensorRepr a)
 operation _ [] = error "No inputs specified" 
 operation op ts =
   let ids = map (\t -> (tensorId t)) ts
-      tensor = head ts
   in 
   do i <- getId
      let nom = "tensor" ++ show i
      tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])
-   
-     let result =  mkTensor nom (transformDim op (tensorDim tensor))
+
+     let result_dim = (transformDim op (map tensorDim ts)) 
+
+     -- Evaluate for the side effect of error 
+     (result_dim `seq` return ()) 
+       
+     let result =  mkTensor nom result_dim
      return result -- id {-(transform op)-}  result -- TODO: FIX
 
 
-transformDim :: Ingredient -> [Integer] -> [Integer]
+transformDim :: Ingredient -> [Dimensions] -> Dimensions
 transformDim op i =
   let i' = toValue i
       (Ingredient _ a h _ exp) = op
       e = Map.empty
   in  case (runEval h a e (evalApply exp i')) of
         Left (EvalError s) -> error $ "Error evaluating transformation function\n" ++ " " ++ s ++ "\n"
-        Right l@(ListVal _) -> fromValue l
+        Right l@(ListVal _) -> error $ show l -- (fromValue l)
 
 
 build :: Coppe a -> Recipe
