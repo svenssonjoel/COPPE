@@ -144,14 +144,23 @@ evalTiny (EIf  e1 e2 e3) =
       (Right (BoolVal False)) -> evalTiny e3
       (Left (EvalError s))    -> return $ Left $ EvalError s
 evalTiny (EApp e1 e2)    =
-  do v <- evalTiny e2
+  do args <- evalArgs e2
      f <- evalTiny e1
-     case (f,v) of
+     case (f,args) of
        (Right f, Right v) -> evalApp f v
        (Left e, _)        -> return $ Left e
        (_, Left e)        -> return $ Left e
   
 evalTiny x = error $ "Not implemented: " ++ show x 
+
+evalArgs :: [AppArg] -> Eval (Either EvalError Value)
+evalArgs (es) =
+  do
+    res <- mapM (\(AppArg e) -> evalTiny e) es
+    let (ls,rs) = partitionEithers res
+    case ls of
+      [] -> return $ Right $ ListVal $ rights res
+      (x:_) -> return $ Left x 
 
 evalApp :: Value -> Value -> Eval (Either EvalError Value)
 evalApp (StringVal "length")  (ListVal l) = return $ Right $ toValue (length l)
