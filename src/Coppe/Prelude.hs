@@ -45,14 +45,14 @@ convTransform = case parseTiny prg of
   where prg =
           unlines $ 
           ["fun dim -> ",
-           "  let ndims = length dim in",
-           "  let ok = length kernel_size == ndims - 1 && length strides == ndims - 1 in",
-           "  let dims = take (ndims - 1) dim in",
-           "  let newDims = zipWith3 (fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)))",
-           "                dim ",
-           "                kernel_size ",
-           "                strides in",
-           "  if ok then (extend newDims filters) else error" ]
+           "  let ndims = length(dim) in",
+           "  let ok = length(kernel_size) == ndims - 1 && length(strides) == ndims - 1 in",
+           "  let dims = take(ndims - 1, dim) in",
+           "  let newDims = zipWith3(fun d k s -> ((d - k + 2 * (k - 1)) / (s + 1)),",
+           "                dims, ",
+           "                kernel_size, ",
+           "                strides) in",
+           "  if ok then extend(newDims,filters) else error" ]
 
 
 addTransform :: Exp
@@ -62,11 +62,11 @@ addTransform = case parseTiny prg of
   where prg =
           unlines $
           ["fun d1 d2 -> ",
-           "  let nd1 = length d1 in",
-           "  let nd2 = length d2 in",
+           "  let nd1 = length(d1) in",
+           "  let nd2 = length(d2) in",
            "  let ndim_ok = nd1 == nd2 in",
-           "  let ok_list = zipWith (fun a b -> a == b) d1 d2 in",
-           "  if ndim_ok && !(elem False ok_list) then d1 else error" ]
+           "  let ok_list = zipWith((fun a b -> a == b), d1, d2) in",
+           "  if ndim_ok && !elem(False, ok_list) then d1 else error" ]
   
 
 tinyId :: Exp

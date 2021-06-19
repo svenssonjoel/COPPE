@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.Either
 import qualified Data.Map as Map
 import Control.Monad.State
-
+import MonadUtils
 
 data ParseError = ParseError String
 
@@ -108,13 +108,14 @@ evalTiny (EBool BTrue)   = return $ Right $ toValue True
 evalTiny (EBool BFalse)  = return $ Right $ toValue False
 evalTiny (EVar i)    =
   do res <- lookupBinding (identToString i)
+     ( EvalState h m e) <- get
      case res of
        Just v -> return $ Right v
        Nothing -> if (identToString i) `elem` builtIn
                   then return $ Right (StringVal (identToString i))
                   else return $
                        Left $
-                       EvalError $ "Ident " ++ identToString i ++ "is not present in environment, annotations or hyperparameters."
+                       EvalError $ "Ident " ++ identToString i ++ " is not present in environment, annotations or hyperparameters: " ++ show e
                        
 evalTiny (EAdd e1 op e2) = evalAdd op e1 e2
 evalTiny (EMul e1 op e2) = evalMul op e1 e2
@@ -172,15 +173,32 @@ evalApp (StringVal "take")   (ListVal [IntVal n, ListVal l]) =
   return $ Right $ ListVal (take (fromInteger n) l)
 evalApp (StringVal "take") a = return $ Left $ EvalError $ "Argument to take incorrect: " ++ show a
 evalApp (StringVal "extend") (ListVal [ListVal l1, a2]) = return $ Right $ ListVal (l1 ++ [a2])
-evalApp (StringVal "zipWith3") (ListVal [CloVal f args h a e, ListVal l1, ListVal l2, ListVal l3]) =
-  local $
-  do
-    put (EvalState h a e) 
-    addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
-    evalTiny f
+evalApp (StringVal "zipWith3") (ListVal [closure, ListVal l1, ListVal l2, ListVal l3]) =
+  do 
+    res <- evalZipWith3 closure (ListVal l1) (ListVal l2) (ListVal l3)
+    let (ls,rs) = partitionEithers res
+    case ls of
+      [] -> return $ Right $ ListVal rs
+      (x:_) -> return $ Left x
+
+  -- Just wrong! 
+  -- local $
+  -- do
+  --   put (EvalState h a e) 
+  --   addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
+  --   evalTiny f
 evalApp (StringVal"zipWith3") _ = return $ Left $ EvalError "Argument to zipWith3 incorrect."
 evalApp (StringVal x) _ = return $ Left $ EvalError $ "Unknown function: " ++ x
 evalApp _ _ = return $ Left $ EvalError "Unknown function."
+
+evalZipWith3 (CloVal f args h a e) (ListVal ls1) (ListVal ls2) (ListVal ls3) =
+  zipWith3M body ls1 ls2 ls3
+  where
+    body x y z =
+      local $
+      do put $ EvalState h a e
+         addAllBindings args (ListVal [ListVal ls1, ListVal ls2, ListVal ls3])
+         evalTiny f
 
 local :: Eval (Either EvalError a) -> Eval (Either EvalError a)
 local e =
@@ -194,7 +212,7 @@ addAllBindings [] (ListVal []) = return $ Right ()
 addAllBindings (x:xs) (ListVal (v:vs)) =
   case x of
     (Arg i) -> do addBinding (identToString i) v
-                  return $ Right ()
+                  addAllBindings xs (ListVal vs)
                         
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
 
@@ -214,11 +232,14 @@ evalAdd aop e1 e2 =
          op = case aop of
                 Plus -> (+)
                 Minus -> (-)
+         opstr = case aop of
+                   Plus -> " + "
+                   Minus -> " - "
      let r = case (v1,v2) of
                (Right (IntVal i1), Right (IntVal i2)) -> Right $ IntVal (op i1 i2)
                (Right (IntVal i1), Right (FloatVal f2)) -> Right $ FloatVal (op (fromIntegral i1) f2)
                (Right (FloatVal f1), Right (IntVal i2)) -> Right $ FloatVal (op f1 (fromIntegral i2))
-               (_, _) -> Left $ EvalError "Arithmetic error"
+               (x, y) -> Left $ EvalError $ "Arithmetic error: " ++ show x ++ opstr ++ show y
      return r
 
 evalMul :: MulOp -> Exp -> Exp -> Eval (Either EvalError Value)
@@ -230,12 +251,12 @@ evalMul mop e1 e2 =
                           (Right (IntVal i1), Right (IntVal i2)) -> Right $ IntVal (i1 * i2)
                           (Right (IntVal i1), Right (FloatVal f2)) -> Right $ FloatVal ((fromIntegral i1) * f2)
                           (Right (FloatVal f1), Right (IntVal i2)) -> Right $ FloatVal (f1 * (fromIntegral i2))
-                          (_, _) -> Left $ EvalError "Arithmetic error"
+                          (x, y) -> Left $ EvalError $ "Arithmetic error: " ++ show x ++ " * " ++ show y
                Div -> case (v1,v2) of
                         (Right (IntVal i1), Right (IntVal i2)) -> Right $ IntVal (div i1 i2)
                         (Right (IntVal i1), Right (FloatVal f2)) -> Right $ FloatVal ((fromIntegral i1) / f2)
                         (Right (FloatVal f1), Right (IntVal i2)) -> Right $ FloatVal (f1 / (fromIntegral i2))
-                        (_, _) -> Left $ EvalError "Arithmetic error"
+                        (x, y) -> Left $ EvalError $ "Arithmetic error: " ++ show x ++ " / " ++ show y
      return r
 
 evalRel :: RelOp -> Exp -> Exp -> Eval (Either EvalError Value)
