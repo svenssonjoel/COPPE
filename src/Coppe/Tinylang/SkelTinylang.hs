@@ -27,8 +27,8 @@ transExp x = case x of
   EInt integer -> failure x
   EFloat double -> failure x
   EBool boolean -> failure x
-  EError -> failure x
   EVar ident -> failure x
+  EString string -> failure x
 transAddOp :: AddOp -> Result
 transAddOp x = case x of
   Plus -> failure x

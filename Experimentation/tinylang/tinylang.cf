@@ -14,8 +14,8 @@ EApp.    Exp6 ::= Exp6 "(" [ AppArg ] ")" ;
 EInt. 	 Exp7 ::= Integer ;
 EFloat.  Exp7 ::= Double ;
 EBool.   Exp7 ::= Boolean ;
-EError.  Exp7 ::= "error" ;
 EVar.    Exp7 ::= Ident ;
+EString. Exp7 ::= String ;
 
 Plus.   AddOp ::= "+" ;
 Minus.  AddOp ::= "-" ;
@@ -32,14 +32,11 @@ EQC.  RelOp ::= "==" ;
 coercions 	Exp 	7 ;
 separator       Exp     "";
 
-
 Arg. Arg ::= Ident  ;
 separator Arg "";
 
 AppArg. AppArg ::= Exp ;
 separator AppArg ",";
-
-
 
 BTrue.  Boolean ::= "True" ;
 BFalse. Boolean ::= "False" ;

@@ -27,15 +27,19 @@ followed by an unsigned or negative exponent.
 
 
 
+String literals //String// have the form
+``"``//x//``"``}, where //x// is any sequence of any characters
+except ``"`` unless preceded by ``\``.
+
+
 
 
 ===Reserved words and symbols===
 The set of reserved words is the set of terminals appearing in the grammar. Those reserved words that consist of non-letter characters are called symbols, and they are treated in a different way from those that are similar to identifiers. The lexer follows rules familiar from languages like Haskell, C, and Java, including longest match and spacing conventions.
 
 The reserved words used in tinylang are the following:
-  | ``False`` | ``True`` | ``else`` | ``error``
-  | ``fun`` | ``if`` | ``in`` | ``let``
-  | ``then`` |  |  | 
+  | ``False`` | ``True`` | ``else`` | ``fun``
+  | ``if`` | ``in`` | ``let`` | ``then``
 
 The symbols used in tinylang are the following:
   | -> | = | || | &&
@@ -73,8 +77,8 @@ All other symbols are terminals.
   | //Exp7// | -> | //Integer// 
   |  |  **|**  | //Double// 
   |  |  **|**  | //Boolean// 
-  |  |  **|**  | ``error`` 
   |  |  **|**  | //Ident// 
+  |  |  **|**  | //String// 
   |  |  **|**  | ``(`` //Exp// ``)`` 
   | //AddOp// | -> | ``+`` 
   |  |  **|**  | ``-`` 

@@ -22,8 +22,8 @@ data Exp
     | EInt Integer
     | EFloat Double
     | EBool Boolean
-    | EError
     | EVar Ident
+    | EString String
   deriving (Eq, Ord, Show, Read)
 
 data AddOp = Plus | Minus

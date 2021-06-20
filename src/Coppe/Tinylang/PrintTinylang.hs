@@ -98,8 +98,8 @@ instance Print Exp where
     EInt n -> prPrec i 7 (concatD [prt 0 n])
     EFloat d -> prPrec i 7 (concatD [prt 0 d])
     EBool boolean -> prPrec i 7 (concatD [prt 0 boolean])
-    EError -> prPrec i 7 (concatD [doc (showString "error")])
     EVar id -> prPrec i 7 (concatD [prt 0 id])
+    EString str -> prPrec i 7 (concatD [prt 0 str])
   prtList _ [] = (concatD [])
   prtList _ (x:xs) = (concatD [prt 0 x, prt 0 xs])
 instance Print AddOp where

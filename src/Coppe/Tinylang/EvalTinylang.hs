@@ -136,7 +136,7 @@ evalTiny (ENot e1) = do a <- evalTiny e1
                           _ -> return $ Left $ EvalError "not a boolean used in !"
                                                                                                    
 evalTiny (ELam as e)     = evalLam as e
-evalTiny EError          = return $ Left $ EvalError "Program finishes in error"
+-- evalTiny EError          = return $ Left $ EvalError "Program finishes in error"
 evalTiny (EIf  e1 e2 e3) =
   do
     cond <- evalTiny e1
