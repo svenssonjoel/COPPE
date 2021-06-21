@@ -42,19 +42,32 @@ type Eval a = State EvalState a
 identToString (Ident s) = s
 argToString   (Arg (Ident s)) = s 
 
+builtIn :: [String]
+builtIn = ["length",
+           "tail",
+           "take",
+           "extend",
+           "zipWith3",
+           "zipWith",
+           "elem",
+           "error",
+           "elem"]
+
 -- LookupBinding ignores the FunParams that may be in a hypermap.
 lookupBinding :: String -> Eval (Maybe Value)
 lookupBinding s =
-  do
-    (EvalState h a e) <- get
-    let r = case Map.lookup s h of
-              Just (ValParam v) -> Just v
-              _ -> case Map.lookup s a of
-                     Just v -> Just v
-                     _ -> case Map.lookup s e of
-                            Just v -> Just v
-                            _ -> Nothing
-    return r
+    if (s `elem` builtIn)
+      then return $ Just $ StringVal s
+      else do
+        (EvalState h a e) <- get
+        let r = case Map.lookup s h of
+                  Just (ValParam v) -> Just v
+                  _ -> case Map.lookup s a of
+                         Just v -> Just v
+                         _ -> case Map.lookup s e of
+                                Just v -> Just v
+                                _ -> Nothing
+        return r
 
 addBinding :: String -> Value -> Eval ()
 addBinding s v =
@@ -78,18 +91,10 @@ evalApply e v =
             addAllBindings args v
             evalTiny f
        Right _ -> return $ Left $ EvalError "evalApply: Not a function"
-
-  
-builtIn :: [String]
-builtIn = ["length",
-           "tail",
-           "take",
-           "extend",
-           "zipWith3",
-           "zipWith",
-           "elem"]
            
 
+-----------------------------
+-- EVALUATE A TINY PROGRAM --
 
 evalTiny :: Exp -> Eval (Either EvalError Value)
 evalTiny (ELet (EVar (Ident name)) ev e) =
@@ -106,6 +111,7 @@ evalTiny (EInt i)    = return $ Right $ toValue i
 evalTiny (EFloat d)  = return $ Right $ toValue d
 evalTiny (EBool BTrue)   = return $ Right $ toValue True
 evalTiny (EBool BFalse)  = return $ Right $ toValue False
+evalTiny (EString s)     = return $ Right $ toValue s
 evalTiny (EVar i)    =
   do res <- lookupBinding (identToString i)
      ( EvalState h m e) <- get
@@ -124,16 +130,16 @@ evalTiny (EOr  e1 e2)    = do a <- evalTiny e1
                               b <- evalTiny e2
                               case (a,b) of
                                 (Right (BoolVal a'), Right (BoolVal b')) -> return $ Right (BoolVal (a' || b'))
-                                (_,_) -> return $ Left $ EvalError "Not a boolean used in ||"
+                                (x,y) -> return $ Left $ EvalError $ "Not a boolean used in ||  ( " ++ show x ++ " || " ++ show y ++ ")"
 evalTiny (EAnd  e1 e2)    = do a <- evalTiny e1
                                b <- evalTiny e2
                                case (a,b) of
                                  (Right (BoolVal a'), Right (BoolVal b')) -> return $ Right (BoolVal (a' && b'))
-                                 (_,_) -> return $ Left $ EvalError "Not a boolean used in &&"
+                                 (x,y) -> return $ Left $ EvalError $ "Not a boolean used in &&  ( " ++ show x ++ " && " ++ show y ++ ")"
 evalTiny (ENot e1) = do a <- evalTiny e1
                         case a of
                           (Right (BoolVal a')) -> return $ Right (BoolVal (not a'))
-                          _ -> return $ Left $ EvalError "not a boolean used in !"
+                          x -> return $ Left $ EvalError $ "not a boolean used in !  ( " ++ show x ++ ")"
                                                                                                    
 evalTiny (ELam as e)     = evalLam as e
 -- evalTiny EError          = return $ Left $ EvalError "Program finishes in error"
@@ -152,7 +158,11 @@ evalTiny (EApp e1 e2)    =
        (Left e, _)        -> return $ Left e
        (_, Left e)        -> return $ Left e
   
-evalTiny x = error $ "Not implemented: " ++ show x 
+evalTiny x = error $ "Not implemented: " ++ show x
+
+------------------------
+-- EVALUATE ARGUMENTS -- 
+
 
 evalArgs :: [AppArg] -> Eval (Either EvalError Value)
 evalArgs (es) =
@@ -163,33 +173,83 @@ evalArgs (es) =
       [] -> return $ Right $ ListVal $ rights res
       (x:_) -> return $ Left x 
 
+
+--------------------------
+-- EVALUATE APPLICATION --
+
 evalApp :: Value -> Value -> Eval (Either EvalError Value)
-evalApp (StringVal "length")  (ListVal l) = return $ Right $ toValue (length l)
-evalApp (StringVal "length")  _  = return $ Left $ EvalError "Argument to length is not a list."
-evalApp (StringVal "tail")   (ListVal l) = return $ Right $ ListVal (tail l)
-evalApp (StringVal "tail")   _ = return $ Left $ EvalError "Argument to tail is not a list."
+evalApp (StringVal "length")  (ListVal [(ListVal l)])
+  = return $ Right $ toValue (length l)
 
-evalApp (StringVal "take")   (ListVal [IntVal n, ListVal l]) =
-  return $ Right $ ListVal (take (fromInteger n) l)
-evalApp (StringVal "take") a = return $ Left $ EvalError $ "Argument to take incorrect: " ++ show a
-evalApp (StringVal "extend") (ListVal [ListVal l1, a2]) = return $ Right $ ListVal (l1 ++ [a2])
-evalApp (StringVal "zipWith3") (ListVal [closure, ListVal l1, ListVal l2, ListVal l3]) =
-  do 
-    res <- evalZipWith3 closure (ListVal l1) (ListVal l2) (ListVal l3)
-    let (ls,rs) = partitionEithers res
-    case ls of
-      [] -> return $ Right $ ListVal rs
-      (x:_) -> return $ Left x
+evalApp (StringVal "length")  _
+  = return $ Left $ EvalError "Argument to length is not a list."
 
-  -- Just wrong! 
-  -- local $
-  -- do
-  --   put (EvalState h a e) 
-  --   addAllBindings args (ListVal [ListVal l1, ListVal l2, ListVal l3])
-  --   evalTiny f
-evalApp (StringVal"zipWith3") _ = return $ Left $ EvalError "Argument to zipWith3 incorrect."
-evalApp (StringVal x) _ = return $ Left $ EvalError $ "Unknown function: " ++ x
-evalApp _ _ = return $ Left $ EvalError "Unknown function."
+evalApp (StringVal "tail") (ListVal [(ListVal l)])
+  = return $ Right $ ListVal (tail l)
+  
+evalApp (StringVal "tail") _
+  = return $ Left $ EvalError "Argument to tail is not a list."
+
+evalApp (StringVal "take")   (ListVal [IntVal n, ListVal l])
+  = return $ Right $ ListVal (take (fromInteger n) l)
+  
+evalApp (StringVal "take") a
+  = return $ Left $ EvalError $ "Argument to take incorrect: " ++ show a
+
+evalApp (StringVal "extend") (ListVal [ListVal l1, a2])
+  = return $ Right $ ListVal (l1 ++ [a2])
+
+evalApp (StringVal "elem") (ListVal [v, (ListVal l)])
+  = return $ Right $ toValue (v `elem` l)
+
+evalApp (StringVal "elem") x
+  = return $ Left $ EvalError $ "Argument to elem incorrect: " ++ show x
+
+evalApp (StringVal "zipWith") (ListVal [closure, ListVal l1, ListVal l2])
+  = do
+  res <- evalZipWith closure (ListVal l1) (ListVal l2)
+  let (ls,rs) = partitionEithers res
+  case ls of
+    [] -> return $ Right $ ListVal rs
+    (x:_) -> return $ Left x
+
+evalApp (StringVal "zipWith3") (ListVal [closure, ListVal l1, ListVal l2, ListVal l3])
+  = do 
+      res <- evalZipWith3 closure (ListVal l1) (ListVal l2) (ListVal l3)
+      let (ls,rs) = partitionEithers res
+      case ls of
+        [] -> return $ Right $ ListVal rs
+        (x:_) -> return $ Left x
+
+evalApp (StringVal "zipWith3") _
+  = return $ Left $ EvalError "Argument to zipWith3 incorrect."
+
+evalApp (StringVal "error") (ListVal [])
+  = return $ Left $ EvalError $ "Tinylang program ended in error: unknown error "
+
+evalApp (StringVal "error") (ListVal [(StringVal s)])
+  = return $ Left $ EvalError $ "Tinylang program ended in error: " ++ s
+
+evalApp (StringVal "error") x
+  = return $ Left $ EvalError $ "Tinylang program ended in error: " ++ show x
+
+evalApp (StringVal x) _
+  = return $ Left $ EvalError $ "Unknown function: " ++ x
+
+evalApp _ _
+  = return $ Left $ EvalError "Unknown function."
+-- TODO: Closure application
+
+
+evalZipWith (CloVal f args h a e) (ListVal ls1) (ListVal ls2) =
+  zipWithM body ls1 ls2
+  where
+    body x y =
+      local $
+      do put $ EvalState h a e
+         addAllBindings args (ListVal [x, y])
+         evalTiny f
+
 
 evalZipWith3 (CloVal f args h a e) (ListVal ls1) (ListVal ls2) (ListVal ls3) =
   zipWith3M body ls1 ls2 ls3
@@ -197,7 +257,7 @@ evalZipWith3 (CloVal f args h a e) (ListVal ls1) (ListVal ls2) (ListVal ls3) =
     body x y z =
       local $
       do put $ EvalState h a e
-         addAllBindings args (ListVal [ListVal ls1, ListVal ls2, ListVal ls3])
+         addAllBindings args (ListVal [x, y, z])
          evalTiny f
 
 local :: Eval (Either EvalError a) -> Eval (Either EvalError a)

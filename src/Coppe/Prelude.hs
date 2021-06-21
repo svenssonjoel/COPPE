@@ -52,7 +52,7 @@ convTransform = case parseTiny prg of
            "                dims, ",
            "                kernel_size, ",
            "                strides) in",
-           "  if ok then extend(newDims,filters) else error" ]
+           "  if ok then extend(newDims,filters) else error(\"convTransform not ok!\")" ]
 
 
 addTransform :: Exp
@@ -66,7 +66,7 @@ addTransform = case parseTiny prg of
            "  let nd2 = length(d2) in",
            "  let ndim_ok = nd1 == nd2 in",
            "  let ok_list = zipWith((fun a b -> a == b), d1, d2) in",
-           "  if ndim_ok && !elem(False, ok_list) then d1 else error" ]
+           "  if ndim_ok && ! (elem(False, ok_list)) then d1 else error(\"addTransform not ok!\")" ]
   
 
 tinyId :: Exp

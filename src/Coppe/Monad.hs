@@ -75,7 +75,7 @@ transformDim op i =
       e = Map.empty
   in  case (runEval h a e (evalApply exp i')) of
         Left (EvalError s) -> error $ "Error evaluating transformation function\n" ++ " " ++ s ++ "\n"
-        Right l@(ListVal _) -> error $ show l -- (fromValue l)
+        Right l@(ListVal _) -> fromValue l
 
 
 build :: Coppe a -> Recipe
