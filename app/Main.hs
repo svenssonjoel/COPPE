@@ -59,33 +59,41 @@ main =
     
     let r = build testNetwork
     --putStrLn $ show r
+    case r of
+      Left err -> putStrLn $ "Error: " ++ (errorToString err)
+      Right r -> do    
+        let (Just e) = encodeRecipe r
 
-    let (Just e) = encodeRecipe r
+        putStrLn $ BLU.toString $ encodeNode [(Doc e)]
 
-    putStrLn $ BLU.toString $ encodeNode [(Doc e)]
+        let m = readRecipe $ encodeNode [(Doc e)]
 
-    let m = readRecipe $ encodeNode [(Doc e)]
-
-    putStrLn $ show m 
+        putStrLn $ show m 
 
     putStrLn "***************************************"
 
     let input = mkTensor "input_data" [32,32,3] ::Tensor Float 
     let c =  runCoppeArrow testArrow input
     let r' = build c
-    let (Just e') =  encodeRecipe r'
+    case r' of
+      Left err -> putStrLn $ "Error: " ++ (errorToString err)
+      Right r' -> do    
+        let (Just e') =  encodeRecipe r'
       
-    putStrLn $ BLU.toString $ encodeNode [(Doc e')]
+        putStrLn $ BLU.toString $ encodeNode [(Doc e')]
 
     putStrLn "***************************************"
 
     let r = build shouldFail
-    let (Just e) = encodeRecipe r
-    putStrLn $ BLU.toString $ encodeNode [(Doc e)]
+    case r of
+      Left err -> putStrLn $ "Error: " ++ (errorToString err)
+      Right r -> do    
+        let (Just e) = encodeRecipe r
+        putStrLn $ BLU.toString $ encodeNode [(Doc e)]
 
-    let m = readRecipe $ encodeNode [(Doc e)]
-
-    putStrLn $ show m 
+        let m = readRecipe $ encodeNode [(Doc e)]
+        
+        putStrLn $ show m 
 
     putStrLn "***************************************"
 

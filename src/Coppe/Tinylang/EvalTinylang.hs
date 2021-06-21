@@ -31,6 +31,13 @@ parseTiny s =
 - A tinylang program can refer to any of the annotations
   in the annotation map by name.
 - Should there be a way to tell those namespaces apart?
+
+TODOs
+
+- add some way to translate values to strings for use in error messages.
+- Odd function application syntax `f (arg1, ... , argn)`, fine by me but odd. see
+  what can be done.
+
 -} 
 
 data EvalState = EvalState HyperMap Annotation (Map.Map String Value)

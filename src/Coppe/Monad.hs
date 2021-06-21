@@ -11,19 +11,29 @@ module Coppe.Monad (
   empty,
   operation,
   producer,
-  build
+  build,
+  coppeError,
+  errorToString,
   ) where 
 
 import Coppe.AST
 import Control.Monad.Writer
 import Control.Monad.State
+import Control.Monad.Except
+import Control.Monad.Trans.Except
 import qualified  Control.Monad.Trans.State as S
 import Coppe.Tinylang.AbsTinylang
 import Coppe.Tinylang.EvalTinylang
 import qualified Data.Map as Map
 
-newtype Coppe a = Coppe (StateT Integer (Writer Recipe) a)
-  deriving (Functor, Applicative, Monad, MonadState Integer, MonadWriter Recipe)
+data CoppeError = CoppeError String
+
+coppeError :: String -> Coppe a
+coppeError str = throwError (CoppeError str)
+errorToString (CoppeError str) = str
+
+newtype Coppe a = Coppe (ExceptT CoppeError (StateT Integer (Writer Recipe)) a)
+  deriving (Functor, Applicative, Monad, MonadState Integer, MonadWriter Recipe, MonadError CoppeError)
 
 getId :: Coppe Integer
 getId =
@@ -59,24 +69,27 @@ operation op ts =
      let nom = "tensor" ++ show i
      tell $ Operation (hyperSet op [("input_layer", valParam ids), ("name", valParam nom)])
 
-     let result_dim = (transformDim op (map tensorDim ts)) 
+     let t_res = (transformDim op (map tensorDim ts))
+     case t_res of
+       Left (EvalError s) -> coppeError s
+       Right val -> do
+         let result_dim = fromValue val
+         let result =  mkTensor nom result_dim
+         return result 
 
-     -- Evaluate for the side effect of error 
-     (result_dim `seq` return ()) 
-       
-     let result =  mkTensor nom result_dim
-     return result -- id {-(transform op)-}  result -- TODO: FIX
 
-
-transformDim :: Ingredient -> [Dimensions] -> Dimensions
+transformDim :: Ingredient -> [Dimensions] -> Either EvalError Value
 transformDim op i =
   let i' = toValue i
       (Ingredient _ a h _ exp) = op
       e = Map.empty
-  in  case (runEval h a e (evalApply exp i')) of
-        Left (EvalError s) -> error $ "Error evaluating transformation function\n" ++ " " ++ s ++ "\n"
-        Right l@(ListVal _) -> fromValue l
+  in runEval h a e (evalApply exp i')
 
 
-build :: Coppe a -> Recipe
-build (Coppe m) = execWriter $ evalStateT m 0
+-- build :: Coppe a -> Either CoppeError Recipe
+build (Coppe m) =
+  let (a,w) = runWriter $ evalStateT (runExceptT m) 0
+  in case a of
+       Right _ -> Right w
+       Left e  -> Left e 
+
