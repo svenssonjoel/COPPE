@@ -67,7 +67,13 @@ addTransform = case parseTiny prg of
            "  let ndim_ok = nd1 == nd2 in",
            "  let ok_list = zipWith((fun a b -> a == b), d1, d2) in",
            "  if ndim_ok && ! (elem(False, ok_list)) then d1 else error(\"addTransform not ok!\")" ]
-  
+
+flattenTransform :: Exp
+flattenTransform = case parseTiny prg of
+                     Left (ParseError s) -> error s
+                     Right e -> e
+  where prg = "fun d1 -> prod(d1)"
+
 
 tinyId :: Exp
 tinyId = case parseTiny "fun a -> a" of
@@ -137,22 +143,12 @@ mkConv kernel_size strides filters hyps =
   where
     hm = (Map.fromList hyps)
 
--- convTransform :: [Integer] -> [Integer] -> Integer -> Dimensions -> Dimensions
--- convTransform kernel_size strides filters tensorDim =
---   if ok
---   then newDims ++ [filters]
---   else error "(conv) Incompatible hyperparameters and tensor dimensionality."
---   where
---     ndims = length tensorDim
---     ok = length kernel_size == ndims - 1 && length strides  == ndims - 1
---     dims = take (ndims-1) tensorDim
---     newDims = zipWith3 (\d k s -> (div (d - k + 2 * (k - 1)) (s + 1)))
---               dims
---               kernel_size
---               strides
+{-----------}
+{- POOLING -} 
 
-
-             
+mkPooling :: [Integer] -> [Integer] -> Hyperparameters -> Ingredient
+mkPooling pool_size strides = undefined -- I dont know what to do 
+         
 {----------------}
 {- RELU         -}
 
@@ -172,6 +168,13 @@ mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) 
 
 mkAdd :: Ingredient
 mkAdd = Ingredient "add" (Map.empty) (Map.empty) False addTransform
+
+
+{-----------}
+{- FLATTEN -}
+
+mkFlatten :: Hyperparameters -> Ingredient
+mkFlatten hyps = Ingredient "flatten" (Map.empty) (Map.fromList hyps) False flattenTransform
 
 
 {----------------}
