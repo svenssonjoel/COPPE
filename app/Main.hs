@@ -63,8 +63,9 @@ mnist_model t =
       strides = [1,1]
   in 
   do
-    conv kernel_size strides filters emptyHyperparameters t
-    >>= batchNormalize emptyHyperparameters
+    conv kernel_size strides 32 emptyHyperparameters t
+    >>= relu
+    >>= conv kernel_size strides 64 emptyHyperparameters
     >>= relu
       
 
