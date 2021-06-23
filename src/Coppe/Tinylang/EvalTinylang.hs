@@ -58,7 +58,9 @@ builtIn = ["length",
            "zipWith",
            "elem",
            "error",
-           "elem"]
+           "elem",
+           "floor",
+           "ceil"]
 
 -- LookupBinding ignores the FunParams that may be in a hypermap.
 lookupBinding :: String -> Eval (Maybe Value)
@@ -191,9 +193,18 @@ evalApp (StringVal "length")  (ListVal [(ListVal l)])
 evalApp (StringVal "length")  _
   = return $ Left $ EvalError "Argument to length is not a list."
 
+evalApp (StringVal "floor") (FloatVal f)
+  = return $ Right $ toValue ((floor f) :: Integer)
+evalApp (StringVal "floor")  _
+  = return $ Left $ EvalError "Argument to floor is not a float."
+
+evalApp (StringVal "ceil") (FloatVal f)
+  = return $ Right $ toValue ((ceiling f) :: Integer)
+evalApp (StringVal "ceil")  _
+  = return $ Left $ EvalError "Argument to ceil is not a float."
+
 evalApp (StringVal "tail") (ListVal [(ListVal l)])
   = return $ Right $ ListVal (tail l)
-  
 evalApp (StringVal "tail") _
   = return $ Left $ EvalError "Argument to tail is not a list."
 
@@ -309,6 +320,7 @@ evalAdd aop e1 e2 =
                (x, y) -> Left $ EvalError $ "Arithmetic error: " ++ show x ++ opstr ++ show y
      return r
 
+-- Division always results in a float value
 evalMul :: MulOp -> Exp -> Exp -> Eval (Either EvalError Value)
 evalMul mop e1 e2 =
   do v1 <- evalTiny e1
@@ -320,7 +332,7 @@ evalMul mop e1 e2 =
                           (Right (FloatVal f1), Right (IntVal i2)) -> Right $ FloatVal (f1 * (fromIntegral i2))
                           (x, y) -> Left $ EvalError $ "Arithmetic error: " ++ show x ++ " * " ++ show y
                Div -> case (v1,v2) of
-                        (Right (IntVal i1), Right (IntVal i2)) -> Right $ IntVal (div i1 i2)
+                        (Right (IntVal i1), Right (IntVal i2)) -> Right $ FloatVal ((fromIntegral i1) / (fromIntegral i2))
                         (Right (IntVal i1), Right (FloatVal f2)) -> Right $ FloatVal ((fromIntegral i1) / f2)
                         (Right (FloatVal f1), Right (IntVal i2)) -> Right $ FloatVal (f1 / (fromIntegral i2))
                         (x, y) -> Left $ EvalError $ "Arithmetic error: " ++ show x ++ " / " ++ show y

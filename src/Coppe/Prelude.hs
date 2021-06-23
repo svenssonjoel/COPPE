@@ -38,6 +38,8 @@ import qualified Data.Map as Map
 {------------------------------------------------------------}
 {- TinyLang Functions -}
 
+-- TODO: Implement padding. 
+
 convTransform :: Exp 
 convTransform = case parseTiny prg of
                   Left (ParseError s) -> error s
@@ -54,6 +56,22 @@ convTransform = case parseTiny prg of
            "                strides) in",
            "  if ok then extend(newDims,filters) else error(\"convTransform not ok!\")" ]
 
+-- Assume "Valid" padding
+-- Must implement "same" and "valid"
+
+-- Dilation could be present in the hyperparameters
+
+maxPooling2DTransformSame :: Exp
+maxPooling2DTransformSame = tinyId
+
+
+--- floor(((H * ( -dilation[0] * (kernel_size[0] -1 )) -1 ) / stride[0]) + 1)
+--- floor(((W * ( -dilation[1] * (kernel_size[1] -1 )) -1 ) / stride[1]) + 1)
+
+-- https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html
+
+maxPooling2DTransform :: Exp
+maxPooling2DTransform = undefined
 
 addTransform :: Exp
 addTransform = case parseTiny prg of
@@ -74,6 +92,21 @@ flattenTransform = case parseTiny prg of
                      Right e -> e
   where prg = "fun d1 -> prod(d1)"
 
+
+denseTransform :: Exp
+denseTransform = case parseTiny prg of
+                 Left (ParseError s) -> error s
+                 Right e -> e
+  where prg =
+          unlines $
+          ["fun dim -> nunits"]
+
+
+dropoutTransform :: Exp
+dropoutTransform = tinyId
+
+softmaxTransform :: Exp
+softmaxTransform = tinyId
 
 tinyId :: Exp
 tinyId = case parseTiny "fun a -> a" of
