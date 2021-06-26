@@ -190,6 +190,10 @@ mkDropout rate hyps =
   in Ingredient "dropout" (Map.empty) hyps' False dropoutTransform
 
 
+{- Softmax -}
+mkSoftmax :: Hyperparameters -> Ingredient
+mkSoftmax hyps = Ingredient "softmax" (Map.empty) (Map.fromList hyps) False softmaxTransform
+
 {----------------}
 {- Optimizer    -}
 
