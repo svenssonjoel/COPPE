@@ -125,36 +125,6 @@ glorotUniform = NamedFun "glorot_uniform"
 
 zeroes = NamedFun "Zeroes"
 
-{------------------------------------------------------------}
-{- Planning
-
--- conv2D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
--- conv3D :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
-
--- Type instance for a ?
--- add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
--- add a b =
---   if ok
---   then operation [a,b] Add emptyHyperparameters
---   else error $ "Mismatching tensor dimensions in Addition layer: " ++ show (tensorDim a) ++ "=/=" ++ show (tensorDim b) 
---   where
---     ok = length (tensorDim a) == length (tensorDim b) &&
---          and (zipWith (==) (tensorDim a) (tensorDim b))
---   --- Check dimensions match.
-
--- rep :: Integer -> (Tensor a -> Coppe (Tensor a)) -> Tensor a -> Coppe (Tensor a)
--- rep 0 f t = return t
--- rep n f t =
---    do t' <- f t
---       rep (n - 1) f t'
-
--- skip :: Tensor a -> (Tensor a -> Coppe (Tensor b)) -> Coppe (Tensor a, Tensor b)
--- skip t f =
---   do t' <- f t
---      return (t, t')
-
--}
-
 {----------------}
 {- Input layers -} 
 
@@ -208,6 +178,16 @@ mkAdd = Ingredient "add" (Map.empty) (Map.empty) False addTransform
 
 mkFlatten :: Hyperparameters -> Ingredient
 mkFlatten hyps = Ingredient "flatten" (Map.empty) (Map.fromList hyps) False flattenTransform
+
+
+{-----------}
+{- Dropout -}
+
+mkDropout :: Double -> Hyperparameters -> Ingredient
+mkDropout rate hyps =
+  let hyps' = Map.union ( Map.fromList [("rate", valParam rate)]) hm
+      hm   = Map.fromList hyps
+  in Ingredient "dropout" (Map.empty) hyps' False dropoutTransform
 
 
 {----------------}
