@@ -62,11 +62,27 @@ convTransform = case parseTiny prg of
 -- Dilation could be present in the hyperparameters
 
 maxPooling2DTransformSame :: Exp
-maxPooling2DTransformSame = tinyId
+maxPooling2DTransformSame =
+  case parseTiny prg of
+                  Left (ParseError s) -> error s
+                  Right e -> e 
+  where prg =
+          unlines $ 
+          ["fun dim -> ",
+           "  let pw = index(0, pool_size)",
+           "  let ph = index(1, pool_size)",
+           "  let sw = index(0, strides)",
+           "  let sh = index(1, strides)", 
+           "  let dw = index(0, dilation)",
+           "  let dh = index(1, dilation)",
+           "  let w  = index(0, dim)",
+           "  let h  = index(1, dim)",
+           "  in list( floor( (((w * (-dw * (pw - 1)) - 1) / sw))) + 1,",
+            "          floor( (((h * (-dh * (ph - 1)) - 1) / sh))) + 1)"]
 
 
---- floor(((H * ( -dilation[0] * (kernel_size[0] -1 )) -1 ) / stride[0]) + 1)
---- floor(((W * ( -dilation[1] * (kernel_size[1] -1 )) -1 ) / stride[1]) + 1)
+--- floor(((H * ( -dilation[0] * (pool_size[0] -1 )) -1 ) / stride[0]) + 1)
+--- floor(((W * ( -dilation[1] * (pool_size[1] -1 )) -1 ) / stride[1]) + 1)
 
 -- https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html
 
@@ -189,10 +205,20 @@ mkDropout rate hyps =
       hm   = Map.fromList hyps
   in Ingredient "dropout" (Map.empty) hyps' False dropoutTransform
 
-
+{-----------}
 {- Softmax -}
 mkSoftmax :: Hyperparameters -> Ingredient
 mkSoftmax hyps = Ingredient "softmax" (Map.empty) (Map.fromList hyps) False softmaxTransform
+
+{-------------}
+{- Pooling2D -}
+mkPooling2D :: Hyperparameters -> Ingredient
+mkPooling2D hyps = Ingredient "pooling2d" (Map.empty) (Map.union defaultHyps hyps') False maxPooling2DTransform
+  where defaultHyps = Map.fromList [("dilation", ValParam $ ListVal [IntVal 0, IntVal 0])
+                                   ,("strides" , ValParam $ ListVal [IntVal 1, IntVal 1])]
+        hyps' = Map.fromList hyps
+                                                      
+
 
 {----------------}
 {- Optimizer    -}
