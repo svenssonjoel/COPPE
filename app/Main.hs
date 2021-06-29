@@ -72,6 +72,8 @@ mnist_model t =
     >>= maxPooling2D [2,2] none
     >>= flatten none
     >>= dropout 0.5 none
+    >>= dense 10 none
+    >>= softmax none
 
 
 

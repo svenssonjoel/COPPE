@@ -23,6 +23,7 @@ module Coppe.Prelude (
                 , dropout
                 , softmax
                 , maxPooling2D
+                , dense
                 , par
                 -- Arrow implementations
                 , convA
@@ -268,6 +269,8 @@ softmax h t1 = operation (mkSoftmax h) [t1]
 maxPooling2D :: TensorRepr a => [Integer] -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
 maxPooling2D pool_size h t1 = operation (mkMaxPooling2D pool_size h) [t1]
 
+dense :: TensorRepr a => Integer -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
+dense nunits h t1 = operation (mkDense nunits h) [t1]
 
 {-Combinators-}
 
