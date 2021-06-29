@@ -61,13 +61,17 @@ mnist_model t =
   let kernel_size = [3,3]
       filters = 32
       strides = [1,1]
+      none = emptyHyperparameters
   in 
   do
-    conv kernel_size strides 32 emptyHyperparameters t
+    conv kernel_size strides 32 none t
     >>= relu
-    >>= conv kernel_size strides 64 emptyHyperparameters
+    >>= maxPooling2D [2,2] none
+    >>= conv kernel_size strides 64 none
     >>= relu
-      
+    >>= maxPooling2D [2,2] none
+    >>= flatten none
+    >>= dropout 0.5 none
 
 
 

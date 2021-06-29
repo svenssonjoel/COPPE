@@ -22,7 +22,7 @@ module Coppe.Prelude (
                 , flatten
                 , dropout
                 , softmax
-                , pooling2D
+                , maxPooling2D
                 , par
                 -- Arrow implementations
                 , convA
@@ -175,13 +175,19 @@ mkPooling pool_size strides = undefined -- I dont know what to do
 {----------------}
 {- RELU         -}
 
-
 mkRelu :: Hyperparameters -> Ingredient
 mkRelu hyps = Ingredient "relu" (Map.empty) (Map.fromList hyps) True tinyId  
 
+{---------------}
+{- Dense Layer -}
+
+mkDense :: Integer -> Hyperparameters -> Ingredient
+mkDense nunits hyps = Ingredient "dense" (Map.empty) hyps' True denseTransform
+  where hyps' = Map.union (Map.fromList [("nunits", valParam nunits)]) hm
+        hm    = Map.fromList hyps
+
 {-----------------------}
 {- Batch normalization -}
-
 
 mkBatchNorm :: Hyperparameters -> Ingredient
 mkBatchNorm hyps = Ingredient "batch_normalize" (Map.empty) (Map.fromList hyps) True tinyId  
@@ -216,8 +222,8 @@ mkSoftmax hyps = Ingredient "softmax" (Map.empty) (Map.fromList hyps) False soft
 
 {-------------}
 {- Pooling2D -}
-mkPooling2D :: [Integer] -> Hyperparameters -> Ingredient
-mkPooling2D pool_size hyps
+mkMaxPooling2D :: [Integer] -> Hyperparameters -> Ingredient
+mkMaxPooling2D pool_size hyps
   = Ingredient "pooling2d" (Map.empty) (Map.union defaultHyps hyps') False maxPooling2DTransform
   where defaultHyps = Map.fromList [("dilation", ValParam $ ListVal [IntVal 0, IntVal 0])
                                    ,("strides" , ValParam $ ListVal [IntVal 1, IntVal 1])
@@ -259,8 +265,8 @@ dropout d h t1 = operation (mkDropout d h) [t1]
 softmax :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
 softmax h t1 = operation (mkSoftmax h) [t1]
 
-pooling2D :: TensorRepr a => [Integer] -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
-pooling2D pool_size h t1 = operation (mkPooling2D pool_size h) [t1]
+maxPooling2D :: TensorRepr a => [Integer] -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
+maxPooling2D pool_size h t1 = operation (mkMaxPooling2D pool_size h) [t1]
 
 
 {-Combinators-}
