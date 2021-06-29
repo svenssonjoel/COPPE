@@ -19,6 +19,10 @@ module Coppe.Prelude (
                 , batchNormalize
                 , relu
                 , add
+                , flatten
+                , dropout
+                , softmax
+                , pooling2D
                 , par
                 -- Arrow implementations
                 , convA
@@ -212,10 +216,12 @@ mkSoftmax hyps = Ingredient "softmax" (Map.empty) (Map.fromList hyps) False soft
 
 {-------------}
 {- Pooling2D -}
-mkPooling2D :: Hyperparameters -> Ingredient
-mkPooling2D hyps = Ingredient "pooling2d" (Map.empty) (Map.union defaultHyps hyps') False maxPooling2DTransform
+mkPooling2D :: [Integer] -> Hyperparameters -> Ingredient
+mkPooling2D pool_size hyps
+  = Ingredient "pooling2d" (Map.empty) (Map.union defaultHyps hyps') False maxPooling2DTransform
   where defaultHyps = Map.fromList [("dilation", ValParam $ ListVal [IntVal 0, IntVal 0])
-                                   ,("strides" , ValParam $ ListVal [IntVal 1, IntVal 1])]
+                                   ,("strides" , ValParam $ ListVal [IntVal 1, IntVal 1])
+                                   ,("pool_size", valParam pool_size)]
         hyps' = Map.fromList hyps
                                                       
 
@@ -243,6 +249,18 @@ relu t = operation (mkRelu emptyHyperparameters) [t]
 
 add :: TensorRepr a => Tensor a -> Tensor a -> Coppe (Tensor a)
 add t1 t2 = operation (mkAdd) [t1,t2]
+
+flatten :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+flatten h t1 = operation (mkFlatten h) [t1]
+
+dropout :: TensorRepr a => Double -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
+dropout d h t1 = operation (mkDropout d h) [t1]
+
+softmax :: TensorRepr a => Hyperparameters -> Tensor a -> Coppe (Tensor a)
+softmax h t1 = operation (mkSoftmax h) [t1]
+
+pooling2D :: TensorRepr a => [Integer] -> Hyperparameters -> Tensor a -> Coppe (Tensor a)
+pooling2D pool_size h t1 = operation (mkPooling2D pool_size h) [t1]
 
 
 {-Combinators-}
