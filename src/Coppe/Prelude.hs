@@ -66,8 +66,8 @@ convTransform = case parseTiny prg of
 
 -- Dilation could be present in the hyperparameters
 
-maxPooling2DTransformSame :: Exp
-maxPooling2DTransformSame =
+maxPooling2DTransform :: Exp
+maxPooling2DTransform =
   case parseTiny prg of
                   Left (ParseError s) -> error s
                   Right e -> e 
@@ -83,7 +83,7 @@ maxPooling2DTransformSame =
            "  let w  = index(0, dim)",
            "  let h  = index(1, dim)",
            "  in list( floor( (((w * (-dw * (pw - 1)) - 1) / sw))) + 1,",
-            "          floor( (((h * (-dh * (ph - 1)) - 1) / sh))) + 1)"]
+           "           floor( (((h * (-dh * (ph - 1)) - 1) / sh))) + 1)"]
 
 
 --- floor(((H * ( -dilation[0] * (pool_size[0] -1 )) -1 ) / stride[0]) + 1)
@@ -91,8 +91,8 @@ maxPooling2DTransformSame =
 
 -- https://pytorch.org/docs/stable/generated/torch.nn.MaxPool2d.html
 
-maxPooling2DTransform :: Exp
-maxPooling2DTransform = undefined
+maxPooling2DTransformSame :: Exp
+maxPooling2DTransformSame = tinyId
 
 addTransform :: Exp
 addTransform = case parseTiny prg of

@@ -57,6 +57,8 @@ testArrow =
 -- MNIST Example model -- 
 -- Work in progress
 
+mnist_input = input (mkTensor "input" [8,8,1] :: Tensor Float)
+
 mnist_model t =
   let kernel_size = [3,3]
       filters = 32
@@ -170,6 +172,20 @@ main =
 
     putStrLn "***************************************"
 
+    let r = build $ mnist_model =<< mnist_input
+    --putStrLn $ show r
+    case r of
+      Left err -> putStrLn $ "Error: " ++ (errorToString err)
+      Right r -> do    
+        let (Just e) = encodeRecipe r
+
+        putStrLn $ BLU.toString $ encodeNode [(Doc e)]
+
+        let m = readRecipe $ encodeNode [(Doc e)]
+
+        putStrLn $ show m 
+
+    putStrLn "***************************************"
     
 
     
