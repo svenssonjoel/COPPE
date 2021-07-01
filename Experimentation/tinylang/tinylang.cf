@@ -32,10 +32,10 @@ EQC.  RelOp ::= "==" ;
 coercions 	Exp 	7 ;
 separator       Exp     "";
 
-Arg. Arg ::= Ident  ;
+ArgIdent. Arg ::= Ident  ;
 separator Arg "";
 
-AppArg. AppArg ::= Exp ;
+AppArgExp. AppArg ::= Exp ;
 separator AppArg ",";
 
 BTrue.  Boolean ::= "True" ;

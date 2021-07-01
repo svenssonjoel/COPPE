@@ -46,10 +46,10 @@ transRelOp x = case x of
   EQC -> failure x
 transArg :: Arg -> Result
 transArg x = case x of
-  Arg ident -> failure x
+  ArgIdent ident -> failure x
 transAppArg :: AppArg -> Result
 transAppArg x = case x of
-  AppArg exp -> failure x
+  AppArgExp exp -> failure x
 transBoolean :: Boolean -> Result
 transBoolean x = case x of
   BTrue -> failure x

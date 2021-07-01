@@ -26,7 +26,6 @@ two sequences of digits separated by a decimal point, optionally
 followed by an unsigned or negative exponent.
 
 
-
 String literals //String// have the form
 ``"``//x//``"``}, where //x// is any sequence of any characters
 except ``"`` unless preceded by ``\``.
@@ -46,59 +45,59 @@ The symbols used in tinylang are the following:
   | ! | ( | ) | +
   | - | * | / | <
   | <= | > | >= | ==
-  | , |  |  | 
+  | , |  |  |
 
 ===Comments===
 There are no single-line comments in the grammar.There are no multiple-line comments in the grammar.
 
 ==The syntactic structure of tinylang==
-Non-terminals are enclosed between < and >. 
-The symbols -> (production),  **|**  (union) 
-and **eps** (empty rule) belong to the BNF notation. 
+Non-terminals are enclosed between < and >.
+The symbols -> (production),  **|**  (union)
+and **eps** (empty rule) belong to the BNF notation.
 All other symbols are terminals.
 
-  | //Exp// | -> | ``fun`` //[Arg]// ``->`` //Exp// 
-  |  |  **|**  | ``let`` //Exp// ``=`` //Exp// ``in`` //Exp// 
-  |  |  **|**  | ``if`` //Exp// ``then`` //Exp// ``else`` //Exp// 
-  |  |  **|**  | //Exp1// 
-  | //Exp1// | -> | //Exp2// ``||`` //Exp1// 
-  |  |  **|**  | //Exp2// 
-  | //Exp2// | -> | //Exp3// ``&&`` //Exp2// 
-  |  |  **|**  | //Exp3// 
-  | //Exp6// | -> | ``!`` //Exp7// 
-  |  |  **|**  | //Exp6// ``(`` //[AppArg]// ``)`` 
-  |  |  **|**  | //Exp7// 
-  | //Exp3// | -> | //Exp3// //RelOp// //Exp4// 
-  |  |  **|**  | //Exp4// 
-  | //Exp4// | -> | //Exp4// //AddOp// //Exp5// 
-  |  |  **|**  | //Exp5// 
-  | //Exp5// | -> | //Exp5// //MulOp// //Exp6// 
-  |  |  **|**  | //Exp6// 
-  | //Exp7// | -> | //Integer// 
-  |  |  **|**  | //Double// 
-  |  |  **|**  | //Boolean// 
-  |  |  **|**  | //Ident// 
-  |  |  **|**  | //String// 
-  |  |  **|**  | ``(`` //Exp// ``)`` 
-  | //AddOp// | -> | ``+`` 
-  |  |  **|**  | ``-`` 
-  | //MulOp// | -> | ``*`` 
-  |  |  **|**  | ``/`` 
-  | //RelOp// | -> | ``<`` 
-  |  |  **|**  | ``<=`` 
-  |  |  **|**  | ``>`` 
-  |  |  **|**  | ``>=`` 
-  |  |  **|**  | ``==`` 
+  | //Exp// | -> | ``fun`` //[Arg]// ``->`` //Exp//
+  |  |  **|**  | ``let`` //Exp// ``=`` //Exp// ``in`` //Exp//
+  |  |  **|**  | ``if`` //Exp// ``then`` //Exp// ``else`` //Exp//
+  |  |  **|**  | //Exp1//
+  | //Exp1// | -> | //Exp2// ``||`` //Exp1//
+  |  |  **|**  | //Exp2//
+  | //Exp2// | -> | //Exp3// ``&&`` //Exp2//
+  |  |  **|**  | //Exp3//
+  | //Exp6// | -> | ``!`` //Exp7//
+  |  |  **|**  | //Exp6// ``(`` //[AppArg]// ``)``
+  |  |  **|**  | //Exp7//
+  | //Exp3// | -> | //Exp3// //RelOp// //Exp4//
+  |  |  **|**  | //Exp4//
+  | //Exp4// | -> | //Exp4// //AddOp// //Exp5//
+  |  |  **|**  | //Exp5//
+  | //Exp5// | -> | //Exp5// //MulOp// //Exp6//
+  |  |  **|**  | //Exp6//
+  | //Exp7// | -> | //Integer//
+  |  |  **|**  | //Double//
+  |  |  **|**  | //Boolean//
+  |  |  **|**  | //Ident//
+  |  |  **|**  | //String//
+  |  |  **|**  | ``(`` //Exp// ``)``
+  | //AddOp// | -> | ``+``
+  |  |  **|**  | ``-``
+  | //MulOp// | -> | ``*``
+  |  |  **|**  | ``/``
+  | //RelOp// | -> | ``<``
+  |  |  **|**  | ``<=``
+  |  |  **|**  | ``>``
+  |  |  **|**  | ``>=``
+  |  |  **|**  | ``==``
   | //[Exp]// | -> | **eps**
-  |  |  **|**  | //Exp// //[Exp]// 
-  | //Arg// | -> | //Ident// 
+  |  |  **|**  | //Exp// //[Exp]//
+  | //Arg// | -> | //Ident//
   | //[Arg]// | -> | **eps**
-  |  |  **|**  | //Arg// //[Arg]// 
-  | //AppArg// | -> | //Exp// 
+  |  |  **|**  | //Arg// //[Arg]//
+  | //AppArg// | -> | //Exp//
   | //[AppArg]// | -> | **eps**
-  |  |  **|**  | //AppArg// 
-  |  |  **|**  | //AppArg// ``,`` //[AppArg]// 
-  | //Boolean// | -> | ``True`` 
-  |  |  **|**  | ``False`` 
+  |  |  **|**  | //AppArg//
+  |  |  **|**  | //AppArg// ``,`` //[AppArg]//
+  | //Boolean// | -> | ``True``
+  |  |  **|**  | ``False``
 
 

@@ -47,7 +47,7 @@ data EvalError = EvalError String
 type Eval a = State EvalState a
 
 identToString (Ident s) = s
-argToString   (Arg (Ident s)) = s 
+argToString   (ArgIdent (Ident s)) = s 
 
 builtIn :: [String]
 builtIn = ["length",
@@ -177,7 +177,7 @@ evalTiny x = error $ "Not implemented: " ++ show x
 evalArgs :: [AppArg] -> Eval (Either EvalError Value)
 evalArgs (es) =
   do
-    res <- mapM (\(AppArg e) -> evalTiny e) es
+    res <- mapM (\(AppArgExp e) -> evalTiny e) es
     let (ls,rs) = partitionEithers res
     case ls of
       [] -> return $ Right $ ListVal $ rights res
@@ -295,8 +295,8 @@ addAllBindings :: [Arg] -> Value -> Eval (Either EvalError ())
 addAllBindings [] (ListVal []) = return $ Right ()
 addAllBindings (x:xs) (ListVal (v:vs)) =
   case x of
-    (Arg i) -> do addBinding (identToString i) v
-                  addAllBindings xs (ListVal vs)
+    (ArgIdent i) -> do addBinding (identToString i) v
+                       addAllBindings xs (ListVal vs)
                         
 addAllBindings _ _  = return $ Left $ EvalError "Function application error"
 
