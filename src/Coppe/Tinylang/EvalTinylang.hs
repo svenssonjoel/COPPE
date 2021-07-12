@@ -61,7 +61,8 @@ builtIn = ["length",
            "elem",
            "floor",
            "ceil",
-           "index"]
+           "index",
+           "prod"]
 
 -- LookupBinding ignores the FunParams that may be in a hypermap.
 lookupBinding :: String -> Eval (Maybe Value)
@@ -228,6 +229,11 @@ evalApp (StringVal "elem") (ListVal [v, (ListVal l)])
   = return $ Right $ toValue (v `elem` l)
 evalApp (StringVal "elem") x
   = return $ Left $ EvalError $ "Argument to elem incorrect: " ++ show x
+
+evalApp (StringVal "prod") (ListVal v)
+  = return $ Right $ undefined -- 
+evalApp (StringVal "prod") x
+  = return $ Left $ EvalError $ "Argument to prod incorrect: " ++ show x
 
 evalApp (StringVal "zipWith") (ListVal [closure, ListVal l1, ListVal l2])
   = do

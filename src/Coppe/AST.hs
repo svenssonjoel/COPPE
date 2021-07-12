@@ -157,30 +157,37 @@ class ToValue a where
 instance ToValue Integer where
   toValue = IntVal
   fromValue (IntVal i) = fromInteger i
+  fromValue x = error $ "fromValue integer: " ++ show x
 
 instance ToValue Int where
   toValue i = IntVal (toInteger i)
   fromValue (IntVal i) = fromInteger i
+  fromValue x = error $ "fromValue int: " ++ show x
   
 instance ToValue Float where
   toValue f = FloatVal (realToFrac f)
   fromValue (FloatVal f) = (realToFrac f)
+  fromValue x = error $ "fromValue float: " ++ show x
 
 instance ToValue Bool where
   toValue b = BoolVal b
   fromValue (BoolVal b) = b
+  fromValue x = error $ "fromValue bool: " ++ show x
 
 instance ToValue Double where
   toValue d = FloatVal d
   fromValue (FloatVal d) = d
+  fromValue x = error $ "fromValue double: " ++ show x
 
 instance  {-# OVERLAPPABLE #-} ToValue a => ToValue [a] where
   toValue xs = ListVal $ map toValue xs
   fromValue (ListVal xs) = map fromValue xs
+  fromValue x = error $ "fromValue list: " ++ show x
 
 instance  {-# OVERLAPS #-} ToValue [Char] where
   toValue s = StringVal s
   fromValue (StringVal s) = s
+  fromValue x = error $ "fromValue string: " ++ show x
 
 type Param = Value
 type Annot = Value

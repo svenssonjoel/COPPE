@@ -74,16 +74,16 @@ maxPooling2DTransform =
   where prg =
           unlines $ 
           ["fun dim -> ",
-           "  let pw = index(0, pool_size)",
-           "  let ph = index(1, pool_size)",
-           "  let sw = index(0, strides)",
-           "  let sh = index(1, strides)", 
-           "  let dw = index(0, dilation)",
-           "  let dh = index(1, dilation)",
-           "  let w  = index(0, dim)",
+           "  let pw = index(0, pool_size) in",
+           "  let ph = index(1, pool_size) in",
+           "  let sw = index(0, strides) in",
+           "  let sh = index(1, strides) in", 
+           "  let dw = index(0, dilation) in",
+           "  let dh = index(1, dilation) in",
+           "  let w  = index(0, dim) in",
            "  let h  = index(1, dim)",
-           "  in list( floor( (((w * (-dw * (pw - 1)) - 1) / sw))) + 1,",
-           "           floor( (((h * (-dh * (ph - 1)) - 1) / sh))) + 1)"]
+           "  in list( floor( (((w * ((0 - dw) * (pw - 1)) - 1) / sw))) + 1,",
+           "           floor( (((h * ((0 - dh) * (ph - 1)) - 1) / sh))) + 1)"]
 
 
 --- floor(((H * ( -dilation[0] * (pool_size[0] -1 )) -1 ) / stride[0]) + 1)
