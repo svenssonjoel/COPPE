@@ -62,7 +62,8 @@ builtIn = ["length",
            "floor",
            "ceil",
            "index",
-           "prod"]
+           "prod",
+           "list"]
 
 -- LookupBinding ignores the FunParams that may be in a hypermap.
 lookupBinding :: String -> Eval (Maybe Value)
@@ -195,22 +196,27 @@ evalApp (StringVal "length")  (ListVal [(ListVal l)])
 evalApp (StringVal "length")  _
   = return $ Left $ EvalError "Argument to length is not a list."
 
-evalApp (StringVal "floor") (FloatVal f)
-  = return $ Right $ toValue ((floor f) :: Integer)
-evalApp (StringVal "floor")  _
-  = return $ Left $ EvalError "Argument to floor is not a float."
+evalApp (StringVal "list") (ListVal l) -- Odd case
+  = return $ Right $ ListVal l
+evalApp (StringVal "list") x
+  = return $ Left $ EvalError $ "Argument to list is incorrect: " ++ show x
 
-evalApp (StringVal "ceil") (FloatVal f)
+evalApp (StringVal "floor") (ListVal [FloatVal f])
+  = return $ Right $ toValue ((floor f) :: Integer)
+evalApp (StringVal "floor")  x
+  = return $ Left $ EvalError $ "Argument to floor is not a float: "  ++ show x
+
+evalApp (StringVal "ceil") (ListVal [FloatVal f])
   = return $ Right $ toValue ((ceiling f) :: Integer)
 evalApp (StringVal "ceil")  _
-  = return $ Left $ EvalError "Argument to ceil is not a float."
+  = return $ Left $ EvalError "Argument to ceil is not a float." 
 
-evalApp (StringVal "tail") (ListVal [(ListVal l)])
+evalApp (StringVal "tail") (ListVal [ListVal l])
   = return $ Right $ ListVal (tail l)
 evalApp (StringVal "tail") _
-  = return $ Left $ EvalError "Argument to tail is not a list."
+  = return $ Left $ EvalError "Argument to tail is not a list." 
 
-evalApp (StringVal "take")   (ListVal [IntVal n, ListVal l])
+evalApp (StringVal "take") (ListVal [IntVal n, ListVal l])
   = return $ Right $ ListVal (take (fromInteger n) l)
 evalApp (StringVal "take") a
   = return $ Left $ EvalError $ "Argument to take incorrect: " ++ show a
@@ -230,7 +236,7 @@ evalApp (StringVal "elem") (ListVal [v, (ListVal l)])
 evalApp (StringVal "elem") x
   = return $ Left $ EvalError $ "Argument to elem incorrect: " ++ show x
 
-evalApp (StringVal "prod") (ListVal v)
+evalApp (StringVal "prod") (ListVal [ListVal v])
   = return $ Right $ undefined -- 
 evalApp (StringVal "prod") x
   = return $ Left $ EvalError $ "Argument to prod incorrect: " ++ show x
