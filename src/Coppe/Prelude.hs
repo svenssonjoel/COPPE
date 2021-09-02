@@ -61,6 +61,14 @@ convTransform = case parseTiny prg of
            "                strides) in",
            "  if ok then extend(newDims,filters) else error(\"convTransform not ok!\")" ]
 
+
+conv2dTransform :: Exp
+conv2dTransform = undefined
+
+conv1dTransform :: Exp
+conv1dTransform = undefined
+
+
 -- Assume "Valid" padding
 -- Must implement "same" and "valid"
 
@@ -83,7 +91,8 @@ maxPooling2DTransform =
            "  let w  = index(0, dim) in",
            "  let h  = index(1, dim)",
            "  in list( floor( (((w * ((0 - dw) * (pw - 1)) - 1) / sw))) + 1,",
-           "           floor( (((h * ((0 - dh) * (ph - 1)) - 1) / sh))) + 1)"]
+           "           floor( (((h * ((0 - dh) * (ph - 1)) - 1) / sh))) + 1,",
+           "           index(2, dim))"]
 
 
 --- floor(((H * ( -dilation[0] * (pool_size[0] -1 )) -1 ) / stride[0]) + 1)
